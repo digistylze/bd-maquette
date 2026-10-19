@@ -1724,21 +1724,6 @@ main#view:has(> .footer:last-child) { padding-bottom: 0; }
 .mp-pop small { font-size: 12px; color: var(--muted); }
 .mp-go { display: inline-flex; align-items: center; gap: 5px; margin-top: 4px; font-size: 13px; font-weight: 700; color: var(--violet) !important; }
 .leaflet-container { font-family: var(--ff-sans); }
-/* ---------- Préchargeur « pile et titre » ---------- */
-.pl { position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center; overflow: clip; background: #0f0c11; color: #f4f2ee; animation: plFail .01s 8s forwards; cursor: pointer; }
-@keyframes plFail { to { visibility: hidden; opacity: 0; pointer-events: none; } }
-body.pl-on { overflow: hidden; }
-.pl-card { grid-area: 1 / 1; width: clamp(8.5rem, min(19.5vw, 36svh), 15.625rem); aspect-ratio: 5 / 6; overflow: clip; border-radius: 6px; background: #1d1822; transform: scale(0); box-shadow: 0 24px 60px rgba(0, 0, 0, .5); }
-.pl-card img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.pl-head { grid-area: 1 / 1; position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
-.pl-logo { width: clamp(52px, 6vw, 84px); height: auto; margin-bottom: clamp(10px, 1.6vw, 20px); opacity: 0; filter: drop-shadow(0 8px 22px rgba(0, 0, 0, .55)); }
-.pl-title { position: relative; font-size: clamp(2.75rem, min(1rem + 9vw, 22svh), 15rem); font-weight: 800; line-height: .85; letter-spacing: -.03em; text-transform: uppercase; text-align: center; text-shadow: 0 6px 30px rgba(0, 0, 0, .45); }
-.pl-word { display: inline-block; overflow: clip; padding-block: .06em; margin-block: -.06em; }
-.pl-l { display: inline-block; transform: translateY(110%); }
-.pl-count { position: absolute; top: calc(-1 * clamp(.75rem, 1.2vw, 1.5rem)); left: calc(100% + clamp(.5rem, 1.2vw, 1.5rem)); overflow: clip; }
-.pl-count > span { display: block; font-size: clamp(.875rem, 1.5vw, 2rem); font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: 0; line-height: 1; color: var(--gold-2); transform: translateY(110%); }
-body.pl-reveal .hero3 { animation: plHero 1.3s cubic-bezier(.22, 1, .36, 1) both; }
-@keyframes plHero { from { transform: scale(1.06); filter: brightness(.6); } }
 /* ---------- À la une : coverflow 3D, photo de la mise en avant floutée en fond ---------- */
 .cf-hero { position: relative; overflow: hidden; isolation: isolate; padding: 54px 0 40px; background: #0f0c11; color: #fff; }
 @media (min-width: 1024px) { .cf-hero { margin: 0 24px; border-radius: var(--r-xl); padding: 62px 0 46px; } } /* pas de marge verticale : elle laissait voir le pied de page fixé derrière */
