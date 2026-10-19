@@ -1,4 +1,4 @@
-/* Velours : noyau : état, stockage, composants, routeur */
+/* BD : noyau : état, stockage, composants, routeur */
 (function (V) {
   'use strict';
   const $ = (s, r = document) => r.querySelector(s);
@@ -85,6 +85,12 @@
     .observe(document.documentElement, { childList: true, subtree: true });
 
   /* ---------- Carte profil ---------- */
+  /* Placements sponsorisés (C02, P08) : campagnes en cours, compatibles avec la recherche, jamais en double */
+  V.sponsoredNow = () => (V.SPONSORED || []).filter((c) => c.from <= 0 && c.to >= 0).map((c) => Object.assign({}, c, { p: V.byId(c.pid) })).filter((c) => c.p && V.visible(c.p) && !V.hidden().includes(c.p.id));
+  // « canton » : visible dans toutes les recherches ; quartier : seulement quand la recherche porte sur ce quartier
+  V.sponsoredFor = (q, L) => { const ids = new Set(L.map((p) => p.id)); const com = (q.commune || '').split(',').filter(Boolean); const seen = new Set(); return V.sponsoredNow().filter((c) => ids.has(c.pid) && (c.zone === 'canton' || com.includes(c.zone)) && !seen.has(c.pid) && seen.add(c.pid)).map((c) => c.p); };
+  // un placement sponsorisé en tête de chaque lot de 8 ; le profil n'apparaît plus à sa place organique
+  V.arrangeSponsored = (L, sp, per = 8) => { const s = new Set(sp.map((p) => p.id)); const org = L.filter((p) => !s.has(p.id)); const out = []; let i = 0, k = 0; while (i < org.length || k < sp.length) { if (k < sp.length) out.push(sp[k++]); for (let j = 0; j < per - 1 && i < org.length; j++) out.push(org[i++]); } return out; };
   V.card = (p, o = {}) => {
     const on = V.isSel(p.id);
     const seen = V.S.seen.includes(p.id) && !o.noSeen;
@@ -99,8 +105,8 @@
       <div class="ph protect" data-act="open" data-id="${p.id}">
         <img src="${V.img(p.photos[0], feat ? '' : 's')}" srcset="${V.img(p.photos[0], 's')} 360w, ${V.img(p.photos[0])} 900w" sizes="${feat ? '(min-width:1024px) 40vw, 100vw' : '(min-width:1024px) 22vw, 50vw'}" alt="Photo de ${V.esc(p.name)}" loading="lazy" decoding="async" draggable="false">
         <div class="tl">${V.statusPill(p, false, !feat)}</div>
-        ${feat ? '<span class="badge goldfill feat-tag">Mise en avant</span>' : `<div class="bl">${badges.join('')}</div>`}
-        <span class="wm">velours</span>
+        ${feat ? `<span class="badge goldfill feat-tag" title="Placement payant, affiché seulement s’il correspond à votre recherche">${V.i('sparkles', 'sm')}Sponsorisé</span>` : `<div class="bl">${badges.join('')}</div>`}
+        <span class="wm">BD</span>
       </div>
       <button class="heart${on ? ' on' : ''}" data-act="fav" data-id="${p.id}" aria-label="${on ? 'Retirer de' : 'Ajouter à'} ma sélection" aria-pressed="${on}">${V.i('heart')}</button>
       <div class="body">
@@ -253,7 +259,7 @@
     const view = $('#view');
     view.className = sameView ? '' : 'view-in';
     view.innerHTML = out.html || '';
-    document.title = (out.title ? out.title + ' · ' : '') + 'Velours · Genève (maquette)';
+    document.title = (out.title ? out.title + ' · ' : '') + 'BD · Genève (maquette)';
     V.basePath = path + V.qs(q);
     V.ui.chrome(path, newMode);
     V.ui.enhance(view);

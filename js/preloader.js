@@ -1,4 +1,4 @@
-/* Velours : préchargeur « pile et titre » (pile de photos, logo, titre lettre par lettre, compteur),
+/* BD : préchargeur « pile et titre » (pile de photos, logo, titre lettre par lettre, compteur),
    joué une fois par session puis rideau qui découvre l'accueil. Port sans dépendance de l'effet
    preloader-stacked-images-counter (effects-library), mêmes temps et mêmes courbes. */
 (function (V) {
@@ -12,7 +12,7 @@
   const pics = V.PROFILES.filter((p) => (V.visible ? V.visible(p) : !p.cache)).slice(0, 6).map((p) => V.img(p.photos[0]));
   const ROT = [7.5, -2.5, -10, 12.5, -5, 5];
   const HOP = 'cubic-bezier(0.8, 0, 0.2, 1)', HOP2 = 'cubic-bezier(0.9, 0, 0.1, 1)';
-  const WORD = 'Velours';
+  const WORD = 'BD';
   const root = document.createElement('div');
   root.className = 'pl';
   root.setAttribute('aria-hidden', 'true');

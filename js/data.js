@@ -1,4 +1,4 @@
-/* Velours : données fictives de démonstration (aucune personne réelle) */
+/* BD : données fictives de démonstration (aucune personne réelle) */
 window.V = window.V || {};
 (function (V) {
   'use strict';
@@ -9,7 +9,7 @@ window.V = window.V || {};
   const fmtShort = (d) => d.toLocaleDateString('fr-CH', { day: '2-digit', month: '2-digit', year: 'numeric' });
   V.date = { DAY, now, addDays, fmtD, fmtShort };
 
-  V.BRAND = { name: 'Velours', domain: 'velours.ch', city: 'Genève' };
+  V.BRAND = { name: 'BD', domain: '', city: 'Genève' };
 
   V.CATS = [
     { id: 'all', label: 'Toutes' },
@@ -303,20 +303,35 @@ window.V = window.V || {};
   V.PLANS = [
     { id: 'essentiel', name: 'Présence', price: 149, pitch: 'Le profil vérifié et le statut express. De quoi essayer un mois ou deux.',
       feats: ['Profil vérifié (âge, identité, photos, indépendance)', '8 photos filigranées', 'Statut express en un geste', 'Statistiques de base', 'Masquage immédiat à tout moment'] },
-    { id: 'visibilite', name: 'Visibilité', price: 249, reco: true, pitch: 'Pour celles qui travaillent plusieurs soirs par semaine : deux jours de mise en avant compris.',
-      feats: ['Tout ce que comprend Présence', '20 photos et une vidéo de présentation', '2 jours de mise en avant par mois', 'Statistiques détaillées et conseils', 'Traduction relue en 5 langues', 'Alertes si vos photos apparaissent ailleurs'] },
+    { id: 'visibilite', name: 'Visibilité', price: 249, reco: true, pitch: 'Pour celles qui travaillent plusieurs soirs par semaine : 6 crédits de mise en avant offerts chaque mois.',
+      feats: ['Tout ce que comprend Présence', '20 photos et une vidéo de présentation', '6 crédits de mise en avant par mois', 'Statistiques détaillées et conseils', 'Traduction relue en 5 langues', 'Alertes si vos photos apparaissent ailleurs'] },
     { id: 'premium', name: 'Accompagnement', price: 399, pitch: 'Pour déléguer : nous rédigeons votre profil et vous photographions une fois par an.',
-      feats: ['Tout ce que comprend Visibilité', '6 jours de mise en avant par mois', 'Shooting photo annuel offert (valeur CHF 450)', 'Rédaction du profil par notre équipe', 'Assistance WhatsApp prioritaire 7 j/7'] },
+      feats: ['Tout ce que comprend Visibilité', '18 crédits de mise en avant par mois', 'Shooting photo annuel offert (valeur CHF 450)', 'Rédaction du profil par notre équipe', 'Assistance WhatsApp prioritaire 7 j/7'] },
   ];
   V.PLAN_DUO = { id: 'duo', name: 'Profil duo ou couple', price: 299, note: 'Un abonnement pour le profil commun. Payé par l’une des deux ou partagé à parts égales.' };
   V.LAUNCH = { months: 2, until: () => V.date.addDays(61), label: '2 mois offerts, sans carte' };
   V.ADDONS = [
-    { ico: 'sparkles', name: 'Mise en avant', price: 'CHF 29', unit: '/ jour', desc: 'Encart deux fois plus grand, étiqueté, dans les recherches qui vous correspondent. CHF 149 la semaine.' },
+    { ico: 'sparkles', name: 'Crédits de mise en avant', price: 'dès CHF 7', unit: 'le crédit', desc: 'Profil en grand, étiqueté « Sponsorisé », dans les recherches qui vous correspondent. 3 crédits par jour dans votre quartier, 5 pour tout le canton.' },
     { ico: 'camera', name: 'Shooting photo', price: 'CHF 290', unit: 'au lieu de 450', desc: 'Session groupée de 4 à 5 escortes, retouches comprises. Vidéo + CHF 190.' },
     { ico: 'languages', name: 'Rédaction et traduction', price: 'CHF 120', unit: 'une fois', desc: 'Présentation écrite avec vous et traduite en 5 langues par des natifs.' },
     { ico: 'phone', name: 'Réceptionniste', price: 'dès CHF 390', unit: '/ mois · bientôt', desc: 'Prise de rendez-vous en français au forfait fixe, jamais à la commission. En cours de validation.', soon: true },
   ];
   V.FEATURED = { perDay: 29, perWeek: 149, slotsPerDay: 6 };
+  /* Crédits de mise en avant (P06) : achat par packs, consommation par jour et par zone, journal */
+  V.CREDITS = {
+    packs: [{ id: 'c10', n: 10, price: 90 }, { id: 'c30', n: 30, price: 240, reco: true }, { id: 'c80', n: 80, price: 560 }],
+    cost: { zone: 3, canton: 5 }, // crédits par jour : quartier ou commune / tout le canton
+    slots: { zone: 3, canton: 6 }, // places sponsorisées par jour (plafond par zone, P08)
+    months: 12,
+  };
+  /* Placements sponsorisés en cours (démo) : profil, zone (« canton » ou quartier), début et fin en jours relatifs */
+  V.SPONSORED = [
+    { pid: 'imp-pamela', zone: 'canton', from: -2, to: 4 },
+    { pid: 'imp-sarah', zone: 'canton', from: -3, to: 3 },
+    { pid: 'imp-gwen', zone: 'versoix', from: -1, to: 5 },
+    { pid: 'imp-nina', zone: 'eaux-vives', from: 0, to: 2 },
+    { pid: 'imp-marion', zone: 'carouge', from: -1, to: 6 },
+  ];
 
   /* Espace pro : compte de démonstration = Alma */
   V.PRO = {
@@ -327,10 +342,10 @@ window.V = window.V || {};
       { n: 'VL-2026-0207', d: -41, label: 'Offre de lancement · 2 mois offerts', amt: 0, st: 'Offerte' },
     ],
     messages: [
-      { from: 'Équipe Velours', d: 0, subj: 'Votre contrôle médias arrive à échéance', body: 'Bonjour Alma, votre prochain contrôle médias (selfie de comparaison) est à faire avant le ' + fmtD(addDays(84)) + '. Cela prend moins d’une minute depuis votre téléphone.', unread: true },
-      { from: 'Équipe Velours', d: -2, subj: 'Nouveau : alertes de fuite d’images', body: 'Nous vérifions désormais chaque semaine si vos photos apparaissent ailleurs sur le web. Une alerte a été trouvée cette semaine : consultez l’onglet Sécurité.', unread: true },
+      { from: 'Équipe BD', d: 0, subj: 'Votre contrôle médias arrive à échéance', body: 'Bonjour Alma, votre prochain contrôle médias (selfie de comparaison) est à faire avant le ' + fmtD(addDays(84)) + '. Cela prend moins d’une minute depuis votre téléphone.', unread: true },
+      { from: 'Équipe BD', d: -2, subj: 'Nouveau : alertes de fuite d’images', body: 'Nous vérifions désormais chaque semaine si vos photos apparaissent ailleurs sur le web. Une alerte a été trouvée cette semaine : consultez l’onglet Sécurité.', unread: true },
       { from: 'Facturation', d: -18, subj: 'Facture VL-2026-0318 disponible', body: 'Votre facture d’octobre (CHF 249) est disponible dans Abonnement et factures.' },
-      { from: 'Équipe Velours', d: -41, subj: 'Bienvenue sur Velours', body: 'Votre profil est en ligne. Vos trois contrôles sont validés et datés sur votre fiche.' },
+      { from: 'Équipe BD', d: -41, subj: 'Bienvenue sur BD', body: 'Votre profil est en ligne. Vos trois contrôles sont validés et datés sur votre fiche.' },
     ],
     leaks: [{ where: 'Annuaire d’annonces, Madrid', when: -3, img: 'alma', match: '97 %' }],
     filleules: [{ name: 'Inès', st: 'Abonnée depuis 15 jours', gain: '1 mois offert' }, { name: 'Daria', st: 'Candidature en vérification', gain: 'En attente' }],

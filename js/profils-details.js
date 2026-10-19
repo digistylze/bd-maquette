@@ -1,4 +1,4 @@
-/* Velours : détails des fiches (maquette). Chargé après profils-importes.js.
+/* BD : détails des fiches (maquette). Chargé après profils-importes.js.
    Pratiques, attributs complets, paiements, compteurs, description et avis, propres à chaque profil.
    Séparé du fichier généré par outils/import_profils.py pour ne pas être écrasé à un nouvel import. */
 (function (V) {

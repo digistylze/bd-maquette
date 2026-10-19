@@ -1,4 +1,4 @@
-/* Velours : démarrage, actions, clavier, installation */
+/* BD : démarrage, actions, clavier, installation */
 (function (V) {
   'use strict';
   const { $, $$, i: I, esc } = V;
@@ -26,7 +26,7 @@
     'close-ov': () => V.overlay.back(),
     slide: (el) => { const tr = $('#fTrack'); tr.scrollBy({ left: tr.clientWidth * +el.dataset.d, behavior: 'smooth' }); },
     zoom: () => { const tr = $('#fTrack'); const k = Math.round(tr.scrollLeft / tr.clientWidth); const img = $$('.f-slide img', tr)[k]; lightbox(img.src); },
-    share: async (el) => { const p = V.byId(el.dataset.id); const url = location.href.split('#')[0] + '#/profil/' + p.id; try { if (navigator.share) await navigator.share({ title: 'Velours', text: 'Un profil vérifié', url }); else { await navigator.clipboard.writeText(url); V.toast('Lien copié. Il ne contient aucun terme explicite.', { icon: 'link' }); } } catch (e) { /* partage annulé */ } },
+    share: async (el) => { const p = V.byId(el.dataset.id); const url = location.href.split('#')[0] + '#/profil/' + p.id; try { if (navigator.share) await navigator.share({ title: 'BD', text: 'Un profil vérifié', url }); else { await navigator.clipboard.writeText(url); V.toast('Lien copié. Il ne contient aucun terme explicite.', { icon: 'link' }); } } catch (e) { /* partage annulé */ } },
     report: (el) => V.openReport(el.dataset.id),
     contact: (el) => V.openContact(el.dataset.id, el.dataset.ch || 'wa'),
     theme: (el) => V.ui.toggleTheme(el),
@@ -52,7 +52,7 @@
     'del-search': (el) => { V.L.searches.splice(+el.dataset.k, 1); V.save(); V.render(); },
     'clear-recent': () => { V.L.recent = []; V.save(); V.toast('Historique effacé.', { icon: 'trash' }); V.render(); },
     'kill-session': () => V.toast('Session déconnectée sur cet appareil.', { icon: 'logout' }),
-    export: () => download('velours-mes-donnees.json', JSON.stringify({ compte: { pseudo: V.L.account.pseudo, email: V.L.account.email, depuis: new Date(V.L.account.since).toISOString() }, selection: V.sel(), masques: V.hidden(), recherches: V.L.searches, alertes: V.L.alerts, preferences: V.L.prefs, vusRecemment: V.L.recent, hebergement: 'Suisse' }, null, 2), 'application/json'),
+    export: () => download('bd-mes-donnees.json', JSON.stringify({ compte: { pseudo: V.L.account.pseudo, email: V.L.account.email, depuis: new Date(V.L.account.since).toISOString() }, selection: V.sel(), masques: V.hidden(), recherches: V.L.searches, alertes: V.L.alerts, preferences: V.L.prefs, vusRecemment: V.L.recent, hebergement: 'Suisse' }, null, 2), 'application/json'),
     'delete-account': async () => { if (await V.confirm({ title: 'Supprimer mon compte', text: 'Sélection, recherches, alertes et historique seront supprimés définitivement, sauvegardes comprises, sous 30 jours.', ok: 'Supprimer', danger: true })) { V.L.account = null; V.L.searches = []; V.L.alerts = {}; V.L.recent = []; V.save(); V.toast('Compte supprimé.', { icon: 'trash' }); location.hash = '#/'; } },
     /* espace pro */
     'pro-st': (el) => { const v = el.dataset.v; const st = v === 'tonight' ? { t: 'tonight', at: '21 h' } : { t: v }; V.L.pro.statuses.alma = Object.assign({ since: Date.now() }, st); V.save(); V.toast(`Statut publié : ${V.statusInfo(V.byId('alma')).label}. Visible en moins de 60 s.`, { icon: 'zap' }); V.render(); },
@@ -75,7 +75,7 @@
     uncancel: () => { V.L.pro.cancelAt = null; V.save(); V.toast('Résiliation annulée.', { icon: 'check' }); V.render(); },
     invoice: (el) => invoice(el.dataset.n),
     'copy-ref': async () => { try { await navigator.clipboard.writeText(V.PRO.referral); } catch (e) { /* presse-papiers indisponible */ } V.toast('Code copié : ' + V.PRO.referral, { icon: 'copy' }); },
-    'share-ref': async () => { try { if (navigator.share) await navigator.share({ title: 'Velours', text: `Rejoins Velours avec mon code ${V.PRO.referral} : un mois offert.` }); else V.toast('Démo : partage du code ' + V.PRO.referral, { icon: 'share' }); } catch (e) { /* annulé */ } },
+    'share-ref': async () => { try { if (navigator.share) await navigator.share({ title: 'BD', text: `Rejoins BD avec mon code ${V.PRO.referral} : un mois offert.` }); else V.toast('Démo : partage du code ' + V.PRO.referral, { icon: 'share' }); } catch (e) { /* annulé */ } },
     'pro-msg': (el) => { const m = V.PRO.messages[+el.dataset.k]; V.L.pro.read = [...new Set([...(V.L.pro.read || []), m.subj])]; V.save(); V.sheet.open({ title: esc(m.subj), body: `<p class="small muted">${esc(m.from)} · ${m.d === 0 ? 'aujourd’hui' : D.fmtD(D.addDays(m.d))}</p><p style="margin-top:12px" class="ink2">${esc(m.body)}</p>`, onClose: () => V.render() }); },
     'leak-takedown': async () => { const sh = V.sheet.open({ title: 'Demande de retrait', body: `<p class="ink2">Nous envoyons au site une demande fondée sur votre droit à l’image et sur le droit d’auteur de la photo. Vous restez anonyme.</p><div class="panel soft" style="margin-top:12px;font-size:14px;line-height:1.6"><b>Objet : retrait d’une image utilisée sans autorisation</b><br>Madame, Monsieur, l’image publiée à l’adresse indiquée est utilisée sans le consentement de la personne représentée ni de l’ayant droit. Nous vous prions de la retirer sous 7 jours…</div>`, foot: V.btn('Envoyer la demande', { cls: 'sm block', attrs: 'data-send' }) }); $('[data-send]', sh).onclick = async (e) => { e.currentTarget.classList.add('loading'); await V.wait(900); V.L.pro.leakDone = Date.now(); V.save(); V.sheet.close(); V.toast('Demande envoyée. Relance automatique sous 7 jours.', { icon: 'check' }); V.render(); }; },
     'leak-ignore': () => { V.L.pro.leakDone = Date.now(); V.save(); V.toast('Alerte classée.', { icon: 'check' }); V.render(); },
@@ -92,7 +92,7 @@
     'adm-mod': (el) => V.admMod(el.dataset.id, el.dataset.d),
     'adm-rep': (el) => V.admRep(el.dataset.id),
     'adm-promo': () => { const sh = V.sheet.open({ title: 'Nouveau code', body: `<div class="stack">${V.field('Code', { value: 'NOEL2026' })}${V.field('Avantage', { type: 'select', value: '1 mois offert', options: ['1 mois offert', '2 mois offerts', '-20 % pendant 3 mois', 'Shooting à CHF 290'] })}${V.field('Utilisations maximum', { type: 'number', value: '40' })}</div>`, foot: V.btn('Créer', { cls: 'sm block', attrs: 'data-ok' }) }); $('[data-ok]', sh).onclick = () => { V.sheet.close(); V.toast('Code NOEL2026 créé.', { icon: 'gift' }); }; },
-    'adm-csv': () => download('velours-statistiques.csv', 'filtre;part\n' + V.ADMIN.topFilters.map(([a, b]) => `${a};${b}`).join('\n'), 'text/csv'),
+    'adm-csv': () => download('bd-statistiques.csv', 'filtre;part\n' + V.ADMIN.topFilters.map(([a, b]) => `${a};${b}`).join('\n'), 'text/csv'),
     'adm-invite': () => V.toast('Démo : invitation envoyée, double authentification exigée à la première connexion.', { icon: 'mail', ms: 4000 }),
     'ref-add': () => { const inp = $('input[name="newsvc"]'); const v = (inp.value || '').trim(); if (!v) return; $('#refSvc').insertAdjacentHTML('beforeend', `<span class="chip sm x on">${esc(v)}<button data-act="ref-del" aria-label="Retirer">${I('x', 'sm')}</button></span>`); inp.value = ''; V.toast('Ajouté au catalogue. À traduire dans les 8 langues avant publication.', { icon: 'languages', ms: 4000 }); },
     'ref-del': (el) => { el.closest('.chip').remove(); V.toast('Retiré du catalogue (démo).', { icon: 'trash', ms: 2000 }); },
@@ -131,7 +131,7 @@
   }
   function invoice(n) {
     const f = V.PRO.invoices.find((x) => x.n === n);
-    const html = `<!doctype html><meta charset="utf-8"><title>Facture ${f.n}</title><style>body{font:15px/1.6 system-ui;max-width:680px;margin:40px auto;padding:0 20px;color:#120d18}h1{font-family:Georgia,serif;font-weight:400}table{width:100%;border-collapse:collapse;margin-top:20px}td,th{padding:10px;border-bottom:1px solid #ddd;text-align:left}.r{text-align:right}.muted{color:#777}</style><h1>Velours <span class="muted" style="font-size:16px">(nom de travail)</span></h1><p class="muted">Genève · facture de démonstration</p><p><b>Facture ${f.n}</b><br>Date : ${D.fmtShort(D.addDays(f.d))}<br>Client : Alma (compte pro)</p><table><tr><th>Libellé</th><th class="r">Montant</th></tr><tr><td>${f.label}</td><td class="r">${f.amt ? 'CHF ' + f.amt.toFixed(2) : 'Offert'}</td></tr><tr><th>Total</th><th class="r">${f.amt ? 'CHF ' + f.amt.toFixed(2) : 'CHF 0.00'}</th></tr></table><p class="muted" style="margin-top:30px">Forfait sans commission sur les rendez-vous. Libellé bancaire : VLR SERVICES GENEVE.</p><script>print()<\/script>`;
+    const html = `<!doctype html><meta charset="utf-8"><title>Facture ${f.n}</title><style>body{font:15px/1.6 system-ui;max-width:680px;margin:40px auto;padding:0 20px;color:#120d18}h1{font-family:Georgia,serif;font-weight:400}table{width:100%;border-collapse:collapse;margin-top:20px}td,th{padding:10px;border-bottom:1px solid #ddd;text-align:left}.r{text-align:right}.muted{color:#777}</style><h1>BD <span class="muted" style="font-size:16px">(nom de travail)</span></h1><p class="muted">Genève · facture de démonstration</p><p><b>Facture ${f.n}</b><br>Date : ${D.fmtShort(D.addDays(f.d))}<br>Client : Alma (compte pro)</p><table><tr><th>Libellé</th><th class="r">Montant</th></tr><tr><td>${f.label}</td><td class="r">${f.amt ? 'CHF ' + f.amt.toFixed(2) : 'Offert'}</td></tr><tr><th>Total</th><th class="r">${f.amt ? 'CHF ' + f.amt.toFixed(2) : 'CHF 0.00'}</th></tr></table><p class="muted" style="margin-top:30px">Forfait sans commission sur les rendez-vous. Libellé bancaire : VLR SERVICES GENEVE.</p><script>print()<\/script>`;
     const w = window.open(URL.createObjectURL(new Blob([html], { type: 'text/html' })), '_blank');
     if (!w) V.toast('Autorisez les fenêtres pour télécharger la facture.', { icon: 'info' });
   }
@@ -147,7 +147,7 @@
   }
   function lightbox(src) {
     const lb = document.createElement('div'); lb.className = 'lightbox protect';
-    lb.innerHTML = `<img src="${src}" alt="" draggable="false"><span class="wm">velours · photo vérifiée</span><button class="icon-btn" aria-label="Fermer">${I('x')}</button>`;
+    lb.innerHTML = `<img src="${src}" alt="" draggable="false"><span class="wm">BD · photo vérifiée</span><button class="icon-btn" aria-label="Fermer">${I('x')}</button>`;
     document.body.appendChild(lb); void lb.offsetWidth; lb.classList.add('on');
     let z = false; const img = $('img', lb);
     img.ondblclick = img.onclick = () => { z = !z; img.style.transform = z ? 'scale(2)' : ''; };
@@ -164,7 +164,7 @@
   function install() {
     if (V.deferredPrompt) { V.deferredPrompt.prompt(); V.deferredPrompt.userChoice.finally(() => { V.deferredPrompt = null; }); return; }
     const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
-    V.sheet.open({ title: standalone ? 'Déjà installée' : 'Installer l’application', body: standalone ? '<p class="ink2">Velours est déjà installée sur cet appareil.</p>' : `<div class="stack"><div class="panel soft"><b>iPhone · Safari</b><p class="small ink2" style="margin-top:6px">Touchez ${I('share', 'sm')} Partager, puis « Sur l’écran d’accueil ».</p></div><div class="panel soft"><b>Android · Chrome</b><p class="small ink2" style="margin-top:6px">Menu ⋮, puis « Installer l’application ».</p></div><p class="hint">L’app s’ouvre en plein écran, fonctionne hors connexion pour les pages déjà vues et peut recevoir vos alertes.</p></div>` });
+    V.sheet.open({ title: standalone ? 'Déjà installée' : 'Installer l’application', body: standalone ? '<p class="ink2">BD est déjà installée sur cet appareil.</p>' : `<div class="stack"><div class="panel soft"><b>iPhone · Safari</b><p class="small ink2" style="margin-top:6px">Touchez ${I('share', 'sm')} Partager, puis « Sur l’écran d’accueil ».</p></div><div class="panel soft"><b>Android · Chrome</b><p class="small ink2" style="margin-top:6px">Menu ⋮, puis « Installer l’application ».</p></div><p class="hint">L’app s’ouvre en plein écran, fonctionne hors connexion pour les pages déjà vues et peut recevoir vos alertes.</p></div>` });
   }
 
   /* ---------- Clavier : Échap ferme, deux fois = sortie rapide ---------- */
@@ -229,7 +229,7 @@
     g.className = 'gate'; g.setAttribute('role', 'dialog'); g.setAttribute('aria-modal', 'true'); g.setAttribute('aria-labelledby', 'gateT');
     const cg = [
       'L’accès est réservé aux personnes majeures. En entrant, vous confirmez avoir 18 ans révolus.',
-      'Velours met en relation des adultes. Il ne fournit aucune prestation et ne prend aucune commission sur les rendez-vous.',
+      'BD met en relation des adultes. Il ne fournit aucune prestation et ne prend aucune commission sur les rendez-vous.',
       'Les photos peuvent être suggestives. Aucun contenu pornographique n’est publié.',
       'Les consignes et les limites indiquées sur chaque fiche s’appliquent. Un manquement peut être signalé et entraîner une exclusion.',
       'Aucun cookie de suivi. Votre réponse est gardée 30 jours sur cet appareil.',

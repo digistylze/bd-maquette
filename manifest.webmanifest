@@ -1,6 +1,6 @@
 {
-  "name": "Velours Genève",
-  "short_name": "Velours",
+  "name": "BD Genève",
+  "short_name": "BD",
   "description": "Maquette interactive : profils vérifiés à Genève (profils fictifs).",
   "id": "./",
   "start_url": "./index.html#/",

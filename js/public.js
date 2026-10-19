@@ -1,4 +1,4 @@
-/* Velours : écrans publics */
+/* BD : écrans publics */
 (function (V) {
   'use strict';
   const { $, $$, i: I, esc } = V;
@@ -85,7 +85,8 @@
     let feats = ['valentina', 'alma', 'nina-sasha', 'maya'].map(V.byId).filter((p) => p && V.visible(p));
     if (feats.length < 2) feats = [...L.filter((p) => p.feat), ...L].filter((p, k, a) => a.indexOf(p) === k).slice(0, 4); // profils importés seuls
     const f0 = feats[0], f1 = feats[1] || feats[0];
-    const hot = L.slice().sort((x, y) => (y.likes || 0) - (x.likes || 0)).slice(0, 7);
+    // À la une : uniquement les placements sponsorisés en cours (P08), pas de classement par popularité (A04)
+    const hot = V.sponsoredNow().map((c) => c.p).filter((p, k, a) => a.indexOf(p) === k).slice(0, 7);
     return {
       title: 'Accueil',
       html: `
@@ -138,14 +139,14 @@
       <section class="section-sm"><div class="wrap">
         ${V.seg('seo', [['desc', 'Description'], ['faq', 'Questions']], 'desc')}
         <div class="seo-pane on" data-pane="desc"><div class="seo-text">
-          <h3>Velours, escortes indépendantes à Genève</h3>
-          <p>Velours réunit des escortes indépendantes qui travaillent à Genève. Les couples et les duos ont leur propre catégorie. Chaque profil est vérifié avant sa mise en ligne. L’âge affiché est l’âge réel, lu sur la pièce d’identité, et les photos sont comparées à un selfie de contrôle tous les 90 jours.</p>
+          <h3>BD, escortes indépendantes à Genève</h3>
+          <p>BD réunit des escortes indépendantes qui travaillent à Genève. Les couples et les duos ont leur propre catégorie. Chaque profil est vérifié avant sa mise en ligne. L’âge affiché est l’âge réel, lu sur la pièce d’identité, et les photos sont comparées à un selfie de contrôle tous les 90 jours.</p>
           <h3>Par commune, jamais par adresse</h3>
           <p>Les profils sont classés par commune et, en ville, par quartier : des <a class="link" href="#/geneve/paquis">Pâquis</a> à <a class="link" href="#/geneve/carouge">Carouge</a>, en passant par les <a class="link" href="#/geneve/eaux-vives">Eaux-Vives</a> et <a class="link" href="#/geneve/champel">Champel</a>. La fiche dit si la personne reçoit ou se déplace. Elle ne donne jamais d’adresse.</p>
           <h3>Un contact direct</h3>
-          <p>Vous écrivez ou vous appelez directement, sur les canaux que la personne accepte. Velours ne lit pas les échanges et ne prend rien sur les rendez-vous : les escortes paient un abonnement fixe.</p>
+          <p>Vous écrivez ou vous appelez directement, sur les canaux que la personne accepte. BD ne lit pas les échanges et ne prend rien sur les rendez-vous : les escortes paient un abonnement fixe.</p>
           <h3>Ce que nous ne faisons pas</h3>
-          <p>Velours ne réserve pas à votre place et ne note pas les personnes. Un doute sur un profil ? Le lien « Signaler » est sur chaque fiche, avec ou sans compte.</p>
+          <p>BD ne réserve pas à votre place et ne note pas les personnes. Un doute sur un profil ? Le lien « Signaler » est sur chaque fiche, avec ou sans compte.</p>
           <h3>Discret par défaut</h3>
           <p>Pas besoin de compte pour regarder. La sélection faite avec le cœur s’efface à la fermeture du navigateur ; un compte discret, avec un pseudonyme, permet de la garder d’un appareil à l’autre.</p>
         </div></div>
@@ -153,7 +154,7 @@
           ${[['Les photos sont-elles récentes ?', 'Elles sont comparées à un selfie de contrôle au moins tous les 90 jours. La date du dernier contrôle est en bas de chaque fiche.'],
             ['Faut-il créer un compte ?', 'Non. Un compte sert seulement à garder votre sélection d’un appareil à l’autre et à recevoir des alertes de retour.'],
             ['Comment savoir si quelqu’un est libre ?', 'Le statut est déclaré par la personne et horodaté. Sans mise à jour, il s’efface au bout de trois heures.'],
-            ['Velours prend-il une commission ?', 'Non. Les escortes paient un abonnement fixe ; ce qu’elles gagnent ne passe pas par nous.'],
+            ['BD prend-il une commission ?', 'Non. Les escortes paient un abonnement fixe ; ce qu’elles gagnent ne passe pas par nous.'],
             ['Que faire en cas de problème ?', 'Signalez-le depuis la fiche. Un signalement grave masque le profil tout de suite. En cas d’urgence, appelez le 117.']].map(([t, d]) => `<details class="acc"><summary>${t}<span class="pm">${I('plus', 'sm')}</span></summary><div class="acc-b">${d}</div></details>`).join('')}
         </div></div>
       </div></section>
@@ -177,9 +178,9 @@
       <div class="cf-bgs" aria-hidden="true">${list.map((p, k) => `<div class="cf-bg${k ? '' : ' on'}" style="background-image:url('${V.img(p.photos[0])}')"></div>`).join('')}</div>
       <div class="cf-shade" aria-hidden="true"></div>
       <div class="wrap cf-in">
-        <div class="cf-head"><div class="eyebrow">${I('flame', 'sm')}À la une · mises en avant</div><h2 class="cf-title">Les profils <em>hot</em> du moment</h2></div>
+        <div class="cf-head"><div class="eyebrow">${I('sparkles', 'sm')}À la une · placements sponsorisés</div><h2 class="cf-title">Mises en <em>avant</em></h2><p class="cf-note">Emplacements payants, étiquetés et limités par zone. Ils ne remplacent jamais les résultats de votre recherche.</p></div>
         <div class="cf-stage" tabindex="0">
-          <div class="cf-track">${list.map((p, k) => `<article class="cf-card" data-i="${k}" data-id="${p.id}" data-act="open"><div class="cf-ph"><img src="${V.img(p.photos[0])}" alt="Photo de ${esc(p.name)}" draggable="false">${(p.likes || 0) > 2500 ? `<span class="cf-hot">${I('flame', 'sm')}Hot</span>` : `<span class="cf-hot soft">${I('flame', 'sm')}En vue</span>`}${V.statusPill(p, false, true)}<span class="cf-grad"></span><div class="cf-cap"><b>${esc(p.name)} <span>${V.ageShort(p)}</span>${I('badge-check', 'sm')}</b><small>${I('map-pin', 'sm')}${V.communeTxt(p.commune)} · dès ${p.from}.–</small></div></div></article>`).join('')}</div>
+          <div class="cf-track">${list.map((p, k) => `<article class="cf-card" data-i="${k}" data-id="${p.id}" data-act="open"><div class="cf-ph"><img src="${V.img(p.photos[0])}" alt="Photo de ${esc(p.name)}" draggable="false"><span class="cf-hot">${I('sparkles', 'sm')}Sponsorisé</span>${V.statusPill(p, false, true)}<span class="cf-grad"></span><div class="cf-cap"><b>${esc(p.name)} <span>${V.ageShort(p)}</span>${I('badge-check', 'sm')}</b><small>${I('map-pin', 'sm')}${V.communeTxt(p.commune)} · dès ${p.from}.–</small></div></div></article>`).join('')}</div>
           <button type="button" class="cf-nav prev" aria-label="Profil précédent">${I('chevron-left')}</button><button type="button" class="cf-nav next" aria-label="Profil suivant">${I('chevron-right')}</button>
         </div>
         <div class="cf-info">
@@ -204,7 +205,7 @@
       dots.forEach((b, j) => b.classList.toggle('on', j === k));
       cards.forEach((c, j) => c.classList.toggle('cur', j === k));
       const p = V.byId(cards[k].dataset.id);
-      $('#cfLegend', root).innerHTML = `<b>${esc(p.name)}, ${V.ageShort(p)} ans</b><span>${esc(p.type || V.modeTxt(p.mode))} · ${V.communeTxt(p.commune)}${p.likes ? ` · ${nf(p.likes)} likes` : ''}</span>`;
+      $('#cfLegend', root).innerHTML = `<b>${esc(p.name)}, ${V.ageShort(p)} ans</b><span>${esc(p.type || V.modeTxt(p.mode))} · ${V.communeTxt(p.commune)} · dès ${p.from}.–</span>`;
       $('#cfCta', root).href = '#/profil/' + p.id;
     };
     const place = () => {
@@ -349,9 +350,9 @@
     };
     const render = () => {
       const qq = build();
-      const L = V.filterList(qq);
-      count.innerHTML = `<b>${L.length}</b> profil${L.length > 1 ? 's' : ''} ${L.length > 1 ? 'correspondent' : 'correspond'}`;
-      grid.innerHTML = L.length ? L.slice(0, 8).map((p, k) => V.card(p, { i: k, noHide: true })).join('') : V.empty('search', 'Aucun profil pour ces critères', 'Retirez un critère pour élargir la sélection.', '');
+      const L0 = V.filterList(qq), sp = V.sponsoredFor(qq, L0).slice(0, 1), L = V.arrangeSponsored(L0, sp);
+      count.innerHTML = `<b>${L.length}</b> profil${L.length > 1 ? 's' : ''} ${L.length > 1 ? 'correspondent' : 'correspond'}${sp.length ? ' <span class="qf-sp">· dont 1 sponsorisé</span>' : ''}`;
+      grid.innerHTML = L.length ? L.slice(0, sp.length ? 7 : 8).map((p, k) => V.card(p, { i: k, noHide: true, feat: sp.includes(p) })).join('') : V.empty('search', 'Aucun profil pour ces critères', 'Retirez un critère pour élargir la sélection.', '');
       const qs = new URLSearchParams(Object.entries(qq).filter(([, x]) => x)).toString();
       more.innerHTML = L.length > 8 ? V.btn(`Voir les ${L.length} profils`, { href: '#/profils' + (qs ? '?' + qs : ''), cls: 'ghost', arrow: true }) : '';
       const nAdv = ['age', 'sil', 'hair'].filter((k) => q[k]).length + multi.svc.size + tog.size;
@@ -382,14 +383,14 @@
 
   V.footer = () => `<footer class="footer"><div class="wrap">
     <div class="cols">
-      <div class="f-brand">${V.ui.brand()}<p>Velours met en relation des adultes à Genève. Les profils sont vérifiés, les contacts se font directement, sans intermédiaire ni commission.</p>
+      <div class="f-brand">${V.ui.brand()}<p>BD met en relation des adultes à Genève. Les profils sont vérifiés, les contacts se font directement, sans intermédiaire ni commission.</p>
         <div class="f-langs">${['Français', 'English', 'Español', 'Português', 'Русский'].map((l, k) => `<button type="button" class="${k ? '' : 'on'}" data-act="lang">${l}</button>`).join('')}</div>
         <div class="row">${V.btn('Créer mon profil', { href: '#/pro/inscription/1', cls: 'gold sm', arrow: true })}${V.btn('Espace pro', { href: '#/pro', cls: 'ghost sm', attrs: WHITE_GHOST })}</div></div>
       <div><h5>Liens rapides</h5><ul><li><a href="#/profils">Tous les profils</a></li><li><a href="#/profils?dispo=now">Disponibles maintenant</a></li><li><a href="#/profils?tri=new">Nouvelles arrivées</a></li><li><a href="#/profils?cat=duo">Couples et duos</a></li><li><a href="#/masques">Profils masqués</a></li></ul></div>
       <div><h5>Quartiers</h5><ul>${V.COMMUNES.slice(0, 6).map((c) => `<li><a href="#/geneve/${c.id}">${c.label}</a></li>`).join('')}</ul></div>
       <div><h5>À propos</h5><ul><li><a href="#/verifications">Comment nous vérifions</a></li><li><a href="#/securite">Sécurité et signalement</a></li><li><a href="#/rejoindre">Nous rejoindre</a></li><li><a href="#/legal/cg-visiteurs">Conditions d’utilisation</a></li><li><a href="#/legal/confidentialite">Confidentialité</a></li><li><a href="#/legal/mentions">Mentions légales</a></li></ul></div>
     </div>
-    <div class="legal"><span>© ${new Date().getFullYear()} Velours (nom de travail) · maquette, profils fictifs</span><span class="swiss"><i></i>Données hébergées en Suisse</span><span>Police 117 · Urgences 144</span></div>
+    <div class="legal"><span>© ${new Date().getFullYear()} BD · maquette, profils fictifs</span><span class="swiss"><i></i>Données hébergées en Suisse</span><span>Police 117 · Urgences 144</span></div>
   </div></footer>`;
 
   /* =================================================================== GALERIE */
@@ -447,7 +448,10 @@
 
   V.route(/^\/profils$/, (m, q) => {
     const L0 = V.filterList(q);
-    const L = q.chg ? L0 : stableOrder(q, L0);
+    const L1 = q.chg ? L0 : stableOrder(q, L0);
+    const sp = q.chg ? [] : V.sponsoredFor(q, L1);
+    const L = V.arrangeSponsored(L1, sp);
+    const spSet = new Set(sp.map((p) => p.id));
     V.lastOrder = L.map((p) => p.id);
     const catLbl = (V.CATS.find((c) => c.id === (q.cat || 'all')) || V.CATS[0]).label;
     const ac = activeCount(q);
@@ -476,7 +480,7 @@
           <div>
             <div id="news"></div>
             ${q.chg ? `<div class="mode-changes"><span>Vous voyez uniquement ce qui a changé depuis le début de votre visite.</span><button data-act="exit-changes">Revenir à ma liste</button></div>` : ''}
-            <div class="row-b" style="margin-bottom:14px"><span class="g-count" id="gCount">${L.length} profil${L.length > 1 ? 's' : ''}</span><a class="txt-btn" href="#/masques">${I('eye-off', 'sm')}Masqués (${V.hidden().length})</a></div>
+            <div class="row-b" style="margin-bottom:14px"><span class="g-count" id="gCount">${L.length} profil${L.length > 1 ? 's' : ''}${sp.length ? ` · dont ${sp.length} sponsorisé${sp.length > 1 ? 's' : ''}` : ''}</span><a class="txt-btn" href="#/masques">${I('eye-off', 'sm')}Masqués (${V.hidden().length})</a></div>
             ${L.length ? '<div class="gallery" id="gallery"></div><div class="sentinel" id="sentinel"></div><div class="load-more" id="loadMore"></div>' : V.empty('search', 'Aucun profil ne correspond', 'Élargissez votre recherche : retirez un filtre pour voir plus de profils.', `<div class="chips" style="justify-content:center">${pillsFor(q)}</div>`)}
           </div>
           <aside class="aside-session"><div class="session-box" data-live></div></aside>
@@ -486,7 +490,7 @@
         V.ui.newsBanner();
         V.ui.renderSession();
         $('[data-seg="cat"]', v).addEventListener('seg', (e) => setQ({ cat: e.detail === 'all' ? '' : e.detail }));
-        if (L.length) infinite(v, L);
+        if (L.length) infinite(v, L, spSet);
         const tools = $('#gTools');
         const obs = new IntersectionObserver(([e]) => tools.classList.toggle('stuck', e.intersectionRatio < 1), { threshold: [1], rootMargin: `-${parseInt(getComputedStyle(document.documentElement).getPropertyValue('--top-h')) + 1}px 0px 0px 0px` });
         obs.observe(tools);
@@ -524,22 +528,21 @@
   };
   V.setQ = setQ;
 
-  function infinite(v, L) {
+  function infinite(v, L, spSet = new Set()) {
     const g = $('#gallery', v); const sent = $('#sentinel', v); const more = $('#loadMore', v);
     let n = 0;
     const chg = !!V.parse().q.chg;
     const batch = () => {
       const chunk = L.slice(n, n + 8);
       let html = '';
-      // la mise en avant agrandit la carte du profil à sa place (MEA-01), au plus une par lot de 8, seulement si elle correspond aux filtres
-      let featInBatch = 0;
-      chunk.forEach((p, k) => { const feat = p.feat && !chg && featInBatch < 1; if (feat) featInBatch++; html += V.card(p, { i: k, feat }); });
+      // placement sponsorisé : carte agrandie et étiquetée, en tête de lot, seulement s'il correspond aux filtres (P08)
+      chunk.forEach((p, k) => { html += V.card(p, { i: k, feat: spSet.has(p.id) && !chg }); });
       g.insertAdjacentHTML('beforeend', html);
       n += chunk.length;
       more.innerHTML = n < L.length ? '' : `<span class="muted small">${L.length} profils · fin de la liste</span>`;
     };
     batch();
-    V.ui.refreshCount = () => { const c = $('#gCount'); if (c) { const k = $$('#gallery .card:not(.feat):not(.out)').length; c.textContent = `${k} profil${k > 1 ? 's' : ''}`; } };
+    V.ui.refreshCount = () => { const c = $('#gCount'); if (c) { const k = $$('#gallery .card:not(.out)').length, s = $$('#gallery .card.feat:not(.out)').length; c.textContent = `${k} profil${k > 1 ? 's' : ''}${s ? ` · dont ${s} sponsorisé${s > 1 ? 's' : ''}` : ''}`; } };
     const io = new IntersectionObserver((es) => {
       if (!es[0].isIntersecting || n >= L.length || g.dataset.loading) return;
       g.dataset.loading = 1;
@@ -602,7 +605,7 @@
     const run = () => {
       const s = inp.value.trim();
       const res = s ? V.filterList({ q: s }, P.filter(V.visible)) : [];
-      $('#sres', sh).innerHTML = s ? (res.length ? res.map((p) => `<div style="cursor:pointer" data-act="open" data-id="${p.id}"><img class="avatar sq" src="${V.img(p.photos[0], 's')}" alt=""><div class="sp"><b class="serif" style="font-size:19px;font-weight:400">${esc(p.name)}, ${V.ageShort(p)}</b><div class="small muted">${p.tel} · ${V.communeTxt(p.commune)}</div></div>${I('badge-check', 'gold')}</div>`).join('') : `<div class="callout danger"><span>Aucun profil vérifié ne correspond à « ${esc(s)} ». Méfiez-vous des numéros qui ne figurent pas sur Velours.</span></div>`) : '';
+      $('#sres', sh).innerHTML = s ? (res.length ? res.map((p) => `<div style="cursor:pointer" data-act="open" data-id="${p.id}"><img class="avatar sq" src="${V.img(p.photos[0], 's')}" alt=""><div class="sp"><b class="serif" style="font-size:19px;font-weight:400">${esc(p.name)}, ${V.ageShort(p)}</b><div class="small muted">${p.tel} · ${V.communeTxt(p.commune)}</div></div>${I('badge-check', 'gold')}</div>`).join('') : `<div class="callout danger"><span>Aucun profil vérifié ne correspond à « ${esc(s)} ». Méfiez-vous des numéros qui ne figurent pas sur BD.</span></div>`) : '';
     };
     inp.addEventListener('input', run);
     $('.sh-body', sh).insertAdjacentHTML('beforeend', `<div class="row" style="margin-top:16px">${V.btn('Filtrer la galerie', { cls: 'sm dark', act: 'search-apply' })}</div>`);
@@ -690,7 +693,7 @@
         <button class="icon-btn" data-act="fav" data-id="${p.id}" aria-label="Sélection"><span style="color:${on ? 'var(--violet)' : 'inherit'}">${I('heart')}</span></button></div>
       <div class="f-grid">
         <div class="f-media protect">
-          <div class="f-track" id="fTrack">${slides.map((s, j) => `<div class="f-slide"><img src="${s.src}" alt="Photo ${j + 1} de ${esc(p.name)}" style="object-position:${s.pos};${s.zoom ? `transform:scale(${s.zoom});transform-origin:${s.pos}` : ''}" draggable="false"><span class="wm">velours · photo vérifiée</span></div>`).join('')}</div>
+          <div class="f-track" id="fTrack">${slides.map((s, j) => `<div class="f-slide"><img src="${s.src}" alt="Photo ${j + 1} de ${esc(p.name)}" style="object-position:${s.pos};${s.zoom ? `transform:scale(${s.zoom});transform-origin:${s.pos}` : ''}" draggable="false"><span class="wm">BD · photo vérifiée</span></div>`).join('')}</div>
           <div class="f-dots">${slides.map((_, j) => `<i class="${j ? '' : 'on'}"></i>`).join('')}</div>
           <div class="navs d-only"><button data-act="slide" data-d="-1" aria-label="Photo précédente">${I('chevron-left')}</button><button data-act="slide" data-d="1" aria-label="Photo suivante">${I('chevron-right')}</button></div>
           <button class="icon-btn zoom" style="background:rgba(255,255,255,.88);color:#120d18" data-act="zoom" aria-label="Agrandir">${I('maximize')}</button>
@@ -750,7 +753,7 @@
             <div class="rt"><div class="rt-h"><span>Durée</span><span>${I('home', 'sm')}Reçoit</span><span>${I('car', 'sm')}Se déplace</span></div>${p.rates.map((r) => `<div class="rt-r"><span>${I('clock', 'sm')}${r[0]}</span><span>${price(r, 1, incall)}</span><span>${price(r, 2, outcall)}</span></div>`).join('')}</div>
             <h4 class="f-h4">Moyens de paiement</h4>
             <div class="pay">${(p.pay || ['chf']).filter((k2) => PAY[k2]).map((k2) => `<span class="pay-i">${I(PAY[k2][0], 'sm')}${PAY[k2][1]}</span>`).join('')}</div>
-            <p class="hint">Tarifs fixés librement par ${esc(first)}. Velours ne perçoit aucune commission sur les rendez-vous.</p>
+            <p class="hint">Tarifs fixés librement par ${esc(first)}. BD ne perçoit aucune commission sur les rendez-vous.</p>
           </section>
 
           ${p.likes ? `<section class="f-card"><h3 class="f-h">${I('heart')}Likes et abonnés</h3>
@@ -824,14 +827,14 @@
     const first = p.name.split(' ')[0];
     const labels = { tel: 'Appeler', wa: 'WhatsApp', sms: 'SMS', tg: 'Telegram' };
     V.S.clicks = (V.S.clicks || 0) + 1; V.save();
-    const msg = `Bonjour ${first}, je vous contacte via Velours. Seriez-vous disponible ${V.statusOf(p).t === 'now' ? 'ce soir' : 'prochainement'} ?`;
+    const msg = `Bonjour ${first}, je vous contacte via BD. Seriez-vous disponible ${V.statusOf(p).t === 'now' ? 'ce soir' : 'prochainement'} ?`;
     const sh = V.sheet.open({
       title: `Contacter ${esc(first)}`,
       body: `<div class="row" style="margin-bottom:16px"><img class="avatar lg sq" src="${V.img(p.photos[0], 's')}" alt=""><div><b class="serif" style="font-size:22px;font-weight:400">${esc(p.name)}</b><div class="small">${V.statusPill(p, true)}</div></div></div>
         <div class="panel soft" style="padding:16px"><div class="xs muted">Numéro professionnel (fictif dans la maquette)</div><div class="row-b"><b style="font-size:22px;letter-spacing:.02em" class="num">${p.tel}</b><button class="txt-btn" data-copy>${I('copy', 'sm')}Copier</button></div></div>
         ${ch !== 'tel' ? `<div style="margin-top:14px">${V.field('Message pré-rempli (modifiable)', { type: 'textarea', value: msg, max: 300 })}</div>` : ''}
         <div class="callout gold" style="margin-top:14px"><span><b>Consignes :</b> ${esc(p.rules)}</span></div>
-        <p class="hint" style="margin-top:14px">Le contact se fait directement, hors plateforme. Velours ne lit ni ne conserve vos échanges, et ne prend aucune commission.</p>`,
+        <p class="hint" style="margin-top:14px">Le contact se fait directement, hors plateforme. BD ne lit ni ne conserve vos échanges, et ne prend aucune commission.</p>`,
       foot: `<button class="btn ghost sm" data-close2 style="flex:1">Fermer</button>${V.btn('Ouvrir ' + labels[ch], { cls: 'sm', attrs: 'data-go style="flex:2"', arrow: 'arrow-up-right' })}`,
     });
     $('[data-copy]', sh).onclick = () => V.toast('Numéro copié (fictif).', { icon: 'copy' });
@@ -1035,8 +1038,8 @@
   /* Nous rejoindre : contenu enrichi des offres (éléments clés en gras) */
   const PLAN_RICH = {
     essentiel: { ico: 'badge-check', feats: ['<b>Profil vérifié</b> : âge, identité, photos et indépendance', '<b>8 photos</b> filigranées', '<b>Statut express</b> en un geste', '<b>Statistiques</b> de base', '<b>Masquage immédiat</b> à tout moment'] },
-    visibilite: { ico: 'trending', feats: ['<b>Tout Présence</b>, et en plus :', '<b>20 photos</b> et <b>1 vidéo</b> de présentation', '<b>2 jours de mise en avant</b> par mois', '<b>Statistiques détaillées</b> et conseils', 'Traduction relue en <b>5 langues</b>', '<b>Alertes</b> si vos photos apparaissent ailleurs'] },
-    premium: { ico: 'star', feats: ['<b>Tout Visibilité</b>, et en plus :', '<b>6 jours de mise en avant</b> par mois', '<b>Shooting photo annuel offert</b> (valeur CHF 450)', '<b>Rédaction du profil</b> par notre équipe', 'Assistance WhatsApp <b>prioritaire 7 j/7</b>'] },
+    visibilite: { ico: 'trending', feats: ['<b>Tout Présence</b>, et en plus :', '<b>20 photos</b> et <b>1 vidéo</b> de présentation', '<b>6 crédits de mise en avant</b> offerts par mois', '<b>Statistiques détaillées</b> et conseils', 'Traduction relue en <b>5 langues</b>', '<b>Alertes</b> si vos photos apparaissent ailleurs'] },
+    premium: { ico: 'star', feats: ['<b>Tout Visibilité</b>, et en plus :', '<b>18 crédits de mise en avant</b> offerts par mois', '<b>Shooting photo annuel offert</b> (valeur CHF 450)', '<b>Rédaction du profil</b> par notre équipe', 'Assistance WhatsApp <b>prioritaire 7 j/7</b>'] },
   };
   const planCard = (pl) => {
     const r = PLAN_RICH[pl.id] || { ico: 'check', feats: pl.feats };
@@ -1124,11 +1127,11 @@
 
   /* =================================================================== PAGES LÉGALES */
   const LEGAL = {
-    'cg-visiteurs': ['Conditions d’utilisation · visiteurs', ['Accès réservé aux personnes majeures. L’avertissement d’âge doit être confirmé à l’entrée.', 'Velours met en relation des adultes. Les contacts se font directement entre le visiteur et la personne, hors plateforme.', 'Le respect des consignes, des limites et du consentement est une condition d’utilisation. Tout manquement peut être signalé et entraîner une suspension.', 'Droit suisse applicable, for à Genève.']],
+    'cg-visiteurs': ['Conditions d’utilisation · visiteurs', ['Accès réservé aux personnes majeures. L’avertissement d’âge doit être confirmé à l’entrée.', 'BD met en relation des adultes. Les contacts se font directement entre le visiteur et la personne, hors plateforme.', 'Le respect des consignes, des limites et du consentement est une condition d’utilisation. Tout manquement peut être signalé et entraîner une suspension.', 'Droit suisse applicable, for à Genève.']],
     'cg-escortes': ['Conditions d’utilisation · escortes', ['Publication réservée aux personnes majeures, vérifiées et indépendantes.', 'Le modèle repose exclusivement sur des forfaits : aucune commission, aucun pourcentage sur les rendez-vous.', 'L’abonnement est mensuel, sans engagement, et continue pendant les absences. La résiliation prend effet à la fin de la période en cours.', 'Le consentement à la publication de chaque photo et de chaque information est révocable à tout moment.']],
     confidentialite: ['Politique de confidentialité', ['Données hébergées en Suisse. Traitement conforme à la nLPD ; analyse d’impact réalisée avant l’ouverture.', 'Visiteurs : aucune donnée obligatoire. La sélection anonyme s’efface à la fermeture du navigateur.', 'Escortes : la pièce d’identité reste chez le prestataire de vérification ; seuls le résultat et la date de naissance sont conservés.', 'Droits d’accès, de rectification et d’effacement en libre-service. Effacement effectif sous 30 jours.']],
     contenu: ['Politique de contenu', ['Photos suggestives autorisées, contenu pornographique interdit.', 'Aucune nudité explicite dans les zones publiques ou indexées.', 'Catalogue fermé de services, sans texte libre sur les pratiques.', 'Toute nouvelle photo est modérée avant publication.']],
-    mentions: ['Mentions légales', ['Velours (nom de travail), maquette de démonstration, profils fictifs.', 'Éditeur : à compléter (société, adresse à Genève, numéro IDE).', 'Hébergement : prestataire suisse, à confirmer.', 'Réalisation : Digistylze, Genève.']],
+    mentions: ['Mentions légales', ['BD, maquette de démonstration, profils fictifs.', 'Éditeur : à compléter (société, adresse à Genève, numéro IDE).', 'Hébergement : prestataire suisse, à confirmer.', 'Réalisation : Digistylze, Genève.']],
   };
   V.route(/^\/legal\/([\w-]+)$/, (m) => {
     const [t, items] = LEGAL[m[1]] || LEGAL.mentions;

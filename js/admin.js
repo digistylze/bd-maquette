@@ -1,4 +1,4 @@
-/* Velours : back-office (adresse séparée en production, double authentification obligatoire) */
+/* BD : back-office (adresse séparée en production, double authentification obligatoire) */
 (function (V) {
   'use strict';
   const { $, $$, i: I, esc } = V;
@@ -83,7 +83,7 @@
         ${head(`${c.cat} · reçue ${c.d === -1 ? 'hier' : `il y a ${-c.d} jours`}`, `${esc(c.name)}, ${c.age} ans`, st.done[c.id] ? `<span class="badge ${st.done[c.id] === 'Validée' ? 'ok' : 'warn'}">${st.done[c.id]}</span>` : '')}
         <div class="grid-2">
           <div class="panel"><div class="row-b"><h3>1. Âge et identité</h3><span class="badge ${c.kyc === 'Vérifiée' ? 'ok' : 'warn'}">${c.kyc}</span></div>
-            <dl class="kv" style="margin-top:12px"><dt>Prestataire</dt><dd>Partenaire suisse de vérification</dd><dt>Document</dt><dd>Carte d’identité · authentique</dd><dt>Date de naissance</dt><dd>${c.kyc === 'Vérifiée' ? '•• •• 1999 (conservée)' : 'en attente'}</dd><dt>Majorité</dt><dd>${c.kyc === 'Vérifiée' ? 'Confirmée' : 'En attente'}</dd><dt>Copie de la pièce</dt><dd>Non conservée par Velours</dd></dl></div>
+            <dl class="kv" style="margin-top:12px"><dt>Prestataire</dt><dd>Partenaire suisse de vérification</dd><dt>Document</dt><dd>Carte d’identité · authentique</dd><dt>Date de naissance</dt><dd>${c.kyc === 'Vérifiée' ? '•• •• 1999 (conservée)' : 'en attente'}</dd><dt>Majorité</dt><dd>${c.kyc === 'Vérifiée' ? 'Confirmée' : 'En attente'}</dd><dt>Copie de la pièce</dt><dd>Non conservée par BD</dd></dl></div>
           <div class="panel"><div class="row-b"><h3>2. Concordance des médias</h3><span class="badge ${isD ? 'ok' : 'warn'}">${isD ? '98 %' : 'À vérifier'}</span></div>
             ${isD ? `<div class="cmpface" style="margin-top:12px"><figure><img src="img/p/daria-selfie-s.webp" onerror="this.src='img/p/daria-s.webp'" alt=""><figcaption><span class="badge dark">Selfie vivant</span></figcaption></figure><figure><img src="${V.img('daria', 's')}" alt=""><figcaption><span class="badge dark">Photo proposée</span></figcaption></figure></div><div class="score" style="margin-top:10px">${I('check')}Même personne · 98 % · aucun doublon sur le web</div>` : `<div class="cmpface blur" style="margin-top:12px"><figure style="background:var(--bg-3)"></figure><figure style="background:var(--bg-3)"></figure></div><p class="hint">Photos visibles uniquement par l’équipe de modération.</p>`}</div>
         </div>
@@ -155,7 +155,7 @@
       html: shell('mises-en-avant', `${head(`${V.FEATURED.slotsPerDay} emplacements par jour et par catégorie`, 'Mises en avant')}
         <div class="panel"><h3>Occupation · 14 jours</h3><div style="overflow-x:auto;margin-top:12px"><div class="occ" style="min-width:640px"><span></span>${Array.from({ length: 14 }, (_, k) => `<span class="h">${D.addDays(k).getDate()}</span>`).join('')}${cats.map((c, r) => `<span class="lbl">${c}</span>${Array.from({ length: 14 }, (_, k) => `<span class="c ${lvl(r, k)}"></span>`).join('')}`).join('')}</div></div>
           <div class="legend" style="margin-top:12px"><span><i style="background:var(--bg-3)"></i>Libre</span><span><i style="background:color-mix(in srgb,var(--violet) 35%,var(--bg-3))"></i>1–2 pris</span><span><i style="background:color-mix(in srgb,var(--violet) 65%,var(--bg-3))"></i>3–5 pris</span><span><i style="background:var(--violet)"></i>Complet</span></div></div>
-        <div class="grid-2" style="margin-top:14px"><div class="panel"><h3>Tarifs</h3><dl class="kv" style="margin-top:12px"><dt>Jour</dt><dd>CHF ${V.FEATURED.perDay}</dd><dt>Semaine</dt><dd>CHF ${V.FEATURED.perWeek}</dd><dt>Inclus</dt><dd>2 j (Visibilité), 6 j (Accompagnement)</dd><dt>Règle</dt><dd>Étiquetée, rotation équitable, filtres respectés</dd></dl></div>
+        <div class="grid-2" style="margin-top:14px"><div class="panel"><h3>Tarifs</h3><dl class="kv" style="margin-top:12px"><dt>Coût</dt><dd>${V.CREDITS.cost.zone} crédits / jour (quartier), ${V.CREDITS.cost.canton} (canton)</dd><dt>Packs</dt><dd>${V.CREDITS.packs.map((k) => `${k.n} crédits ${V.chf(k.price)}`).join(' · ')}</dd><dt>Plafond</dt><dd>${V.CREDITS.slots.zone} places / jour par quartier, ${V.CREDITS.slots.canton} pour le canton</dd><dt>Inclus</dt><dd>6 crédits / mois (Visibilité), 18 (Accompagnement)</dd><dt>Règle</dt><dd>Étiquetée, rotation équitable, filtres respectés</dd></dl></div>
           <div class="panel"><h3>Distinctions non achetables</h3><ul class="svc" style="margin-top:10px">${['Nouvelle arrivée (moins de 14 jours)', 'Profil complet', 'Photos vérifiées récemment', 'Très demandée cette semaine (ajouts en sélection)'].map((x) => `<li>${I('check')}${x}</li>`).join('')}</ul></div></div>`),
     };
   }, { mode: 'admin' });

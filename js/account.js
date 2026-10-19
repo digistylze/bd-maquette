@@ -1,4 +1,4 @@
-/* Velours : compte visiteur (facultatif, sans mot de passe) */
+/* BD : compte visiteur (facultatif, sans mot de passe) */
 (function (V) {
   'use strict';
   const { $, $$, i: I, esc } = V;
@@ -95,7 +95,7 @@
           <div><p class="small b" style="margin-bottom:8px">Catégorie par défaut de la galerie</p>${V.seg('defcat', V.CATS.map((c) => [c.id, c.label]), pr.cat || 'all')}</div>
           <div><p class="small b" style="margin-bottom:8px">Fréquence des alertes</p>${V.seg('freq', [['immediate', 'Immédiate'], ['daily', 'Quotidienne'], ['weekly', 'Hebdomadaire']], pr.freq)}</div>
         </div>
-        <div class="panel">${V.sw('discreet', pr.discreet, 'Mode discret', 'Onglet nommé « Notes » et icône neutre')}${V.sw('mail', pr.mail !== false, 'Alertes par e-mail', 'Expéditeur neutre, aucune photo')}${V.sw('push', !!pr.push, 'Notifications sur l’app installée', 'Ajoutez Velours à l’écran d’accueil')}${V.sw('history', pr.history !== false, 'Enregistrer les profils vus', 'Liste « Vus récemment », effaçable')}</div></div>`),
+        <div class="panel">${V.sw('discreet', pr.discreet, 'Mode discret', 'Onglet nommé « Notes » et icône neutre')}${V.sw('mail', pr.mail !== false, 'Alertes par e-mail', 'Expéditeur neutre, aucune photo')}${V.sw('push', !!pr.push, 'Notifications sur l’app installée', 'Ajoutez BD à l’écran d’accueil')}${V.sw('history', pr.history !== false, 'Enregistrer les profils vus', 'Liste « Vus récemment », effaçable')}</div></div>`),
       after: (v) => {
         v.addEventListener('change', (e) => {
           const t = e.target; if (!t.name) return;
@@ -169,7 +169,7 @@
 
   V.ui.discreet = () => {
     const on = V.L.prefs.discreet;
-    document.title = on ? 'Notes' : document.title.replace(/^Notes$/, 'Velours');
+    document.title = on ? 'Notes' : document.title.replace(/^Notes$/, 'BD');
     const fav = $('link[rel="icon"]');
     if (fav) fav.href = on ? 'icons/neutral.svg' : 'icons/icon-192.png';
   };

@@ -1,4 +1,4 @@
-/* Velours : carte des profils (positions approximatives au quartier, jamais d'adresse) */
+/* BD : carte des profils (positions approximatives au quartier, jamais d'adresse) */
 (function (V) {
   'use strict';
   const { $, $$, i: I, esc } = V;
@@ -102,7 +102,8 @@
         if (st.r) { ring = L.circle(st.me, { radius: +st.r * 1000, color: '#4b1c71', weight: 1, fillColor: '#4b1c71', fillOpacity: .05 }).addTo(map); map.fitBounds(ring.getBounds(), { padding: [30, 30] }); }
       }
     }
-    v.addEventListener('click', (e) => {
+    // écouteur posé sur la page (remplacée à chaque affichage), pas sur #view qui persiste
+    v.firstElementChild.addEventListener('click', (e) => {
       const it = e.target.closest('.mp-it'); if (it) { select(it.dataset.id, false); return; }
       const r = e.target.closest('[data-mp-r] .qf-c'); if (r) { $$('[data-mp-r] .qf-c', v).forEach((x) => x.classList.toggle('on', x === r)); st.r = r.dataset.v; render(); return; }
       const n = e.target.closest('[data-mp="now"]'); if (n) { st.now = n.classList.toggle('on'); render(); return; }

@@ -1,10 +1,10 @@
-/* Velours : interface : chrome, menu, thème, sélection, surcouches, nouveautés de session */
+/* BD : interface : chrome, menu, thème, sélection, surcouches, nouveautés de session */
 (function (V) {
   'use strict';
   const { $, $$ } = V;
   const ui = V.ui = {};
 
-  ui.brand = (href = '#/') => `<a class="brand" href="${href}" aria-label="Velours, accueil"><img class="brand-mark" src="img/logo-b-s.webp" alt="" width="101" height="112"><span>Velours</span><small>Genève</small></a>`;
+  ui.brand = (href = '#/') => `<a class="brand" href="${href}" aria-label="BD, accueil"><img class="brand-mark" src="img/logo-b-s.webp" alt="" width="101" height="112"><span>BD</span><small>Genève</small></a>`;
 
   /* ---------- Barre du haut + onglets selon le mode (public / pro / admin) ---------- */
   const NAV = {
@@ -83,7 +83,7 @@
   ui.menuHTML = () => `
     <div class="m-bg"></div><div class="m-bg"></div><div class="m-bg"></div><div class="m-bg"></div>
     <div class="menu-inner"><div class="m-cols">
-      <div class="m-main"><div class="m-eyebrow">Velours · Genève</div>
+      <div class="m-main"><div class="m-eyebrow">BD · Genève</div>
         <ul class="m-links">
           <li><a href="#/profils" data-m="/profils"><span class="n">01</span><span class="t">Tous les profils</span><span class="dot"></span></a></li>
           <li><a href="#/profils?dispo=now" data-m="now"><span class="n">02</span><span class="t">Disponibles maintenant</span><span class="dot"></span></a></li>
@@ -269,8 +269,8 @@
       const lbl = h.querySelector('.lbl'); if (lbl) lbl.textContent = on ? 'Ajoutée' : 'Ajouter';
     });
     ui.counts(true);
-    if (on && !V.L.account && list.length === 1) V.toast(`${p.name} est dans votre sélection.`, { icon: 'heart', action: 'Voir', fn: () => ui.openSession() });
-    else if (!on) V.toast(`${p.name} retirée de la sélection.`, { icon: 'heart', action: 'Annuler', fn: () => ui.fav(id) });
+    if (on) ui.cartOpen(id);
+    else V.toast(`${p.name} retirée de la sélection.`, { icon: 'heart', action: 'Annuler', fn: () => ui.fav(id) });
   };
   ui.burst = (el) => {
     const b = document.createElement('span'); b.className = 'burst';
@@ -299,22 +299,24 @@
       upd: ch.upd.map(V.byId).filter(Boolean),
     };
   };
-  ui.sessionHTML = () => {
+  ui.sessionHTML = (o = {}) => {
     const L = ui.sessionLists();
     const cur = L[ui.sessTab];
     const rows = cur.map((p) => {
       const s = V.statusInfo(p);
       const chg = ui.sessTab === 'fav' && (V.S.chg.upd.includes(p.id) || V.S.chg.dispo.includes(p.id));
-      return `<div class="s-item${chg ? ' chg' : ''}" data-id="${p.id}">
+      return `<div class="s-item${chg ? ' chg' : ''}${o.added === p.id && ui.sessTab === 'fav' ? ' just' : ''}" data-id="${p.id}">
         ${ui.sessTab === 'fav' ? `<span class="grip" title="Glisser pour réordonner">${V.i('grip', 'sm')}</span>` : ''}
         <img src="${V.img(p.photos[0], 's')}" alt="">
-        <div class="t" data-act="open" data-id="${p.id}"><b>${V.esc(p.name)}, ${V.ageShort(p)}</b><span><i class="${s.cls}"></i>${s.short}${chg ? ' · <span style="color:var(--gold-2)">changé</span>' : ''}</span></div>
+        <div class="t" data-act="open" data-id="${p.id}"><b>${V.esc(p.name)}, ${V.ageShort(p)}</b><span><i class="${s.cls}"></i>${s.short}${chg ? ' · <span style="color:var(--gold-2)">changé</span>' : ''}${o.drawer ? ` · dès ${p.from}.–` : ''}</span></div>
         ${ui.sessTab === 'fav' ? `<button class="x" data-act="fav" data-id="${p.id}" aria-label="Retirer">${V.i('x', 'sm')}</button>` : `<button class="x" data-act="fav" data-id="${p.id}" aria-label="Ajouter">${V.i(V.isSel(p.id) ? 'check' : 'plus', 'sm')}</button>`}
       </div>`;
     }).join('');
     const empty = { fav: 'Ajoutez des profils avec le cœur. Ils resteront ici pendant votre visite.', new: 'Aucune nouvelle arrivée ni nouvelle disponibilité depuis le début de votre visite.', upd: 'Aucun profil modifié depuis le début de votre visite.' }[ui.sessTab];
     const n = L.fav.length;
-    return `<h3>Ma session</h3>
+    const added = o.drawer && o.added && V.isSel(o.added) ? V.byId(o.added) : null;
+    return `<h3>${o.drawer ? 'Ma sélection' : 'Ma session'}</h3>
+      ${added ? `<div class="s-added">${V.i('check', 'sm')}<span><b>${V.esc(added.name)}</b> est ajoutée à votre sélection.</span></div>` : ''}
       <div class="s-tabs">
         <button class="${ui.sessTab === 'fav' ? 'on' : ''}" data-act="stab" data-v="fav">Favoris <span class="c">${L.fav.length}</span></button>
         <button class="${ui.sessTab === 'new' ? 'on' : ''}" data-act="stab" data-v="new">Nouveaux <span class="c">${L.new.length}</span></button>
@@ -323,13 +325,25 @@
       <p class="s-note">${V.L.account ? `Synchronisée avec votre compte <b>${V.esc(V.L.account.pseudo)}</b> sur tous vos appareils.` : 'Votre sélection reste visible tant que le navigateur est ouvert. Elle s’efface à sa fermeture.'}</p>
       <div class="s-list" id="sList">${rows || `<div class="s-empty">${empty}</div>`}</div>
       <button class="btn ${n >= 2 ? 'light' : 'light is-disabled'} block" data-act="compare"><span class="roll"><span>Comparer ma sélection${n >= 2 ? ` (${Math.min(n, 6)})` : ''}</span><span aria-hidden="true">Comparer ma sélection${n >= 2 ? ` (${Math.min(n, 6)})` : ''}</span></span></button>
+      ${o.drawer ? V.btn('Continuer mes recherches', { cls: 'ghost block s-continue', attrs: 'data-s-close' }) : ''}
       ${V.L.account ? '' : '<p class="keep">Pour la garder : <a href="#/compte/connexion">créer un compte discret</a></p>'}`;
   };
   ui.renderSession = () => {
-    $$('.session-box[data-live]').forEach((b) => { b.innerHTML = ui.sessionHTML(); ui.dragList(b); });
+    $$('.session-box[data-live]').forEach((b) => { b.innerHTML = ui.sessionHTML({ drawer: b.dataset.drawer === '1', added: b.dataset.added }); ui.dragList(b); });
   };
-  ui.openSession = () => {
-    V.sheet.open({ title: '', side: true, body: '<div class="session-box" data-live style="min-height:calc(100dvh - 120px)"></div>', onOpen: (sh) => { sh.classList.add('sheet-dark'); sh.querySelector('.sh-head').style.display = 'none'; ui.renderSession(); const x = document.createElement('button'); x.className = 'icon-btn'; x.style.cssText = 'position:absolute;right:14px;top:14px;color:#fff;z-index:2'; x.innerHTML = V.i('x'); x.onclick = () => V.sheet.close(); sh.querySelector('.sh-body').style.position = 'relative'; sh.querySelector('.sh-body').appendChild(x); } });
+  /* Sélection façon panier : l'ajout ouvre le tiroir (sauf si le panneau latéral est déjà visible) */
+  const asideOn = () => { const a = $('.aside-session'); return !!a && getComputedStyle(a).display !== 'none'; };
+  ui.cartOpen = (id) => {
+    ui.sessTab = 'fav';
+    const box = V.sheet.el && V.sheet.el.querySelector('.session-box[data-drawer]');
+    if (box) { box.dataset.added = id; ui.renderSession(); return; }
+    if (asideOn()) { ui.renderSession(); const a = $('.aside-session .session-box'); if (a) { a.classList.remove('flash'); void a.offsetWidth; a.classList.add('flash'); } return; }
+    ui.openSession(id);
+  };
+  ui.openSession = (added) => {
+    if (typeof added !== 'string') added = '';
+    V.sheet.open({ title: '', side: true, body: `<div class="session-box" data-live data-drawer="1"${added ? ` data-added="${added}"` : ''} style="min-height:calc(100dvh - 120px)"></div>`, onOpen: (sh) => {
+      sh.addEventListener('click', (e) => { if (e.target.closest('[data-s-close]')) V.sheet.close(); }); sh.classList.add('sheet-dark'); sh.querySelector('.sh-head').style.display = 'none'; ui.renderSession(); const x = document.createElement('button'); x.className = 'icon-btn'; x.style.cssText = 'position:absolute;right:14px;top:14px;color:#fff;z-index:2'; x.innerHTML = V.i('x'); x.onclick = () => V.sheet.close(); sh.querySelector('.sh-body').style.position = 'relative'; sh.querySelector('.sh-body').appendChild(x); } });
   };
   /* Réordonner la sélection par glisser (souris et tactile) */
   ui.dragList = (box) => {

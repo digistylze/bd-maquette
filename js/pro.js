@@ -1,4 +1,4 @@
-/* Velours : espace pro (démo : connectée en tant qu'Alma) + inscription en 4 étapes */
+/* BD : espace pro (démo : connectée en tant qu'Alma) + inscription en 4 étapes */
 (function (V) {
   'use strict';
   const { $, $$, i: I, esc } = V;
@@ -91,13 +91,13 @@
         </div>
         <div class="panel" id="hours" style="margin-top:14px;display:none"><p class="b" style="margin-bottom:10px">À quelle heure ?</p><div class="slots">${['14 h', '16 h', '18 h', '19 h', '20 h', '21 h', '22 h', '23 h'].map((h) => `<button class="chip" data-act="ex-h" data-h="${h}">${h}</button>`).join('')}</div></div>
         <div class="grid-2" style="margin-top:14px">
-          <div class="panel soft"><h3>Sur l’écran d’accueil</h3><p class="small ink2" style="margin-top:8px">Installez Velours comme une application : le statut express s’ouvre en un tap, sans vous reconnecter.</p><div style="margin-top:14px">${V.btn('Installer l’app', { act: 'install', cls: 'sm dark', arrow: 'smartphone' })}</div></div>
+          <div class="panel soft"><h3>Sur l’écran d’accueil</h3><p class="small ink2" style="margin-top:8px">Installez BD comme une application : le statut express s’ouvre en un tap, sans vous reconnecter.</p><div style="margin-top:14px">${V.btn('Installer l’app', { act: 'install', cls: 'sm dark', arrow: 'smartphone' })}</div></div>
           <div class="panel soft">${V.sw('smslink', V.L.pro.smslink !== false, 'Lien de connexion directe par SMS', 'Un SMS discret quand votre statut expire')}${V.sw('remind', V.L.pro.remind !== false, 'Me rappeler quand le statut expire', '« Votre statut a expiré. Êtes-vous disponible ? »')}</div>
         </div>
         <p class="hint" style="margin-top:14px">L’historique de vos statuts n’est jamais public : un visiteur ne voit que le statut en cours.</p>`),
       after: (v) => {
         let pending = null;
-        v.addEventListener('click', (e) => {
+        v.firstElementChild.addEventListener('click', (e) => {
           const b = e.target.closest('[data-act="ex"]'); const h = e.target.closest('[data-act="ex-h"]');
           if (b) {
             const k = b.dataset.v;
@@ -150,12 +150,12 @@
             <div class="chips" style="margin-top:12px">${Object.entries(V.SERVICES).map(([k, l]) => `<button class="chip sm${p.services.includes(k) ? ' on' : ''}" data-act="toggle-on"><span class="ck">${I('check', 'sm')}</span>${l}</button>`).join('')}</div>
             <p class="small b" style="margin:16px 0 8px">Ce que je ne fais pas</p><div class="chips">${Object.entries(V.LIMITS).map(([k, l]) => `<button class="chip sm${p.limits.includes(k) ? ' on' : ''}" data-act="toggle-on"><span class="ck">${I('check', 'sm')}</span>${l}</button>`).join('')}</div></div>
           <div class="panel"><h3>Contacts et consignes</h3>${V.sw('c-tel', true, 'Appels', p.tel)}${V.sw('c-wa', true, 'WhatsApp', 'Message pré-rempli proposé aux visiteurs')}${V.sw('c-sms', true, 'SMS', '')}${V.sw('c-tg', false, 'Telegram', '')}<div style="margin-top:12px">${V.field('Consignes affichées avant le contact', { type: 'textarea', value: p.rules, max: 200 })}</div>
-            ${V.sw('seo', V.L.pro.seo !== false, 'Fiche visible dans les moteurs de recherche', 'Désactivez pour n’être trouvée que sur Velours')}</div>
+            ${V.sw('seo', V.L.pro.seo !== false, 'Fiche visible dans les moteurs de recherche', 'Désactivez pour n’être trouvée que sur BD')}</div>
         </div>
         <div style="position:sticky;bottom:calc(var(--tab-h) + 20px);z-index:5;margin-top:16px"><div class="panel row-b wrapr" style="box-shadow:var(--shadow-2);padding:14px 18px"><span class="small ink2">${I('info', 'sm')} Les photos et les textes passent en modération, comptez moins de 2 h. Les tarifs et les horaires sont publiés tout de suite.</span>${V.btn('Enregistrer', { act: 'pro-save', cls: 'sm', arrow: 'check' })}</div></div>`),
       after: (v) => {
         $('[data-seg="tr"]', v).addEventListener('seg', (e) => { $('#trBox p', v).textContent = TR[e.detail]; });
-        v.addEventListener('click', (e) => { const c = e.target.closest('[data-act="toggle-on"]'); if (c) c.classList.toggle('on'); });
+        v.firstElementChild.addEventListener('click', (e) => { const c = e.target.closest('[data-act="toggle-on"]'); if (c) c.classList.toggle('on'); });
       },
     };
   }, { mode: 'pro' });
@@ -167,7 +167,7 @@
     return {
       title: 'Photos',
       html: shell('photos', `<div class="dash-head"><div><div class="eyebrow">${ph.length} / 20 photos · formule ${planOf().name}</div><h1>Mes photos</h1></div>${V.btn('Ajouter des photos', { act: 'ph-add', cls: 'sm', arrow: 'upload' })}</div>
-        <div class="upl protect" id="upl">${ph.map((x, k) => `<div class="u${x.blur ? ' blurf' : ''}" data-k="${k}"><img src="${V.img(x.src, 's')}" alt="" draggable="false"><span class="facebox"></span>${x.main ? '<span class="badge goldfill main">Principale</span>' : x.st === 'mod' ? '<span class="badge warn main">En modération</span>' : ''}<div class="acts"><button data-act="ph-main" data-k="${k}" title="Photo principale">${I('star', 'sm')}</button><button data-act="ph-blur" data-k="${k}" title="Flouter le visage">${I('eye-off', 'sm')}</button><button data-act="ph-del" data-k="${k}" title="Supprimer">${I('trash', 'sm')}</button></div><span class="wm">velours</span></div>`).join('')}<div class="u add" data-act="ph-add">${I('plus', 'lg')}<span>Ajouter<br>JPG, HEIC, PNG</span></div></div>
+        <div class="upl protect" id="upl">${ph.map((x, k) => `<div class="u${x.blur ? ' blurf' : ''}" data-k="${k}"><img src="${V.img(x.src, 's')}" alt="" draggable="false"><span class="facebox"></span>${x.main ? '<span class="badge goldfill main">Principale</span>' : x.st === 'mod' ? '<span class="badge warn main">En modération</span>' : ''}<div class="acts"><button data-act="ph-main" data-k="${k}" title="Photo principale">${I('star', 'sm')}</button><button data-act="ph-blur" data-k="${k}" title="Flouter le visage">${I('eye-off', 'sm')}</button><button data-act="ph-del" data-k="${k}" title="Supprimer">${I('trash', 'sm')}</button></div><span class="wm">BD</span></div>`).join('')}<div class="u add" data-act="ph-add">${I('plus', 'lg')}<span>Ajouter<br>JPG, HEIC, PNG</span></div></div>
         <div class="grid-2" style="margin-top:16px">
           <div class="panel soft"><h3>Protection automatique</h3><ul class="svc" style="margin-top:10px">${['Filigrane sur chaque photo affichée', 'Métadonnées supprimées (EXIF, GPS, appareil)', 'Clic droit et glisser-déposer désactivés', 'Recherche hebdomadaire de vos photos sur le web', 'Floutage du visage en un geste, au choix'].map((x) => `<li>${I('check')}${x}</li>`).join('')}</ul></div>
           <div class="panel soft"><h3>Modération et contrôle</h3><p class="small ink2" style="margin-top:8px">Chaque nouvelle photo est vérifiée avant publication : concordance avec votre selfie de contrôle et respect de la politique de contenu (photos suggestives oui, explicites non).</p><p class="small ink2" style="margin-top:8px">Un selfie de contrôle tous les 90 jours garde le badge « Photos récentes ».</p></div>
@@ -204,7 +204,7 @@
             <dl class="kv" style="margin-top:14px"><dt>Abonnement</dt><dd>Profil duo · ${V.PLAN_DUO.price} CHF / mois</dd><dt>Répartition</dt><dd>${V.L.pro.duoSplit === 'me' ? 'Payé par Alma' : V.L.pro.duoSplit === 'her' ? 'Payé par Jade' : 'Partagé · 149.50 CHF chacune'}</dd><dt>Statut</dt><dd>Propre au duo</dd></dl>
             <div style="margin-top:14px">${V.seg('split', [['half', 'Partager 50/50'], ['me', 'Je paie'], ['her', 'Jade paie']], V.L.pro.duoSplit || 'half')}</div>
             <div class="row wrapr" style="margin-top:14px">${V.btn('Voir la fiche duo', { href: '#/profil/alma-jade', cls: 'sm ghost' })}${V.btn('Quitter le duo', { act: 'duo-quit', cls: 'sm danger-ghost' })}</div></div>
-          <div class="panel"><h3>Inviter une partenaire</h3><p class="small ink2" style="margin-top:6px">Elle doit être vérifiée sur Velours. Elle accepte depuis son espace pro ; chacune peut masquer le profil commun ou quitter le duo à tout moment.</p>
+          <div class="panel"><h3>Inviter une partenaire</h3><p class="small ink2" style="margin-top:6px">Elle doit être vérifiée sur BD. Elle accepte depuis son espace pro ; chacune peut masquer le profil commun ou quitter le duo à tout moment.</p>
             <div style="margin-top:14px">${V.field('Pseudo de votre partenaire', { name: 'partner', value: inv ? inv.name : '' })}</div><div class="list-rows" id="pres"></div>
             ${inv ? `<div class="callout ${inv.ok ? 'ok' : 'gold'}" style="margin-top:12px">${I(inv.ok ? 'check' : 'clock')}<span>${inv.ok ? `${esc(inv.name)} a accepté : le profil duo est en modération.` : `Invitation envoyée à ${esc(inv.name)}. En attente de son accord.`}</span></div>${inv.ok ? '' : `<div style="margin-top:10px">${V.btn('Démo : accepter au nom de ' + esc(inv.name), { act: 'duo-accept', cls: 'sm ghost' })}</div>`}` : ''}</div>
         </div>`),
@@ -218,23 +218,109 @@
   }, { mode: 'pro' });
 
   /* =================================================================== MISE EN AVANT */
+  const nf = (n) => Number(n || 0).toLocaleString('fr-CH');
+  /* Mise en avant par crédits (P06, P07) : solde, packs, réservation avec places et coût affichés avant débit, campagnes, journal */
+  const CRED = () => {
+    const p = V.L.pro;
+    if (!p.cr) p.cr = {
+      bal: 24,
+      ledger: [{ d: -20, t: 'Achat · pack de 30 crédits', n: 30 }, { d: -12, t: 'Mise en avant · Eaux-Vives · 2 jours', n: -6 }],
+      camps: [{ id: 'k1', zone: 'zone', from: -12, days: 2, cost: 6, views: 1240, clicks: 38 }],
+    };
+    return p.cr;
+  };
+  const crZoneTxt = (z) => (z === 'canton' ? 'Tout le canton' : V.communeTxt(ME().commune));
+  // places sponsorisées restantes par jour (démo déterministe), diminuées de vos propres réservations
+  const crLeft = (type, k) => {
+    const max = V.CREDITS.slots[type];
+    const taken = (k * 7 + (type === 'canton' ? 3 : 1)) % (max + 2);
+    const mine = CRED().camps.filter((c) => c.zone === type && k >= c.from && k < c.from + c.days).length;
+    return Math.max(0, max - taken - mine);
+  };
+  const crState = (c) => (c.from > 0 ? 'avenir' : c.from + c.days - 1 < 0 ? 'fini' : 'cours');
+  const crDate = (k) => D.fmtD(D.addDays(k), { weekday: 'short', day: 'numeric', month: 'short' });
   V.route(/^\/pro\/visibilite$/, () => {
-    const days = Array.from({ length: 14 }, (_, k) => ({ k, d: D.addDays(k), left: [3, 1, 0, 4, 5, 2, 0, 6, 4, 3, 5, 2, 6, 6][k] }));
-    const chosen = V.L.pro.featDays || [];
+    const cr = CRED();
+    const pr = { zone: 'zone', start: 1, days: 3 };
+    V._crPick = pr;
     return {
       title: 'Mise en avant',
-      html: shell('visibilite', `<div class="dash-head"><div><div class="eyebrow">Encart deux fois plus grand · étiqueté</div><h1>Mise en avant</h1></div></div>
+      html: shell('visibilite', `<div class="dash-head"><div><div class="eyebrow">Placements sponsorisés · étiquetés · limités par zone</div><h1>Mise en avant</h1></div>
+          <div class="cr-bal"><small>Solde</small><b id="crBal">${cr.bal}</b><span>crédits</span></div></div>
         <div class="grid-2">
-          <div class="panel"><h3>Choisissez vos jours</h3><p class="small muted" style="margin:4px 0 14px">${V.FEATURED.slotsPerDay} emplacements par jour au maximum, rotation équitable. Encore <b>1 jour inclus</b> ce mois-ci dans votre formule.</p>
-            <div class="cal">${['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'].map((x) => `<span class="dh">${x}</span>`).join('')}${Array.from({ length: (days[0].d.getDay() + 6) % 7 }, () => '<span></span>').join('')}${days.map((x) => `<button data-act="feat-day" data-k="${x.k}" class="${chosen.includes(x.k) ? 'on' : ''}${x.k === 0 ? ' today' : ''}" ${x.left ? '' : 'disabled'}>${x.d.getDate()}<small>${x.left ? x.left + ' libre' + (x.left > 1 ? 's' : '') : 'complet'}</small></button>`).join('')}</div>
-            <div class="row-b" style="margin-top:16px"><div><div class="small muted" id="featSum">Aucun jour choisi</div><b class="serif" style="font-size:30px;font-weight:400" id="featTot">CHF 0</b></div>${V.btn('Réserver', { act: 'feat-pay', cls: '', arrow: 'sparkles' })}</div>
-            <p class="hint">CHF ${V.FEATURED.perDay} par jour · CHF ${V.FEATURED.perWeek} les 7 jours · jamais lié au nombre de contacts.</p></div>
-          <div class="panel soft"><h3>Aperçu dans la galerie</h3><p class="small muted" style="margin:4px 0 14px">Visible seulement dans les recherches qui vous correspondent.</p><div class="gallery" style="grid-template-columns:repeat(2,1fr)">${V.card(ME(), { feat: true, noHide: true })}</div>
-            <div class="callout" style="margin-top:14px">${I('info')}<span>Pas de « hot du jour » acheté : la distinction « Très demandée cette semaine » reste non achetable, fondée sur les ajouts en sélection.</span></div></div>
+          <div class="panel">
+            <h3>Programmer une mise en avant</h3>
+            <p class="small muted" style="margin:4px 0 16px">Votre profil apparaît en grand, étiqueté « Sponsorisé », en tête des recherches qui vous correspondent. Aucun crédit n’est débité sans place attribuée.</p>
+            <div class="cr-step"><span class="qf-l">Zone</span><div class="qf-chips" data-cr="zone">
+              <button type="button" class="qf-c on" data-v="zone">${esc(V.communeTxt(ME().commune))} · ${V.CREDITS.cost.zone} crédits / jour</button>
+              <button type="button" class="qf-c" data-v="canton">Tout le canton · ${V.CREDITS.cost.canton} crédits / jour</button></div></div>
+            <div class="cr-step"><span class="qf-l">Début</span><div class="cr-days" id="crDays"></div></div>
+            <div class="cr-step"><span class="qf-l">Durée</span><div class="qf-chips" data-cr="days">${[1, 3, 7].map((n) => `<button type="button" class="qf-c${n === 3 ? ' on' : ''}" data-v="${n}">${n} jour${n > 1 ? 's' : ''}</button>`).join('')}</div></div>
+            <dl class="kv cr-sum" id="crSum"></dl>
+            <div id="crGo" style="margin-top:14px"></div>
+          </div>
+          <div class="panel">
+            <h3>Acheter des crédits</h3>
+            <p class="small muted" style="margin:4px 0 16px">Valables ${V.CREDITS.months} mois. Votre formule ${PRO.plan === 'premium' ? 'Accompagnement offre 18' : 'Visibilité offre 6'} crédits chaque mois.</p>
+            <div class="cr-packs">${V.CREDITS.packs.map((k) => `<button type="button" class="cr-pack${k.reco ? ' reco' : ''}" data-pack="${k.id}">${k.reco ? '<span class="cr-tag">Le plus choisi</span>' : ''}<b>${k.n}<small> crédits</small></b><span class="cr-pr">${V.chf(k.price)}</span><span class="cr-unit">${V.chf(k.price / k.n)} le crédit</span></button>`).join('')}</div>
+            <p class="hint">Démonstration : aucun paiement n’est effectué. En production, le paiement passe par un prestataire agréé ; BD ne conserve aucune donnée de carte.</p>
+          </div>
+        </div>
+        <div class="panel" style="margin-top:14px"><div class="row-b"><h3>Mes campagnes</h3><span class="small muted">Vues et clics sponsorisés, séparés de vos statistiques organiques</span></div><div id="crCamps" style="margin-top:10px"></div></div>
+        <div class="grid-2" style="margin-top:14px">
+          <div class="panel"><h3>Historique des crédits</h3><div id="crLog" style="margin-top:10px"></div></div>
+          <div class="panel soft"><h3>Aperçu dans la galerie</h3><p class="small muted" style="margin:4px 0 14px">Visible seulement dans les recherches qui vous correspondent.</p><div class="gallery" style="grid-template-columns:repeat(2,1fr)">${V.card(ME(), { feat: true, noHide: true })}</div></div>
         </div>`),
-      after: (v) => upFeat(v),
+      after: (v) => crAfter(v),
     };
   }, { mode: 'pro' });
+  function crAfter(v) {
+    const cr = CRED(), pr = V._crPick;
+    const cost = () => pr.days * V.CREDITS.cost[pr.zone];
+    const range = () => Array.from({ length: pr.days }, (_, j) => pr.start + j);
+    const free = () => range().every((k) => crLeft(pr.zone, k) > 0);
+    const draw = () => {
+      $('#crBal', v).textContent = cr.bal;
+      $('#crDays', v).innerHTML = Array.from({ length: 14 }, (_, k) => k + 1).map((k) => { const n = crLeft(pr.zone, k); return `<button type="button" data-k="${k}" class="${k >= pr.start && k < pr.start + pr.days ? 'in' : ''}${k === pr.start ? ' on' : ''}" ${n ? '' : 'disabled'}><b>${D.addDays(k).getDate()}</b><small>${D.fmtD(D.addDays(k), { weekday: 'short' })}</small><i>${n ? `${n} pl.` : 'complet'}</i></button>`; }).join('');
+      const c = cost(), ok = free(), enough = cr.bal >= c;
+      $('#crSum', v).innerHTML = `<dt>Zone</dt><dd>${esc(crZoneTxt(pr.zone))}</dd><dt>Période</dt><dd>du ${crDate(pr.start)} au ${crDate(pr.start + pr.days - 1)}</dd><dt>Places</dt><dd>${ok ? '<span class="ok-t">disponibles chaque jour</span>' : '<span class="no-t">un jour est complet : changez de date</span>'}</dd><dt>Coût</dt><dd><b>${c} crédits</b></dd><dt>Solde après</dt><dd>${enough ? `${cr.bal - c} crédits` : `<span class="no-t">il manque ${c - cr.bal} crédits</span>`}</dd>`;
+      $('#crGo', v).innerHTML = ok && enough ? V.btn(`Réserver pour ${c} crédits`, { cls: 'block', attrs: 'data-cr-go', arrow: 'sparkles' }) : !enough ? V.btn('Acheter des crédits', { cls: 'ghost block', attrs: 'data-cr-buy', arrow: true }) : '';
+      $('#crCamps', v).innerHTML = cr.camps.length ? `<div class="cr-camps">${cr.camps.slice().sort((a, b) => b.from - a.from).map((x) => { const s = crState(x); return `<div class="cr-camp ${s}"><span class="cr-st">${{ cours: 'En cours', avenir: 'À venir', fini: 'Terminée' }[s]}</span><div class="sp"><b>${esc(crZoneTxt(x.zone))} · ${x.days} jour${x.days > 1 ? 's' : ''}</b><small>du ${crDate(x.from)} au ${crDate(x.from + x.days - 1)} · ${x.cost} crédits</small></div>${s === 'avenir' ? `<button type="button" class="soc-b" data-cr-cancel="${x.id}">Annuler · restituer ${x.cost} crédits</button>` : `<span class="small muted">${nf(x.views || 0)} vues · ${nf(x.clicks || 0)} clics</span>`}</div>`; }).join('')}</div>` : '<p class="small muted">Aucune campagne pour l’instant.</p>';
+      let run = cr.bal;
+      const rows = cr.ledger.slice().reverse().map((l) => { const after = run; run -= l.n; return `<div class="cr-row"><span class="small muted">${D.fmtD(D.addDays(l.d), { day: 'numeric', month: 'short' })}</span><span class="sp">${esc(l.t)}</span><b class="${l.n > 0 ? 'ok-t' : ''}">${l.n > 0 ? '+' : ''}${l.n}</b><span class="small muted">solde ${after}</span></div>`; });
+      $('#crLog', v).innerHTML = rows.join('') || '<p class="small muted">Aucune opération.</p>';
+    };
+    const buy = (id) => {
+      const k = V.CREDITS.packs.find((x) => x.id === id) || V.CREDITS.packs[1];
+      const sh = V.sheet.open({ title: `Acheter ${k.n} crédits`, body: `<dl class="kv"><dt>Pack</dt><dd>${k.n} crédits</dd><dt>Prix</dt><dd>${V.chf(k.price)} TTC</dd><dt>Validité</dt><dd>${V.CREDITS.months} mois</dd><dt>Solde après</dt><dd>${cr.bal + k.n} crédits</dd></dl><p class="hint">Démonstration : aucun paiement n’est effectué.</p>`, foot: V.btn(`Payer ${V.chf(k.price)}`, { cls: 'sm block', attrs: 'data-ok' }) });
+      $('[data-ok]', sh).onclick = async (e) => { e.currentTarget.classList.add('loading'); await V.wait(900); cr.bal += k.n; cr.ledger.push({ d: 0, t: `Achat · pack de ${k.n} crédits`, n: k.n }); V.save(); V.sheet.close(); draw(); V.toast(`${k.n} crédits ajoutés. Solde : ${cr.bal}.`, { icon: 'check' }); };
+    };
+    // écouteur posé sur la page (remplacée à chaque affichage), pas sur #view qui persiste
+    v.firstElementChild.addEventListener('click', (e) => {
+      const z = e.target.closest('[data-cr="zone"] .qf-c'); if (z) { pr.zone = z.dataset.v; $$('[data-cr="zone"] .qf-c', v).forEach((x) => x.classList.toggle('on', x === z)); draw(); return; }
+      const n = e.target.closest('[data-cr="days"] .qf-c'); if (n) { pr.days = +n.dataset.v; $$('[data-cr="days"] .qf-c', v).forEach((x) => x.classList.toggle('on', x === n)); draw(); return; }
+      const d = e.target.closest('#crDays button'); if (d) { pr.start = +d.dataset.k; draw(); return; }
+      const pk = e.target.closest('[data-pack]'); if (pk) { buy(pk.dataset.pack); return; }
+      if (e.target.closest('[data-cr-buy]')) { buy('c30'); return; }
+      const cx = e.target.closest('[data-cr-cancel]');
+      if (cx) { const x = cr.camps.find((c) => c.id === cx.dataset.crCancel); if (!x || crState(x) !== 'avenir') return; cr.camps.splice(cr.camps.indexOf(x), 1); cr.bal += x.cost; cr.ledger.push({ d: 0, t: `Restitution · campagne annulée (${crZoneTxt(x.zone)})`, n: x.cost }); V.save(); draw(); V.toast(`Campagne annulée : ${x.cost} crédits restitués.`, { icon: 'check' }); return; }
+      if (e.target.closest('[data-cr-go]')) {
+        const c = cost();
+        // contrôle au moment de la confirmation : place toujours libre et solde suffisant, sinon aucun débit
+        const sh = V.sheet.open({ title: 'Confirmer la mise en avant', body: `<dl class="kv"><dt>Zone</dt><dd>${esc(crZoneTxt(pr.zone))}</dd><dt>Période</dt><dd>du ${crDate(pr.start)} au ${crDate(pr.start + pr.days - 1)}</dd><dt>Coût</dt><dd>${c} crédits</dd><dt>Solde après</dt><dd>${cr.bal - c} crédits</dd></dl><p class="hint">Étiquetée « Sponsorisé », elle n’apparaît que dans les recherches qui vous correspondent. Annulable jusqu’au début, avec restitution des crédits.</p>`, foot: V.btn('Confirmer', { cls: 'sm block', attrs: 'data-ok' }) });
+        $('[data-ok]', sh).onclick = async (ev) => {
+          ev.currentTarget.classList.add('loading'); await V.wait(700);
+          if (!free() || cr.bal < c) { V.sheet.close(); draw(); return V.toast('La place vient d’être prise ou le solde a changé : rien n’a été débité.', { icon: 'info', ms: 4000 }); }
+          cr.bal -= c;
+          cr.camps.push({ id: 'k' + Date.now(), zone: pr.zone, from: pr.start, days: pr.days, cost: c, views: 0, clicks: 0 });
+          cr.ledger.push({ d: 0, t: `Mise en avant · ${crZoneTxt(pr.zone)} · ${pr.days} jour${pr.days > 1 ? 's' : ''}`, n: -c });
+          V.save(); V.sheet.close(); draw();
+          V.toast(`Réservée : ${c} crédits débités, solde ${cr.bal}.`, { icon: 'sparkles', ms: 3500 });
+        };
+      }
+    });
+    draw();
+  }
   const upFeat = (v) => {
     const n = (V.L.pro.featDays || []).length;
     const paid = Math.max(0, n - 1);
@@ -302,9 +388,9 @@
   /* =================================================================== MESSAGES */
   V.route(/^\/pro\/messages$/, () => ({
     title: 'Messages',
-    html: shell('messages', `<div class="dash-head"><div><div class="eyebrow">De l’équipe Velours uniquement</div><h1>Messages</h1></div></div>
+    html: shell('messages', `<div class="dash-head"><div><div class="eyebrow">De l’équipe BD uniquement</div><h1>Messages</h1></div></div>
       <div class="panel inbox">${PRO.messages.map((m, k) => `<div class="msg${m.unread && !(V.L.pro.read || []).includes(m.subj) ? ' unread' : ''}" data-act="pro-msg" data-k="${k}"><div class="t"><b>${esc(m.subj)}</b><span>${esc(m.from)} · ${m.d === 0 ? 'aujourd’hui' : D.fmtD(D.addDays(m.d))} · ${esc(m.body)}</span></div></div>`).join('')}</div>
-      <p class="hint" style="margin-top:12px">Velours n’intervient jamais dans vos échanges avec les visiteurs : il n’y a pas de messagerie entre visiteurs et escortes.</p>`),
+      <p class="hint" style="margin-top:12px">BD n’intervient jamais dans vos échanges avec les visiteurs : il n’y a pas de messagerie entre visiteurs et escortes.</p>`),
   }), { mode: 'pro' });
 
   /* =================================================================== SÉCURITÉ */
@@ -381,7 +467,7 @@
         ${V.field('Langue de votre espace pro', { type: 'select', value: 'fr', options: [['fr', 'Français'], ['en', 'English'], ['es', 'Español'], ['pt', 'Português'], ['ru', 'Русский']] })}
       </div>`),
       after: (v) => {
-        v.addEventListener('click', (e) => { const c = e.target.closest('[data-act="toggle-on"]'); if (c) c.classList.toggle('on'); const k = e.target.closest('[data-act="reg-cat"]'); if (k) { $$('[data-act="reg-cat"]', v).forEach((b) => b.classList.toggle('on', b === k)); R.cat = k.dataset.v; V.save(); } });
+        v.firstElementChild.addEventListener('click', (e) => { const c = e.target.closest('[data-act="toggle-on"]'); if (c) c.classList.toggle('on'); const k = e.target.closest('[data-act="reg-cat"]'); if (k) { $$('[data-act="reg-cat"]', v).forEach((b) => b.classList.toggle('on', b === k)); R.cat = k.dataset.v; V.save(); } });
         const ps = $('input[name="pseudo"]', v); let t;
         ps.addEventListener('input', () => { const st = ps.parentElement.querySelector('.state'); st.innerHTML = '<span class="muted">Vérification…</span>'; clearTimeout(t); t = setTimeout(() => { const taken = V.PROFILES.some((p) => p.name.toLowerCase() === ps.value.trim().toLowerCase()); st.innerHTML = taken ? `<span class="danger">${I('x', 'sm')}Déjà pris</span>` : `<span class="ok">${I('check', 'sm')}Disponible</span>`; R.pseudo = ps.value.trim(); V.save(); }, 600); });
         $('textarea[name="bio"]', v).addEventListener('input', (e) => { R.bio = e.target.value; V.save(); });
@@ -405,7 +491,7 @@
         <div class="panel">${V.opt('cgu', '1', 'J’accepte les conditions escortes et la politique de contenu', 'Forfaits uniquement, aucune commission · photos suggestives, jamais explicites', { box: true, on: R.cgu })}<div style="height:10px"></div>${V.opt('ind', '1', 'Je confirme travailler de manière indépendante', 'Personne ne me contraint, ne gère mes rendez-vous ni ne perçoit mes revenus', { box: true, on: R.ind })}</div>
       </div>`),
       after: (v) => {
-        v.addEventListener('click', (e) => {
+        v.firstElementChild.addEventListener('click', (e) => {
           const d = e.target.closest('[data-act="reg-day"]'), s = e.target.closest('[data-act="reg-slot"]');
           if (d) { R.day = +d.dataset.k; $$('[data-act="reg-day"]', v).forEach((b) => b.classList.toggle('on', b === d)); V.save(); }
           if (s) { R.slot = s.dataset.v; $$('[data-act="reg-slot"]', v).forEach((b) => b.classList.toggle('on', b === s)); V.save(); V.toast(`Entretien réservé : ${days[R.day || 0].toLocaleDateString('fr-CH', { weekday: 'long', day: 'numeric', month: 'long' })} à ${R.slot}.`, { icon: 'calendar' }); }
@@ -416,10 +502,10 @@
     };
   }, { mode: 'pro' });
   function kycStage(R) {
-    if (R.kyc === 0) return `<div class="stack">${V.opt('doc', 'id', 'Carte d’identité', '', { on: true })}${V.opt('doc', 'pass', 'Passeport', '')}${V.opt('doc', 'permit', 'Permis de séjour', '')}</div><div style="margin-top:14px">${V.btn('Scanner ma pièce', { act: 'kyc-scan', arrow: 'id-card' })}</div><p class="hint">${I('lock', 'sm')} Votre pièce reste chez le prestataire : Velours ne conserve que le résultat et votre date de naissance.</p>`;
+    if (R.kyc === 0) return `<div class="stack">${V.opt('doc', 'id', 'Carte d’identité', '', { on: true })}${V.opt('doc', 'pass', 'Passeport', '')}${V.opt('doc', 'permit', 'Permis de séjour', '')}</div><div style="margin-top:14px">${V.btn('Scanner ma pièce', { act: 'kyc-scan', arrow: 'id-card' })}</div><p class="hint">${I('lock', 'sm')} Votre pièce reste chez le prestataire : BD ne conserve que le résultat et votre date de naissance.</p>`;
     if (R.kyc === 1) return `<div class="scanner"><div class="doc"><div class="pic"></div><div class="lines"><i></i><i></i><i></i><i></i></div></div><span class="corner c1"></span><span class="corner c2"></span><span class="corner c3"></span><span class="corner c4"></span><span class="beam"></span><span class="lbl" id="scanLbl">Recto · tenez la carte bien à plat</span></div>`;
     if (R.kyc === 2) return `<div class="selfie"><svg viewBox="0 0 220 220"><circle class="trk" cx="110" cy="110" r="105"/><circle class="val" id="ring" cx="110" cy="110" r="105"/></svg><div class="face"><img src="img/p/daria-selfie-s.webp" alt="" onerror="this.src='img/p/daria-s.webp'"></div></div><p class="center b" style="text-align:center;margin-top:14px" id="liveLbl">Regardez l’écran, puis tournez lentement la tête</p>`;
-    return `<div class="steps-run">${['Document authentique', 'Visage concordant · 98 %', 'Majorité confirmée · 27 ans', 'Aucune copie conservée par Velours'].map((t) => `<div class="ok"><i></i>${t}</div>`).join('')}</div><div class="callout ok">${I('badge-check')}<span><b>Identité vérifiée.</b> Votre âge réel (27 ans) sera affiché sur votre profil.</span></div>`;
+    return `<div class="steps-run">${['Document authentique', 'Visage concordant · 98 %', 'Majorité confirmée · 27 ans', 'Aucune copie conservée par BD'].map((t) => `<div class="ok"><i></i>${t}</div>`).join('')}</div><div class="callout ok">${I('badge-check')}<span><b>Identité vérifiée.</b> Votre âge réel (27 ans) sera affiché sur votre profil.</span></div>`;
   }
   V.kycRun = async () => {
     const R = REG(); const box = $('#kyc'); if (!box) return;
@@ -432,7 +518,7 @@
     for (let k = 1; k <= 20; k++) { await V.wait(110); if (ring) ring.style.strokeDashoffset = 660 - (660 * k) / 20; if (k === 9 && lbl) lbl.textContent = 'Encore un peu…'; }
     if (lbl) lbl.textContent = 'Vivacité confirmée';
     await V.wait(500);
-    box.innerHTML = `<div class="steps-run" id="krun">${['Document authentique', 'Visage concordant · 98 %', 'Majorité confirmée · 27 ans', 'Aucune copie conservée par Velours'].map((t) => `<div><i></i>${t}</div>`).join('')}</div>`;
+    box.innerHTML = `<div class="steps-run" id="krun">${['Document authentique', 'Visage concordant · 98 %', 'Majorité confirmée · 27 ans', 'Aucune copie conservée par BD'].map((t) => `<div><i></i>${t}</div>`).join('')}</div>`;
     for (const r of $$('#krun div')) { r.classList.add('run'); await V.wait(480); r.classList.remove('run'); r.classList.add('ok'); }
     R.kyc = 3; V.save();
     box.insertAdjacentHTML('beforeend', `<div class="callout ok">${I('badge-check')}<span><b>Identité vérifiée.</b> Votre âge réel (27 ans) sera affiché sur votre profil.</span></div>`);
@@ -446,14 +532,14 @@
       title: 'Inscription · profil',
       html: regShell(3, `<div class="stack-lg">
         <div class="panel"><div class="row-b"><h3>Photos</h3><span class="small muted">3 minimum</span></div>
-          <div class="upl protect" id="regUpl" style="margin-top:12px">${R.photos.map((x, k) => `<div class="u${x.blur ? ' blurf' : ''}"><img src="${V.img(x.src, 's')}" alt="" style="${x.pos ? `object-position:${x.pos};transform:scale(${x.z || 1})` : ''}" draggable="false"><span class="facebox"></span>${x.main ? '<span class="badge goldfill main">Principale</span>' : ''}<div class="acts"><button data-act="reg-blur" data-k="${k}" title="Flouter le visage">${I('eye-off', 'sm')}</button></div><span class="wm">velours</span></div>`).join('')}<div class="u add" data-act="reg-add">${I('camera', 'lg')}<span>Ajouter</span></div></div>
+          <div class="upl protect" id="regUpl" style="margin-top:12px">${R.photos.map((x, k) => `<div class="u${x.blur ? ' blurf' : ''}"><img src="${V.img(x.src, 's')}" alt="" style="${x.pos ? `object-position:${x.pos};transform:scale(${x.z || 1})` : ''}" draggable="false"><span class="facebox"></span>${x.main ? '<span class="badge goldfill main">Principale</span>' : ''}<div class="acts"><button data-act="reg-blur" data-k="${k}" title="Flouter le visage">${I('eye-off', 'sm')}</button></div><span class="wm">BD</span></div>`).join('')}<div class="u add" data-act="reg-add">${I('camera', 'lg')}<span>Ajouter</span></div></div>
           <p class="hint">${I('check', 'sm')} Filigrane ajouté · métadonnées GPS supprimées · modération avant publication.</p></div>
         <div class="panel"><h3>À propos</h3><div class="form-grid two" style="margin-top:12px">${V.field('Taille', { type: 'select', value: '169 cm', options: ['160 cm', '165 cm', '169 cm', '172 cm', '175 cm'] })}${V.field('Silhouette', { type: 'select', value: 'Mince', options: ['Mince', 'Sportive', 'Normale', 'Pulpeuse'] })}${V.field('Cheveux', { type: 'select', value: 'Châtain clair', options: ['Blond', 'Châtain clair', 'Brun', 'Noir', 'Roux'] })}${V.field('Yeux', { type: 'select', value: 'Vert', options: ['Bleu', 'Vert', 'Noisette', 'Marron'] })}${V.field('Origine (facultative)', { type: 'select', value: 'Non précisée', options: V.ORIGINS })}${V.field('Tabac', { type: 'select', value: 'Non', options: ['Non', 'Occasionnellement', 'Oui'] })}</div></div>
         <div class="panel"><h3>Tarifs</h3><div class="form-grid two" style="margin-top:12px">${V.field('1 heure', { value: '400', suffix: 'CHF' })}${V.field('2 heures', { value: '750', suffix: 'CHF' })}${V.field('Soirée (4 h)', { value: '1300', suffix: 'CHF' })}${V.field('Nuit', { value: '2200', suffix: 'CHF' })}</div><p class="hint">Fixés librement. Aucune commission.</p></div>
         <div class="panel"><h3>Services</h3><div class="chips" style="margin-top:12px">${Object.entries(V.SERVICES).map(([k, l], j) => `<button class="chip sm${[0, 1, 4, 6, 7].includes(j) ? ' on' : ''}" data-act="toggle-on"><span class="ck">${I('check', 'sm')}</span>${l}</button>`).join('')}</div></div>
         <div class="panel"><h3>Contacts</h3>${V.sw('wa', true, 'WhatsApp', '')}${V.sw('tel', true, 'Appels', '')}${V.sw('sms', false, 'SMS', '')}<div style="margin-top:10px">${V.field('Consignes pour les visiteurs', { type: 'textarea', value: 'Messages uniquement · réservation 1 h à l’avance', max: 200 })}</div></div>
       </div>`),
-      after: (v) => v.addEventListener('click', (e) => { const c = e.target.closest('[data-act="toggle-on"]'); if (c) c.classList.toggle('on'); }),
+      after: (v) => v.firstElementChild.addEventListener('click', (e) => { const c = e.target.closest('[data-act="toggle-on"]'); if (c) c.classList.toggle('on'); }),
     };
   }, { mode: 'pro' });
 

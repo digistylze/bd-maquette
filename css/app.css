@@ -1733,7 +1733,10 @@ body.pl-reveal .hero3 { animation: plHero 1.3s cubic-bezier(.22, 1, .36, 1) both
 .cf-ph { position: relative; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 18px; background: #241d29; box-shadow: 0 30px 60px rgba(0, 0, 0, .45); }
 .cf-card.cur .cf-ph { box-shadow: 0 0 0 2px var(--gold-2), 0 34px 70px rgba(0, 0, 0, .55); }
 .cf-ph img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; -webkit-user-drag: none; }
-.cf-hot { position: absolute; right: 10px; top: 10px; z-index: 3; display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; background: linear-gradient(135deg, #ff8a3d, #e5384f); color: #fff; font-size: 12px; font-weight: 700; box-shadow: 0 4px 14px rgba(229, 56, 79, .4); }
+.cf-hot { position: absolute; right: 10px; top: 10px; z-index: 3; display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; background: var(--gold-2); color: #17131a; font-size: 12px; font-weight: 700; box-shadow: 0 4px 14px rgba(0, 0, 0, .3); }
+.cf-note { max-width: 46ch; margin: 10px auto 0; font-size: 13px; color: #cbc4cf; }
+.qf-sp { font-size: 12.5px; color: var(--gold); }
+.feat-tag .ico { width: 13px; height: 13px; margin-right: 3px; vertical-align: -2px; }
 .cf-hot.soft { background: rgba(15, 12, 17, .6); box-shadow: none; }
 .cf-hot .ico { width: 14px; height: 14px; fill: currentColor; stroke-width: 1.2; }
 .cf-ph .status { position: absolute; left: 10px; top: 10px; z-index: 3; }
@@ -1770,3 +1773,50 @@ body.pl-reveal .hero3 { animation: plHero 1.3s cubic-bezier(.22, 1, .36, 1) both
   .f-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
   .f-act { flex-direction: column; gap: 4px; padding: 9px 2px; border-radius: 14px; font-size: 11.5px; }
 }
+/* ---------- Sélection façon panier : le tiroir s'ouvre à chaque ajout (C08) ---------- */
+.s-added { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; padding: 10px 12px; border-radius: 12px; background: rgba(47, 191, 107, .14); color: #d8f5e4; font-size: 13.5px; animation: cardIn .45s var(--ease-out) both; }
+.s-added .ico { color: #2fbf6b; flex: none; }
+.s-item.just { border-color: var(--gold-2); background: rgba(207, 174, 108, .12); }
+.session-box .s-continue { margin-top: 10px; --bf: transparent; color: #f1ecf3; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .3); }
+.aside-session .session-box.flash { animation: sessFlash .9s var(--ease-out); }
+@keyframes sessFlash { 30% { box-shadow: 0 0 0 3px var(--gold-2); } }
+/* ---------- Espace pro : mise en avant par crédits (P06, P07) ---------- */
+.cr-bal { display: flex; flex-direction: column; align-items: flex-end; padding: 10px 16px; border-radius: 16px; background: var(--black); color: #f1ecf3; }
+.cr-bal small { font-size: 11px; color: #a69dab; }
+.cr-bal b { font-size: 30px; font-weight: 800; line-height: 1; color: var(--gold-2); font-variant-numeric: tabular-nums; }
+.cr-bal span { font-size: 11.5px; color: #cbc4cf; }
+.cr-step { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.cr-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+.cr-days button { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 7px 2px; border-radius: 12px; border: 1px solid var(--line-2); background: var(--bg); transition: background-color .2s, border-color .2s, color .2s; }
+.cr-days button b { font-size: 15px; }
+.cr-days button small { font-size: 10.5px; color: var(--muted); text-transform: capitalize; }
+.cr-days button i { font-style: normal; font-size: 10px; color: var(--ok); }
+.cr-days button.in { background: var(--bg-2); border-color: var(--gold-2); }
+.cr-days button.on { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.cr-days button.on small, .cr-days button.on i { color: inherit; opacity: .8; }
+.cr-days button[disabled] { opacity: .45; cursor: not-allowed; }
+.cr-days button[disabled] i { color: var(--danger); }
+.cr-sum { margin-top: 4px; padding-top: 12px; border-top: 1px solid var(--line); }
+.ok-t { color: var(--ok); font-weight: 600; }
+.no-t { color: var(--danger); font-weight: 600; }
+.cr-packs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.cr-pack { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 16px 14px 14px; border-radius: 16px; border: 1px solid var(--line-2); background: var(--bg); text-align: left; transition: border-color .25s, transform .4s var(--spring); }
+.cr-pack:hover { border-color: var(--ink); transform: translateY(-3px); }
+.cr-pack.reco { border-color: var(--gold-2); box-shadow: 0 0 0 1px var(--gold-2); }
+.cr-pack b { font-size: 26px; font-weight: 800; line-height: 1; letter-spacing: -.02em; }
+.cr-pack b small { font-size: 13px; font-weight: 500; color: var(--muted); }
+.cr-pr { margin-top: 8px; font-size: 15px; font-weight: 700; }
+.cr-unit { font-size: 11.5px; color: var(--muted); }
+.cr-tag { position: absolute; top: -10px; left: 12px; padding: 2px 9px; border-radius: 999px; background: var(--gold-2); color: #17131a; font-size: 10.5px; font-weight: 700; }
+@media (max-width: 480px) { .cr-packs { grid-template-columns: 1fr; } }
+.cr-camps { display: flex; flex-direction: column; }
+.cr-camp { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; padding: 12px 0; border-top: 1px solid var(--line); }
+.cr-camp:first-child { border-top: 0; }
+.cr-camp b { display: block; font-size: 14.5px; }
+.cr-camp small { display: block; font-size: 12px; color: var(--muted); }
+.cr-st { padding: 3px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 700; background: var(--bg-2); color: var(--ink-2); }
+.cr-camp.cours .cr-st { background: rgba(47, 191, 107, .15); color: var(--ok); }
+.cr-camp.avenir .cr-st { background: rgba(207, 174, 108, .2); color: var(--gold); }
+.cr-row { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-top: 1px solid var(--line); font-size: 13.5px; }
+.cr-row:first-child { border-top: 0; }
+.cr-row b { min-width: 34px; text-align: right; font-variant-numeric: tabular-nums; }

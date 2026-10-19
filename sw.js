@@ -1,5 +1,5 @@
-/* Velours — service worker : app installable et consultable hors connexion */
-const CACHE = 'velours-v17';
+/* BD — service worker : app installable et consultable hors connexion */
+const CACHE = 'bd-v20';
 const SHELL = [
 "./",
 "index.html",
