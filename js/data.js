@@ -36,10 +36,29 @@ window.V = window.V || {};
   /* Catalogue fermé des services (identique dans toutes les langues) */
   V.SERVICES = {
     s1: 'Accompagnement dîner, événement', s2: 'Soirée privée', s3: 'Nuit complète', s4: 'Voyage, week-end',
-    s5: 'Massage relaxant', s6: 'Massage sensuel', s7: 'Expérience « petite amie »', s8: 'Rapport protégé',
-    s9: 'Duo', s10: 'Couples', s11: 'Jeux de rôle', s12: 'Effeuillage', s13: 'Tenues sur demande', s14: 'Domination douce',
+    s5: 'Massage relaxant', s6: 'Massage sensuel', s7: 'Girlfriend experience (GFE)', s8: 'Rapport protégé',
+    s9: 'Duo', s10: 'Couples', s11: 'Jeux de rôle', s12: 'Striptease', s13: 'Lingerie et tenues', s14: 'Domination douce',
+    p1: 'Fellation protégée', p2: 'Fellation nature', p3: 'Gorge profonde', p4: '69', p5: 'Cunnilingus',
+    p6: 'Embrasse avec la langue', p7: 'Bisous sans la langue', p8: 'Branlette espagnole', p9: 'Masturbation',
+    p11: 'Éjaculation sur le corps', p12: 'Éjaculation faciale', p13: 'Éjaculation en bouche',
+    p14: 'Sodomie', p15: 'Facesitting', p16: 'Fétichisme des pieds', p17: 'Soumission légère', p18: 'Sextoys',
+    p19: 'Douche ensemble', p20: 'Porn star experience (PSE)', p21: 'Service VIP', p22: 'Trio avec une amie',
+    p23: 'Massage érotique', p24: 'Massage body-body', p25: 'Massage tantrique',
   };
-  V.LIMITS = { l1: 'Aucun rapport non protégé', l2: 'Pas de photos ni de vidéos', l3: 'Pas de déplacement hors du canton', l4: 'Pas de rendez-vous sous influence' };
+  /* Regroupement des pratiques pour la fiche (ordre d'affichage) */
+  V.SVC_GROUPS = [
+    ['Essentiels', ['s8', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8', 'p9']],
+    ['Finitions', ['p11', 'p12', 'p13']],
+    ['Expériences', ['s7', 'p20', 's12', 's13', 'p19', 'p21']],
+    ['Fantasmes et jeux', ['p14', 'p15', 'p16', 's11', 's14', 'p17', 'p18']],
+    ['Massages', ['s5', 's6', 'p23', 'p24', 'p25']],
+    ['À plusieurs', ['s9', 's10', 'p22']],
+    ['Accompagnement', ['s1', 's2', 's3', 's4']],
+  ];
+  V.LIMITS = {
+    l1: 'Aucun rapport non protégé', l2: 'Pas de photos ni de vidéos', l3: 'Pas de déplacement hors du canton', l4: 'Pas de rendez-vous sous influence',
+    l5: 'Pas de sodomie', l6: 'Pas d’éjaculation en bouche', l7: 'Pas de fellation nature', l8: 'Pas de baisers avec la langue',
+  };
 
   const R = (h1i, h1o, h2i, h2o, soi, nuit) => ([
     ['1 heure', h1i, h1o], ['2 heures', h2i, h2o], ['Soirée (4 h)', soi, soi], ['Nuit', nuit, nuit],

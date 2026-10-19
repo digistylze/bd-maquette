@@ -15,17 +15,11 @@
     const tags = [p.attrs && p.attrs.Silhouette, MODE_TXT[p.mode]].filter(Boolean).map((t) => `<i class="ptag">${esc(t)}</i>`).join('');
     return `<article class="p-card"><a class="p-ph" href="#/profil/${p.id}" data-act="open" data-id="${p.id}"><img src="${V.img(p.photos[0], 's')}" alt="Photo de ${esc(p.name)}" loading="lazy" draggable="false">${V.statusPill(p, false, true)}<span class="p-ago">${V.agoTxt(V.statusOf(p).since)}</span><span class="p-grad"></span><b class="p-name">${esc(p.name)} <span>${V.ageShort(p)}</span>${V.i('badge-check', 'sm')}</b></a><div class="p-body"><div class="p-line">${V.i('map-pin', 'sm')}<span>${V.communeTxt(p.commune)}</span></div><div class="p-line p-langs">${V.i('languages', 'sm')}<span>${langs}</span></div><div class="p-tags">${tags}</div><div class="p-foot"><span class="p-price"><small>dès</small> <b>${p.from}.–</b></span>${V.btn('Voir le profil', { href: '#/profil/' + p.id, cls: 'sm dark', arrow: true })}</div></div></article>`;
   };
-  /* Avis de démonstration (maquette) : rattachés aux profils importés visibles */
-  const REVIEWS = [
-    { to: 'imp-nina', by: 'Marc', ago: 2 * 3600e3, txt: 'Accueil tout en douceur et discrétion parfaite. Fidèle aux photos, je recommande les yeux fermés.' },
-    { to: 'imp-sarah', by: 'David', ago: 5 * 3600e3, txt: 'Élégante et cultivée, parfaite pour une soirée. Ponctuelle et vraiment charmante.' },
-    { to: 'imp-julie', by: 'Thomas', ago: 3 * 3600e3, txt: 'Très à l’aise et naturelle, le courant passe tout de suite. Un moment simple et agréable.' },
-    { to: 'imp-lou', by: 'Antoine', ago: 6 * 3600e3, txt: 'Douce et souriante, elle met tout de suite à l’aise. Rien à redire, je reviendrai.' },
-    { to: 'imp-gwen', by: 'Nicolas', ago: 22 * 3600e3, txt: 'Femme de caractère et pleine d’esprit. Un vrai moment de qualité, au calme.' },
-    { to: 'imp-marion', by: 'Julien', ago: 8 * 3600e3, txt: 'Pile à l’heure, exactement le profil annoncé. Conversation facile et très bon moment.' },
-    { to: 'imp-cindy', by: 'Laurent', ago: 10 * 3600e3, txt: 'Super accueil, très professionnelle et discrète. Les photos sont parfaitement fidèles.' },
-    { to: 'imp-lana', by: 'Paul', ago: 26 * 3600e3, txt: 'Déplacement rapide et discret à l’hôtel. Charmante, attentionnée et ponctuelle.' },
-  ];
+  /* Avis de démonstration (js/profils-details.js) : les plus récents, un par profil, pour l'accueil */
+  const latestReviews = (n = 8) => {
+    const seen = new Set();
+    return (V.AVIS || []).slice().sort((a, b) => a.ago - b.ago).filter((r) => !seen.has(r.to) && seen.add(r.to)).slice(0, n);
+  };
   const reviewCard = (r) => {
     const p = V.byId(r.to); if (!p || !V.visible(p)) return '';
     const prenom = p.name.split(' ')[0];
@@ -134,7 +128,7 @@
         <div class="stack-gap" aria-hidden="true"></div>
         <section class="over section"><div class="wrap">
           <div class="sec-head"><div>${H2('Derniers avis')}<p class="sec-note">Ce que les clients ont partagé après leur rendez-vous.</p></div></div>
-          ${V.carousel(REVIEWS.map(reviewCard).join(''), 'wide')}
+          ${V.carousel(latestReviews().map(reviewCard).join(''), 'wide')}
         </div></section>
       </div>
 
@@ -457,6 +451,30 @@
     else s.push({ src: s[0].src, pos: 'center 15%', zoom: 1.3 });
     return s;
   };
+  /* ---------- Fiche : aides d'affichage (drapeaux en SVG car Windows n'affiche pas les émojis drapeaux) ---------- */
+  const FLAGS = {
+    fr: '<rect width="30" height="20" fill="#ED2939"/><rect width="20" height="20" fill="#fff"/><rect width="10" height="20" fill="#002395"/>',
+    it: '<rect width="30" height="20" fill="#CE2B37"/><rect width="20" height="20" fill="#fff"/><rect width="10" height="20" fill="#009246"/>',
+    de: '<rect width="30" height="20" fill="#FFCE00"/><rect width="30" height="13.33" fill="#DD0000"/><rect width="30" height="6.67" fill="#000"/>',
+    es: '<rect width="30" height="20" fill="#AA151B"/><rect y="5" width="30" height="10" fill="#F1BF00"/>',
+    ru: '<rect width="30" height="20" fill="#D52B1E"/><rect width="30" height="13.33" fill="#0039A6"/><rect width="30" height="6.67" fill="#fff"/>',
+    pt: '<rect width="30" height="20" fill="#FF0000"/><rect width="12" height="20" fill="#006600"/><circle cx="12" cy="10" r="4" fill="#FFCC00"/>',
+    en: '<rect width="30" height="20" fill="#012169"/><path d="M0 0 30 20M30 0 0 20" stroke="#fff" stroke-width="4"/><path d="M0 0 30 20M30 0 0 20" stroke="#C8102E" stroke-width="1.6"/><path d="M15 0v20M0 10h30" stroke="#fff" stroke-width="6"/><path d="M15 0v20M0 10h30" stroke="#C8102E" stroke-width="3.6"/>',
+    uk: '<rect width="30" height="20" fill="#FFD700"/><rect width="30" height="10" fill="#0057B7"/>',
+    sv: '<rect width="30" height="20" fill="#006AA7"/><rect x="9" width="4" height="20" fill="#FECC00"/><rect y="8" width="30" height="4" fill="#FECC00"/>',
+    zh: '<rect width="30" height="20" fill="#DE2910"/><path d="M5 2.5l1.2 3.6h3.8L6.9 8.3l1.2 3.6L5 9.7l-3.1 2.2 1.2-3.6L0 6.1h3.8z" fill="#FFDE00"/>',
+    th: '<rect width="30" height="20" fill="#A51931"/><rect y="3.33" width="30" height="13.33" fill="#F4F5F8"/><rect y="6.67" width="30" height="6.67" fill="#2D2A4A"/>',
+    ca: '<rect width="30" height="20" fill="#FCDD09"/><g fill="#DA121A"><rect y="2.2" width="30" height="2.2"/><rect y="6.7" width="30" height="2.2"/><rect y="11.1" width="30" height="2.2"/><rect y="15.6" width="30" height="2.2"/></g>',
+    ln: '<rect width="30" height="20" fill="#007FFF"/><path d="M0 17 25 0h5v3L5 20H0Z" fill="#F7D618"/><path d="M0 18.5 27.5 0H30v1.5L2.5 20H0Z" fill="#CE1021"/>',
+    ar: '<rect width="30" height="20" fill="#1f6f47"/><text x="15" y="15" font-size="12" text-anchor="middle" fill="#fff" font-family="serif">ع</text>',
+  };
+  const flag = (l) => `<svg class="flag" viewBox="0 0 30 20" aria-hidden="true">${FLAGS[l] || `<rect width="30" height="20" fill="#2a2430"/><text x="15" y="14" font-size="9" font-weight="700" text-anchor="middle" fill="#e2c68d" font-family="sans-serif">${l.toUpperCase()}</text>`}</svg>`;
+  const LV_TXT = { C2: 'Parfait', C1: 'Courant', B2: 'Très bien', B1: 'Bien', A2: 'Notions', A1: 'Débutant' };
+  const LV_N = { C2: 5, C1: 4, B2: 3, B1: 3, A2: 2, A1: 1 };
+  const starsRow = (n, max) => Array.from({ length: max }, (_, j) => `<i class="${j < n ? 'on' : ''}">${I('star', 'sm')}</i>`).join('');
+  const PAY = { chf: ['banknote', 'Espèces (CHF)'], eur: ['euro', 'Euros'], twint: ['smartphone', 'Twint'], card: ['card', 'Carte bancaire'] };
+  const ABOUT = [['Taille', 'ruler'], ['Silhouette', 'user'], ['Cheveux', 'palette'], ['Yeux', 'eye'], ['Poitrine', 'target'], ['Épilation', 'scissors'], ['Tatouage', 'brush'], ['Piercing', 'gem'], ['Tabac', 'cigarette']];
+  const nf = (n) => Number(n || 0).toLocaleString('fr-CH');
   function ficheHTML(p) {
     const st = V.statusInfo(p);
     const on = V.isSel(p.id);
@@ -466,7 +484,28 @@
     const prev = V.byId(order[(k - 1 + order.length) % order.length]), next = V.byId(order[(k + 1) % order.length]);
     const v = p.verif;
     const persons = p.persons ? p.persons.map((x) => { const ref = x.ref && V.byId(x.ref); const at = ref ? ref.attrs : x.attrs || {}; return `<div class="panel soft" style="padding:16px"><div class="row" style="margin-bottom:10px">${ref ? `<img class="avatar" src="${V.img(ref.photos[0], 's')}" alt="">` : `<span class="avatar">${x.name[0]}</span>`}<div><b class="serif" style="font-size:20px;font-weight:400">${esc(x.name)}, ${x.age} ans</b><div class="xs muted">Âge vérifié · identité contrôlée</div></div></div><div class="attrs">${Object.entries(at).slice(0, 6).map(([kk, vv]) => `<div class="attr"><span>${kk}</span><b>${vv}</b></div>`).join('')}</div></div>`; }).join('') : '';
-    const rate = (r, ix) => (r[ix] ? `<b>${V.chf(r[ix])}</b>` : '<span class="muted">non</span>');
+    const first = p.name.split(' ')[0];
+    const pron = p.cat === 'homme' ? 'Il' : p.cat === 'duo' ? 'Ils' : 'Elle';
+    const comm = V.COMMUNES.find((c) => c.id === p.commune);
+    const shield = comm && comm.c ? comm.c : p.commune;
+    const placeTxt = V.communeTxt(p.commune) + (comm && comm.c === 'geneve' ? ' (Genève)' : '');
+    const incall = p.mode !== 'outcall', outcall = p.mode !== 'incall';
+    const modeShort = { both: 'Reçoit et se déplace', incall: 'Reçoit', outcall: 'Se déplace' }[p.mode] || '';
+    const revs = (V.AVIS || []).filter((r) => r.to === p.id).sort((a, b) => a.ago - b.ago);
+    const avg = revs.length ? revs.reduce((s, r) => s + r.note, 0) / revs.length : 0;
+    const offered = new Set(p.services);
+    const groups = (V.SVC_GROUPS || []).map(([g, ids]) => [g, ids.filter((s) => offered.has(s))]).filter(([, ids]) => ids.length);
+    const inGroups = new Set(groups.flatMap(([, ids]) => ids));
+    const others = p.services.filter((s) => !inGroups.has(s) && V.SERVICES[s]);
+    if (others.length) groups.push(['Autres', others]);
+    const price = (r, ix, ok) => (ok && r[ix] ? `<b>${V.chf(r[ix])}</b>` : '<span class="muted">—</span>');
+    const typeTxt = p.type || p.kind || ((V.CATS.find((c) => c.id === p.cat) || {}).label || '').replace(/s$/, '');
+    const aboutRows = [
+      ['map-pin', 'Quartier', placeTxt], ['flag', 'Origine', p.origin], ['cake', 'Âge', V.ageTxt(p)], ['briefcase', 'Profil', typeTxt],
+      ...ABOUT.filter(([k2]) => p.attrs[k2]).map(([k2, ic]) => [ic, k2 === 'Tabac' ? (p.cat === 'homme' ? 'Fumeur' : 'Fumeuse') : k2, p.attrs[k2]]),
+      ...Object.entries(p.attrs).filter(([k2]) => !ABOUT.some(([a]) => a === k2)).map(([k2, v2]) => ['info', k2, v2]),
+      ['users', 'Accepte', p.accepts.join(', ')],
+    ];
     const contacts = { tel: ['phone', 'Appeler'], wa: ['wa', 'WhatsApp'], sms: ['sms', 'SMS'], tg: ['tg', 'Telegram'] };
     const cs = p.contacts.slice(0, 3); // seulement les canaux acceptés par la personne
     const duoP = p.duo ? V.byId(p.duo) : null;
@@ -482,40 +521,83 @@
           <button class="icon-btn zoom" style="background:rgba(255,255,255,.88);color:#120d18" data-act="zoom" aria-label="Agrandir">${I('maximize')}</button>
         </div>
         <div class="f-body">
-          <div class="eyebrow">${p.kind || (V.CATS.find((c) => c.id === p.cat) || {}).label?.replace(/s$/, '') || ''} · ${V.communeTxt(p.commune)}</div>
+          <div class="eyebrow">${esc(typeTxt)} · ${V.communeTxt(p.commune)}</div>
           <h2 class="f-name" style="margin-top:10px">${esc(p.name)}<span class="age">${V.ageTxt(p)}</span></h2>
-          <div class="f-sub">${V.statusPill(p, true)}<span class="xs muted">${st.sub}</span></div>
-          <p class="f-ver"><b>Profil vérifié</b> · âge réel contrôlé${p.photosRecent || -v.media <= 30 ? ' · photos de moins de 30 jours' : ''}${p.duoVerified ? ' · duo vérifié' : ''}${p.video ? ' · vidéo de présentation' : ''}</p>
+          <div class="f-sub">${V.statusPill(p, true)}<span class="xs muted">${st.sub}</span>${(p.likes || 0) > 2500 ? `<span class="f-hot">${I('flame', 'sm')}Très demandée</span>` : ''}</div>
+          <div class="f-meta">${revs.length ? `<span class="f-rate">${I('star', 'sm')}<b>${avg.toFixed(1)}</b> · ${revs.length} avis</span>` : ''}${p.likes ? `<span>${I('heart', 'sm')}${nf(p.likes)} likes</span><span>${I('eye', 'sm')}${nf(p.visits)} visites</span>` : ''}</div>
+          <p class="f-ver">${I('badge-check', 'sm')}<span><b>Profil vérifié</b> · âge réel contrôlé${p.photosRecent || -v.media <= 30 ? ' · photos de moins de 30 jours' : ''}${p.duoVerified ? ' · duo vérifié' : ''}${p.video ? ' · vidéo de présentation' : ''}</span></p>
           <div class="f-actions">
             <button class="f-act${on ? ' on' : ''}" data-act="fav" data-id="${p.id}">${I('heart')}<span class="lbl">${on ? 'Ajoutée' : 'Ajouter'}</span></button>
             <button class="f-act" data-act="compare-with" data-id="${p.id}">${I('columns')}<span>Comparer</span></button>
             <button class="f-act" data-act="hide-close" data-id="${p.id}">${I('eye-off')}<span>Masquer</span></button>
             <button class="f-act" data-act="report" data-id="${p.id}">${I('flag')}<span>Signaler</span></button>
           </div>
-          <p class="serif" style="font-size:21px;line-height:1.45;margin-top:18px;color:var(--ink)">« ${esc(p.bio)} »</p>
-          <div class="callout gold" style="margin-top:16px"><span><b>Consignes de ${esc(p.name.split(' ')[0])}</b><br>${esc(p.rules)}</span></div>
-          ${persons ? `<section class="f-sec"><span class="eyebrow">Les deux personnes</span><div class="stack">${persons}</div></section>` : `<section class="f-sec"><span class="eyebrow">À propos</span><div class="attrs">${Object.entries(p.attrs).map(([kk, vv]) => `<div class="attr"><span>${kk}</span><b>${vv}</b></div>`).join('')}<div class="attr"><span>Origine (déclarée)</span><b>${p.origin}</b></div></div></section>`}
-          <section class="f-sec"><span class="eyebrow">Langues</span><div class="langs">${p.langs.map(([l, lv]) => `<span class="lang">${V.LANGS[l]}<span class="lv">${lv}</span></span>`).join('')}</div></section>
-          <section class="f-sec"><span class="eyebrow">Rendez-vous</span>
-            <div class="attrs" style="margin-bottom:14px"><div class="attr"><span>Modalité</span><b>${V.modeTxt(p.mode).replace(/^./, (c) => c.toUpperCase())}</b></div><div class="attr"><span>Secteur</span><b>${V.communeTxt(p.commune)}${p.mode !== 'incall' ? ' et canton' : ''}</b></div><div class="attr"><span>Horaires habituels</span><b>${p.hours}</b></div></div>
+          <div class="f-keys">
+            <div class="fk">${I('map-pin')}<span><small>Quartier</small><b>${V.communeTxt(p.commune)}</b></span></div>
+            <div class="fk">${I('banknote')}<span><small>À partir de</small><b>${V.chf(p.from)}</b></span></div>
+            <div class="fk">${I(incall ? 'home' : 'car')}<span><small>Rendez-vous</small><b>${modeShort}</b></span></div>
+            <div class="fk">${I('languages')}<span><small>Langues</small><b class="fk-flags">${p.langs.slice(0, 4).map(([l]) => flag(l)).join('')}</b></span></div>
+          </div>
+          ${p.bio ? `<p class="f-quote">« ${esc(p.bio)} »</p>` : ''}
+
+          <section class="f-card"><h3 class="f-h">${I('user')}${persons ? 'Les deux personnes' : `À propos de ${esc(first)}`}</h3>
+            ${persons ? `<div class="stack">${persons}</div>` : `<div class="ab-grid">${aboutRows.map(([ic, k2, v2]) => `<div class="ab"><span class="ab-i">${I(ic)}</span><span><small>${k2}</small><b>${esc(String(v2))}</b></span></div>`).join('')}</div>`}
+          </section>
+
+          <section class="f-card"><h3 class="f-h">${I('quote')}Description</h3>
+            <div class="f-desc">${(p.desc || [p.bio]).filter(Boolean).map((t) => `<p>${esc(t)}</p>`).join('')}</div>
+            <div class="callout gold" style="margin-top:14px"><span><b>Consignes de ${esc(first)}</b><br>${esc(p.rules)}</span></div>
+            ${p.interests && p.interests.length ? `<div class="f-int"><small>Centres d’intérêt</small><div class="chips">${p.interests.map((t) => `<span class="chip sm" style="pointer-events:none">${esc(t)}</span>`).join('')}</div></div>` : ''}
+          </section>
+
+          <section class="f-card"><div class="f-h-row"><h3 class="f-h">${I('flame')}Pratiques</h3><span class="f-count">${p.services.length} pratiques</span></div>
+            <div class="svc-groups">${groups.map(([g, ids]) => `<div class="svc-g"><span class="svc-gt">${g}</span><div class="svc-chips">${ids.map((s) => `<span class="svc-c">${I('check', 'sm')}${V.SERVICES[s]}</span>`).join('')}</div></div>`).join('')}${p.limits.length ? `<div class="svc-g"><span class="svc-gt">Ne pratique pas</span><div class="svc-chips">${p.limits.map((l) => `<span class="svc-c no">${I('x', 'sm')}${V.LIMITS[l]}</span>`).join('')}</div></div>` : ''}</div>
+          </section>
+
+          <section class="f-card"><h3 class="f-h">${I('map-pin')}Localisation</h3>
+            <p class="f-p">${esc(first)} travaille dans le secteur <b>${placeTxt}</b>. ${incall && outcall ? `${pron} reçoit et se déplace dans tout le canton.` : incall ? `${pron} reçoit uniquement.` : `${pron} se déplace uniquement, dans tout le canton.`}</p>
+            <div class="loc-modes"><span class="${incall ? 'ok' : 'no'}">${I(incall ? 'check' : 'x', 'sm')}Je reçois</span><span class="${outcall ? 'ok' : 'no'}">${I(outcall ? 'check' : 'x', 'sm')}Je me déplace</span></div>
+            <div class="loc-map" aria-hidden="true"><span class="loc-lake"></span><span class="loc-zone"></span><span class="loc-pin">${I('map-pin')}</span><span class="loc-lbl"><img src="img/armoiries/${shield}.webp" alt="" width="16" height="19">${V.communeTxt(p.commune)}</span></div>
+            <p class="hint">Zone approximative. L’adresse exacte n’est jamais publiée : ${esc(first)} la communique au moment du rendez-vous.</p>
+          </section>
+
+          <section class="f-card"><h3 class="f-h">${I('languages')}Langues parlées</h3>
+            <div class="lg-list">${p.langs.map(([l, lv], j) => `<div class="lg">${flag(l)}<span class="lg-n">${V.LANGS[l] || l}<small>${j === 0 && lv === 'C2' ? 'Langue maternelle' : LV_TXT[lv] || lv}</small></span><span class="lg-s" title="Niveau ${lv}">${starsRow(LV_N[lv] || 1, 5)}</span></div>`).join('')}</div>
+          </section>
+
+          <section class="f-card"><h3 class="f-h">${I('calendar')}Disponibilités</h3>
             <div class="week">${['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'].map((dd, j) => `<div class="${p.week[j] ? 'on' : 'off'}"><b>${dd}</b>${p.week[j] ? 'Oui' : 'Repos'}</div>`).join('')}</div>
-            <p class="hint">Horaires indicatifs déclarés par ${esc(p.name.split(' ')[0])}. Le statut du jour fait foi.</p></section>
-          <section class="f-sec"><span class="eyebrow">Accepte</span><p>${p.accepts.map((a, k) => (k ? a.toLowerCase() : a)).join(', ')}</p></section>
-          <section class="f-sec"><span class="eyebrow">Services proposés</span><ul class="svc">${p.services.map((s) => `<li>${V.SERVICES[s]}</li>`).join('')}</ul>
-            <span class="eyebrow" style="display:block;margin:20px 0 8px">Limites</span><ul class="svc">${p.limits.map((l) => `<li class="no">${V.LIMITS[l]}</li>`).join('')}</ul></section>
-          <section class="f-sec"><div class="row-b" style="margin-bottom:6px"><span class="eyebrow">Tarifs publiés</span></div>
-            <table class="rates"><thead><tr><th>Durée</th><th>Reçoit</th><th>Se déplace</th></tr></thead><tbody>${p.rates.map((r) => `<tr><td>${r[0]}</td><td>${rate(r, 1)}</td><td>${rate(r, 2)}</td></tr>`).join('')}</tbody></table>
-            <p class="hint">Tarifs fixés librement par ${esc(p.name.split(' ')[0])}. Velours ne perçoit aucune commission sur les rendez-vous.</p></section>
-          <section class="f-sec"><span class="eyebrow">Centres d’intérêt</span><div class="chips">${p.interests.map((t) => `<span class="chip sm" style="pointer-events:none">${t}</span>`).join('')}</div></section>
-          ${duoP && V.visible(duoP) ? `<section class="f-sec"><span class="eyebrow">Aussi en duo</span><div class="duo-link" data-act="open" data-id="${duoP.id}"><img src="${V.img(duoP.photos[0], 's')}" alt=""><div class="sp"><b class="serif" style="font-size:21px;font-weight:400">${esc(duoP.name)}</b><div class="small muted">Duo réel · deux profils vérifiés et liés</div></div>${I('chevron-right')}</div></section>` : ''}
-          ${p.members ? `<section class="f-sec"><span class="eyebrow">Profils individuels</span><div class="stack">${p.members.map(V.byId).map((x) => `<div class="duo-link" data-act="open" data-id="${x.id}"><img src="${V.img(x.photos[0], 's')}" alt=""><div class="sp"><b class="serif" style="font-size:21px;font-weight:400">${esc(x.name)}, ${x.age}</b><div class="small muted">${V.statusInfo(x).label}</div></div>${I('chevron-right')}</div>`).join('')}</div></section>` : ''}
-          <section class="f-sec"><span class="eyebrow">Contrôles et dates</span>
+            <div class="f-line">${I('clock', 'sm')}<span>Horaires habituels : <b>${p.hours}</b></span></div>
+            <p class="hint">Horaires indicatifs déclarés par ${esc(first)}. Le statut du jour fait foi.</p>
+          </section>
+
+          <section class="f-card"><h3 class="f-h">${I('banknote')}Tarifs</h3>
+            <div class="rt"><div class="rt-h"><span>Durée</span><span>${I('home', 'sm')}Reçoit</span><span>${I('car', 'sm')}Se déplace</span></div>${p.rates.map((r) => `<div class="rt-r"><span>${I('clock', 'sm')}${r[0]}</span><span>${price(r, 1, incall)}</span><span>${price(r, 2, outcall)}</span></div>`).join('')}</div>
+            <h4 class="f-h4">Moyens de paiement</h4>
+            <div class="pay">${(p.pay || ['chf']).filter((k2) => PAY[k2]).map((k2) => `<span class="pay-i">${I(PAY[k2][0], 'sm')}${PAY[k2][1]}</span>`).join('')}</div>
+            <p class="hint">Tarifs fixés librement par ${esc(first)}. Velours ne perçoit aucune commission sur les rendez-vous.</p>
+          </section>
+
+          ${p.likes ? `<section class="f-card"><h3 class="f-h">${I('heart')}Likes et abonnés</h3>
+            <div class="soc"><div class="soc-i"><b data-likes>${nf(p.likes)}</b><span>likes</span><button type="button" class="soc-b" data-f="like">${I('thumbs-up', 'sm')}J’aime</button></div><div class="soc-i"><b data-fol>${nf(p.followers)}</b><span>abonnés</span><button type="button" class="soc-b" data-f="follow">${I('star', 'sm')}Suivre</button></div><div class="soc-i"><b>${nf(p.visits)}</b><span>visites du profil</span></div></div>
+          </section>` : ''}
+
+          <section class="f-card"><div class="f-h-row"><h3 class="f-h">${I('edit')}Avis (${revs.length})</h3>${revs.length ? `<span class="fr-avg"><span class="fr-st">${starsRow(Math.round(avg), 5)}</span><b>${avg.toFixed(1)}</b>/5</span>` : ''}</div>
+            <div class="fr-actions"><button type="button" class="soc-b" data-f="review">${I('edit', 'sm')}Écrire un avis</button><button type="button" class="soc-b danger" data-act="report" data-id="${p.id}">${I('alert', 'sm')}Signaler le profil</button></div>
+            ${revs.length ? `<div class="fr-list">${revs.map((r) => `<article class="fr-i"><div class="fr-top"><span class="fr-av">${esc(r.by[0])}</span><div class="sp"><b>${esc(r.by)}</b><small>${V.agoTxt(Date.now() - r.ago)}</small></div><span class="fr-st">${starsRow(r.note, 5)}</span></div><p>« ${esc(r.txt)} »</p></article>`).join('')}</div>` : `<p class="small muted" style="margin-top:12px">Aucun avis pour l’instant. Soyez le premier à partager votre expérience.</p>`}
+          </section>
+
+          ${duoP && V.visible(duoP) ? `<section class="f-card"><h3 class="f-h">${I('users')}Aussi en duo</h3><div class="duo-link" data-act="open" data-id="${duoP.id}"><img src="${V.img(duoP.photos[0], 's')}" alt=""><div class="sp"><b class="serif" style="font-size:21px;font-weight:400">${esc(duoP.name)}</b><div class="small muted">Duo réel · deux profils vérifiés et liés</div></div>${I('chevron-right')}</div></section>` : ''}
+          ${p.members ? `<section class="f-card"><h3 class="f-h">${I('users')}Profils individuels</h3><div class="stack">${p.members.map(V.byId).map((x) => `<div class="duo-link" data-act="open" data-id="${x.id}"><img src="${V.img(x.photos[0], 's')}" alt=""><div class="sp"><b class="serif" style="font-size:21px;font-weight:400">${esc(x.name)}, ${x.age}</b><div class="small muted">${V.statusInfo(x).label}</div></div>${I('chevron-right')}</div>`).join('')}</div></section>` : ''}
+
+          <section class="f-card"><h3 class="f-h">${I('shield')}Contrôles et dates</h3>
             <div class="checks">
-              <div class="chk"><div><b>Âge réel et identité vérifiés le ${D.fmtShort(D.addDays(v.id))}</b><span>Pièce d’identité et selfie vivant, prestataire suisse. L’âge affiché est l’âge réel.</span></div></div>
-              <div class="chk"><div><b>Médias concordants le ${D.fmtShort(D.addDays(v.media))}</b><span>Selfie de contrôle comparé aux photos publiées. Prochain contrôle avant le ${D.fmtShort(D.addDays(v.media + 90))}.</span></div></div>
-              <div class="chk"><div><b>Indépendance confirmée le ${D.fmtShort(D.addDays(v.indep))}</b><span>Entretien direct avec notre équipe${p.persons ? ', pour chacune des deux personnes' : ''}. Renouvelé tous les 6 mois.</span></div></div>
+              <div class="chk"><span class="chk-i">${I('badge-check')}</span><div><b>Âge réel et identité vérifiés le ${D.fmtShort(D.addDays(v.id))}</b><span>Pièce d’identité et selfie vivant, prestataire suisse. L’âge affiché est l’âge réel.</span></div></div>
+              <div class="chk"><span class="chk-i">${I('badge-check')}</span><div><b>Médias concordants le ${D.fmtShort(D.addDays(v.media))}</b><span>Selfie de contrôle comparé aux photos publiées. Prochain contrôle avant le ${D.fmtShort(D.addDays(v.media + 90))}.</span></div></div>
+              <div class="chk"><span class="chk-i">${I('badge-check')}</span><div><b>Indépendance confirmée le ${D.fmtShort(D.addDays(v.indep))}</b><span>Entretien direct avec notre équipe${p.persons ? ', pour chacune des deux personnes' : ''}. Renouvelé tous les 6 mois.</span></div></div>
             </div>
-            <p class="hint">Portée exacte et date toujours visibles. Vérifié ne veut pas dire garanti : en cas de doute, <button class="link" data-act="report" data-id="${p.id}">signalez-le</button>.</p></section>
+            <p class="hint">Portée exacte et date toujours visibles. Vérifié ne veut pas dire garanti : en cas de doute, <button class="link" data-act="report" data-id="${p.id}">signalez-le</button>.</p>
+          </section>
           <div class="f-next">
             <button data-act="goto" data-id="${prev.id}"><img src="${V.img(prev.photos[0], 's')}" alt=""><span><small>Précédent</small><b>${esc(prev.name)}</b></span></button>
             <button class="r" data-act="goto" data-id="${next.id}"><img src="${V.img(next.photos[0], 's')}" alt=""><span><small>Suivant</small><b>${esc(next.name)}</b></span></button>
@@ -538,6 +620,27 @@
     f.addEventListener('touchmove', (e) => { if (y0 === null) return; const dy = e.touches[0].clientY - y0; if (dy > 0) f.style.transform = `translateY(${dy * .6}px)`; }, { passive: true });
     f.addEventListener('touchend', (e) => { if (y0 === null) return; const dy = e.changedTouches[0].clientY - y0; f.style.transform = ''; if (dy > 120) V.overlay.back(); y0 = null; });
     f.addEventListener('contextmenu', (e) => { if (e.target.tagName === 'IMG') e.preventDefault(); });
+    // likes, abonnement et avis : démonstration (rien n'est envoyé)
+    const first = p.name.split(' ')[0];
+    const likeB = $('[data-f="like"]', ov), folB = $('[data-f="follow"]', ov), revB = $('[data-f="review"]', ov);
+    if (likeB) likeB.onclick = () => { const on = likeB.classList.toggle('on'); $('[data-likes]', ov).textContent = nf(p.likes + (on ? 1 : 0)); V.toast(on ? `Vous aimez le profil de ${first}.` : 'J’aime retiré.', { icon: 'heart' }); };
+    if (folB) folB.onclick = () => { const on = folB.classList.toggle('on'); $('[data-fol]', ov).textContent = nf(p.followers + (on ? 1 : 0)); V.toast(on ? `Vous suivez ${first} : ses nouveaux statuts vous seront signalés.` : `Vous ne suivez plus ${first}.`, { icon: 'star' }); };
+    if (revB) revB.onclick = () => openReview(p);
+  }
+  function openReview(p) {
+    const first = p.name.split(' ')[0];
+    let note = 5;
+    const sh = V.sheet.open({
+      title: `Votre avis sur ${esc(first)}`,
+      body: `<p class="ink2" style="margin-bottom:14px">Les avis sont publiés après modération, sous un pseudonyme. Aucun détail permettant d’identifier qui que ce soit.</p>
+        <div class="rate-in" role="group" aria-label="Note sur 5">${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-n="${n}" class="on" aria-label="${n} sur 5">${I('star')}</button>`).join('')}</div>
+        <div style="margin-top:14px">${V.field('Votre pseudonyme')}</div>
+        <div style="margin-top:12px">${V.field('Votre avis', { type: 'textarea', max: 600 })}</div>`,
+      foot: `${V.btn('Envoyer mon avis', { cls: 'sm block', attrs: 'data-send' })}`,
+    });
+    const stars = $$('.rate-in button', sh);
+    stars.forEach((b) => { b.onclick = () => { note = +b.dataset.n; stars.forEach((x) => x.classList.toggle('on', +x.dataset.n <= note)); }; });
+    $('[data-send]', sh).onclick = () => { V.sheet.close(); V.toast(`Merci ! Votre avis (${note}/5) sur ${first} sera publié après modération.`, { icon: 'check', ms: 4000 }); };
   }
 
   /* Contact direct (hors plateforme) */
