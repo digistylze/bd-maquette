@@ -51,7 +51,7 @@
   const communeTile = (c, dup) => `<a class="c-tile" href="#/geneve/${c.id}"${dup ? ' aria-hidden="true" tabindex="-1"' : ''}><img src="img/armoiries/${c.id}.webp" alt="" loading="lazy" draggable="false" width="96" height="112"><b>${c.label}</b><span>${c.n ? `${c.n} profil${c.n > 1 ? 's' : ''}` : ''}</span></a>`;
   const communeTiles = (skip) => communeList(skip).map((c) => communeTile(c)).join('');
   // deux rangées en boucle (contenu doublé pour un défilement sans couture), sens opposés
-  const communeMarquee = () => V.carousel(communeList().map((c) => communeTile(c)).join(''), 'commune');
+  const communeMarquee = () => V.carousel(communeList().map((c) => communeTile(c)).join(''), 'shields');
   // mur de profils du hero : trois colonnes en boucle (contenu doublé), décor cliquable à la souris
   const wallCard = (p) => { const s = V.statusInfo(p); return `<a class="wcard" href="#/profil/${p.id}" tabindex="-1"><img src="${V.img(p.photos[0], 's')}" srcset="${V.img(p.photos[0], 's')} 360w, ${V.img(p.photos[0])} 900w" sizes="(min-width:1024px) 18vw, 34vw" alt="" draggable="false"><span class="wc-st ${s.cls}"><i></i>${s.short}</span><b>${esc(p.name)} <span>${V.ageShort(p)}</span></b><small>${V.communeTxt(p.commune)}</small></a>`; };
   const profileWall = (L) => {
@@ -109,11 +109,11 @@
         </div>
       </section>
 
-      <section class="stories" aria-label="Stories"><div class="wrap"><div class="st-rail">${stories.map(storyItem).join('')}</div></div></section>
+      <section class="stories" aria-label="Stories"><div class="wrap">${V.carousel(stories.map(storyItem).join(''), 'stories')}</div></section>
 
       <section class="section-sm"><div class="wrap">
         <div class="sec-head"><div>${H2('Derniers statuts')}<p class="sec-note">Ce que les escortes ont publié ces dernières heures.</p></div><a class="link d-only" href="#/profils?tri=dispo">Tout voir</a></div>
-        ${V.carousel(recent.map(statusCard).join(''), 'wide')}
+        ${V.carousel(recent.map(statusCard).join(''))}
       </div></section>
 
       <section class="section-sm"><div class="wrap">
@@ -263,8 +263,13 @@
     V.S.order = V.S.order || {};
     if (!V.S.order[key]) { V.S.order[key] = list.map((p) => p.id); V.save(); return list; }
     const known = V.S.order[key];
+    const knownSet = new Set(known);
     const inList = new Set(list.map((p) => p.id));
-    return known.filter((id) => inList.has(id)).map(V.byId);
+    const ordered = known.filter((id) => inList.has(id));
+    // les profils présents dans la liste mais absents de l'ordre mémorisé (ex. profils ajoutés après coup) sont ajoutés à la fin
+    const extras = list.filter((p) => !knownSet.has(p.id)).map((p) => p.id);
+    if (extras.length) { V.S.order[key] = [...known, ...extras]; V.save(); }
+    return [...ordered, ...extras].map(V.byId);
   };
   const activeCount = (q) => FKEYS.filter((k) => !['cat', 'tri', 'q', 'chg'].includes(k) && q[k]).length;
   const DISPO = [['all', 'Toutes'], ['now', 'Disponibles maintenant'], ['today', 'Aujourd’hui'], ['tomorrow', 'Demain'], ['request', 'Sur demande']];

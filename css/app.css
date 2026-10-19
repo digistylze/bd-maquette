@@ -649,8 +649,8 @@ main#view:has(> .footer:last-child) { padding-bottom: 0; }
 .f-top .ttl { flex: 1; min-width: 0; font-family: var(--ff-serif); font-size: 21px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0; transform: translateY(6px); transition: opacity .3s, transform .3s; font-weight: 600; }
 .f-top.show .ttl { opacity: 1; transform: none; }
 .f-grid { display: grid; grid-template-columns: 1fr; }
-@media (min-width: 1024px) { .f-grid { grid-template-columns: 1.05fr 1fr; gap: 0; } .f-media { position: sticky; top: 61px; align-self: start; height: calc(100dvh - 61px); } }
 .f-media { position: relative; background: var(--black); overflow: hidden; }
+@media (min-width: 1024px) { .f-grid { grid-template-columns: 1.05fr 1fr; gap: 0; align-items: start; } .f-media { position: sticky; top: 61px; align-self: start; height: calc(100dvh - 61px); } }
 .f-track { display: flex; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
 .f-track::-webkit-scrollbar { display: none; }
 .f-slide { position: relative; flex: 0 0 100%; scroll-snap-align: start; aspect-ratio: 3 / 4; max-height: 78dvh; }
@@ -1160,11 +1160,15 @@ main#view:has(> .footer:last-child) { padding-bottom: 0; }
 
 /* ---------- Accueil : stories ---------- */
 .stories { padding: 18px 0 4px; }
-/* Stories façon Instagram : rond, anneau doré (dégradé), point vert « en ligne », nom dessous */
-.st-rail { display: flex; gap: 18px; overflow-x: auto; scrollbar-width: none; padding: 4px 16px 10px; margin: 0 -16px; scroll-snap-type: x proximity; }
-.st-rail::-webkit-scrollbar { display: none; }
-@media (min-width: 1024px) { .st-rail { justify-content: center; margin: 0; padding: 4px 0 10px; } }
-.st-item { flex: none; width: 92px; text-align: center; scroll-snap-align: start; }
+/* Stories façon Instagram (rond + anneau doré + point vert), en carrousel à flèches, bords non coupés */
+.stories .car { position: relative; }
+.car-track.stories { grid-auto-columns: 92px; gap: 18px; padding-top: 4px; padding-bottom: 10px; }
+@media (min-width: 1024px) {
+  .stories .car-foot { justify-content: center; margin-top: 10px; }
+  .stories .car-nav { position: absolute; top: 4px; left: -6px; right: -6px; height: 92px; display: flex; align-items: center; justify-content: space-between; z-index: 6; pointer-events: none; }
+  .stories .car-nav button { pointer-events: auto; background: var(--bg); box-shadow: 0 8px 24px rgba(15, 12, 17, .22); }
+}
+.st-item { text-align: center; }
 .st-ph { position: relative; display: block; width: 92px; height: 92px; border-radius: 50%; padding: 4px; background: linear-gradient(135deg, #f0d089, var(--gold-2) 45%, #b9893f); transition: transform .5s var(--spring); }
 .st-item.seen .st-ph { background: none; box-shadow: inset 0 0 0 2px var(--line-2); }
 .st-item:hover .st-ph { transform: translateY(-3px) scale(1.03); }
@@ -1206,8 +1210,8 @@ main#view:has(> .footer:last-child) { padding-bottom: 0; }
 .p-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 4px; }
 .p-price { font-size: 13px; color: var(--muted); } .p-price small { font-size: 11px; } .p-price b { font-size: 18px; color: var(--ink); font-weight: 700; letter-spacing: -.01em; }
 /* ---------- Par commune : une seule ligne, slider manuel (flèches + glisse) ---------- */
-.car-track.commune { grid-auto-columns: 112px; }
-@media (min-width: 1024px) { .car-track.commune { grid-auto-columns: 138px; } }
+.car-track.shields { grid-auto-columns: 112px; }
+@media (min-width: 1024px) { .car-track.shields { grid-auto-columns: 138px; } }
 /* Visionneuse de story */
 .story { position: absolute; inset: 0; background: #000; color: #fff; overflow: hidden; transform: translateY(100%); transition: transform .55s var(--ease-out); }
 .ov.on .story { transform: none; }
