@@ -1159,28 +1159,31 @@ main#view:has(> .footer:last-child) { padding-bottom: 0; }
 @keyframes flatten { from { border-radius: 44px 44px 0 0; } to { border-radius: 0; } }
 
 /* ---------- Accueil : stories ---------- */
-.stories { padding: 16px 0 4px; }
-.stories .car { position: relative; }
-/* Carte "à la une" : plus grande, cadre doré, statut, nom sur la photo + badge vérifié */
-.st-card { display: flex; flex-direction: column; min-width: 0; scroll-snap-align: start; }
-.st-card-ph { position: relative; display: block; aspect-ratio: 3 / 4; border-radius: 20px; padding: 4px; box-shadow: inset 0 0 0 2px var(--gold-2); transition: transform .5s var(--spring), box-shadow .3s; }
-.st-card.seen .st-card-ph { box-shadow: inset 0 0 0 2px var(--line-2); }
-.st-card:hover .st-card-ph { transform: translateY(-4px); }
-.st-card-ph > img { width: 100%; height: 100%; object-fit: cover; border-radius: 16px; }
-.st-card-ph .status { position: absolute; left: 10px; top: 10px; z-index: 3; }
-.st-card-grad { position: absolute; left: 4px; right: 4px; bottom: 4px; height: 46%; border-radius: 0 0 16px 16px; background: linear-gradient(transparent, rgba(15, 12, 17, .72)); z-index: 1; }
-.st-card-name { position: absolute; left: 12px; right: 10px; bottom: 10px; z-index: 2; display: flex; align-items: center; gap: 4px; color: #fff; font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
-.st-card-name .ico { width: 15px; height: 15px; color: var(--gold-2); flex: none; }
-.st-card-where { display: flex; align-items: center; gap: 4px; margin-top: 9px; font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; }
-.st-card-where .ico { width: 14px; height: 14px; flex: none; }
-.car-track.strip { grid-auto-columns: 46%; }
-@media (min-width: 640px) { .car-track.strip { grid-auto-columns: 28%; } }
-@media (min-width: 1024px) { .car-track.strip { grid-auto-columns: calc(16.666% - 12px); } }
-@media (min-width: 1024px) {
-  .stories .car-foot { justify-content: center; margin-top: 12px; }
-  .stories .car-nav { position: absolute; inset: 0 -6px; height: auto; align-items: center; justify-content: space-between; z-index: 6; pointer-events: none; }
-  .stories .car-nav button { pointer-events: auto; background: var(--bg); box-shadow: 0 8px 24px rgba(15, 12, 17, .22); }
-}
+.stories { padding: 18px 0 4px; }
+/* Stories façon Instagram : rond, anneau doré (dégradé), point vert « en ligne », nom dessous */
+.st-rail { display: flex; gap: 18px; overflow-x: auto; scrollbar-width: none; padding: 4px 16px 10px; margin: 0 -16px; scroll-snap-type: x proximity; }
+.st-rail::-webkit-scrollbar { display: none; }
+@media (min-width: 1024px) { .st-rail { justify-content: center; margin: 0; padding: 4px 0 10px; } }
+.st-item { flex: none; width: 92px; text-align: center; scroll-snap-align: start; }
+.st-ph { position: relative; display: block; width: 92px; height: 92px; border-radius: 50%; padding: 4px; background: linear-gradient(135deg, #f0d089, var(--gold-2) 45%, #b9893f); transition: transform .5s var(--spring); }
+.st-item.seen .st-ph { background: none; box-shadow: inset 0 0 0 2px var(--line-2); }
+.st-item:hover .st-ph { transform: translateY(-3px) scale(1.03); }
+.st-ph > img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 3px solid var(--bg); }
+.st-on { position: absolute; right: 5px; bottom: 5px; width: 17px; height: 17px; border-radius: 50%; background: #2fbf6b; border: 3px solid var(--bg); z-index: 2; box-shadow: 0 0 0 1px rgba(47, 191, 107, .35); }
+.st-item b { display: block; margin-top: 9px; font-size: 13px; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.st-item span { display: block; font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* ---------- Cartes d'avis (Derniers avis) ---------- */
+.av-card { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; min-width: 0; scroll-snap-align: start; border: 1px solid var(--line); border-radius: 20px; padding: 24px 20px 20px; background: var(--bg); transition: border-color .3s, transform .5s var(--spring), box-shadow .3s; }
+.av-card:hover { border-color: var(--line-2); transform: translateY(-4px); box-shadow: 0 16px 40px rgba(15, 12, 17, .1); }
+.av-ph { width: 74px; height: 74px; border-radius: 50%; padding: 3px; background: linear-gradient(135deg, #f0d089, var(--gold-2) 45%, #b9893f); flex: none; }
+.av-ph img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 3px solid var(--bg); }
+.av-head { display: flex; flex-direction: column; gap: 2px; }
+.av-to { font-size: 17px; font-weight: 700; letter-spacing: -.02em; color: var(--gold-2); }
+.av-sub { font-size: 13px; color: var(--muted); } .av-sub b { color: var(--ink-2); font-weight: 600; }
+.av-meta { display: flex; align-items: center; gap: 5px; font-size: 12.5px; color: var(--muted); }
+.av-meta .ico { width: 14px; height: 14px; flex: none; }
+.av-txt { font-size: 14px; line-height: 1.6; color: var(--ink-2); font-style: italic; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.av-card .btn { width: 100%; margin-top: 4px; }
 /* ---------- Cartes profil détaillées (Derniers statuts) ---------- */
 .p-card { display: flex; flex-direction: column; min-width: 0; scroll-snap-align: start; border: 1px solid var(--line); border-radius: 20px; overflow: hidden; background: var(--bg); transition: border-color .3s, transform .5s var(--spring), box-shadow .3s; }
 .p-card:hover { border-color: var(--line-2); transform: translateY(-4px); box-shadow: 0 16px 40px rgba(15, 12, 17, .1); }

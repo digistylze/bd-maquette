@@ -8,12 +8,28 @@
 
   /* =================================================================== ACCUEIL */
   /* Briques de l'accueil */
-  const storyItem = (p) => `<a class="st-card${(V.S.stSeen || []).includes(p.id) ? ' seen' : ''}" href="#/story/${p.id}"><span class="st-card-ph"><img src="${V.img(p.photos[0], 's')}" alt="Photo de ${esc(p.name)}" loading="lazy" draggable="false">${V.statusPill(p, false, true)}<span class="st-card-grad"></span><b class="st-card-name">${esc(p.name)}${V.i('badge-check', 'sm')}</b></span><span class="st-card-where">${V.i('map-pin', 'sm')}${V.communeTxt(p.commune)}</span></a>`;
+  const storyItem = (p) => `<a class="st-item${(V.S.stSeen || []).includes(p.id) ? ' seen' : ''}" href="#/story/${p.id}"><span class="st-ph"><img src="${V.img(p.photos[0], 's')}" alt="Photo de ${esc(p.name)}" loading="lazy" draggable="false">${V.statusOf(p).t === 'now' ? '<i class="st-on" title="En ligne"></i>' : ''}</span><b>${esc(p.name)}</b><span>${V.communeTxt(p.commune)}</span></a>`;
   const MODE_TXT = { incall: 'Reçoit', outcall: 'Se déplace', both: 'Reçoit · déplace' };
   const statusCard = (p) => {
     const langs = p.langs.slice(0, 3).map(([l]) => `<i class="lang">${l.toUpperCase()}</i>`).join('');
     const tags = [p.attrs && p.attrs.Silhouette, MODE_TXT[p.mode]].filter(Boolean).map((t) => `<i class="ptag">${esc(t)}</i>`).join('');
     return `<article class="p-card"><a class="p-ph" href="#/profil/${p.id}" data-act="open" data-id="${p.id}"><img src="${V.img(p.photos[0], 's')}" alt="Photo de ${esc(p.name)}" loading="lazy" draggable="false">${V.statusPill(p, false, true)}<span class="p-ago">${V.agoTxt(V.statusOf(p).since)}</span><span class="p-grad"></span><b class="p-name">${esc(p.name)} <span>${V.ageShort(p)}</span>${V.i('badge-check', 'sm')}</b></a><div class="p-body"><div class="p-line">${V.i('map-pin', 'sm')}<span>${V.communeTxt(p.commune)}</span></div><div class="p-line p-langs">${V.i('languages', 'sm')}<span>${langs}</span></div><div class="p-tags">${tags}</div><div class="p-foot"><span class="p-price"><small>dès</small> <b>${p.from}.–</b></span>${V.btn('Voir le profil', { href: '#/profil/' + p.id, cls: 'sm dark', arrow: true })}</div></div></article>`;
+  };
+  /* Avis de démonstration (maquette) : rattachés aux profils importés visibles */
+  const REVIEWS = [
+    { to: 'imp-nina', by: 'Marc', ago: 2 * 3600e3, txt: 'Accueil tout en douceur et discrétion parfaite. Fidèle aux photos, je recommande les yeux fermés.' },
+    { to: 'imp-sarah', by: 'David', ago: 5 * 3600e3, txt: 'Élégante et cultivée, parfaite pour une soirée. Ponctuelle et vraiment charmante.' },
+    { to: 'imp-julie', by: 'Thomas', ago: 3 * 3600e3, txt: 'Très à l’aise et naturelle, le courant passe tout de suite. Un moment simple et agréable.' },
+    { to: 'imp-lou', by: 'Antoine', ago: 6 * 3600e3, txt: 'Douce et souriante, elle met tout de suite à l’aise. Rien à redire, je reviendrai.' },
+    { to: 'imp-gwen', by: 'Nicolas', ago: 22 * 3600e3, txt: 'Femme de caractère et pleine d’esprit. Un vrai moment de qualité, au calme.' },
+    { to: 'imp-marion', by: 'Julien', ago: 8 * 3600e3, txt: 'Pile à l’heure, exactement le profil annoncé. Conversation facile et très bon moment.' },
+    { to: 'imp-cindy', by: 'Laurent', ago: 10 * 3600e3, txt: 'Super accueil, très professionnelle et discrète. Les photos sont parfaitement fidèles.' },
+    { to: 'imp-lana', by: 'Paul', ago: 26 * 3600e3, txt: 'Déplacement rapide et discret à l’hôtel. Charmante, attentionnée et ponctuelle.' },
+  ];
+  const reviewCard = (r) => {
+    const p = V.byId(r.to); if (!p || !V.visible(p)) return '';
+    const prenom = p.name.split(' ')[0];
+    return `<article class="av-card"><a class="av-ph" href="#/profil/${p.id}" data-act="open" data-id="${p.id}"><img src="${V.img(p.photos[0], 's')}" alt="Photo de ${esc(p.name)}" loading="lazy" draggable="false"></a><div class="av-head"><b class="av-to">${esc(p.name)}</b><span class="av-sub">a reçu un avis de <b>${esc(r.by)}</b></span></div><div class="av-meta">${V.i('map-pin', 'sm')}<span>${V.communeTxt(p.commune)} · ${V.agoTxt(Date.now() - r.ago)}</span></div><p class="av-txt">« ${esc(r.txt)} »</p>${V.btn('Voir le profil de ' + prenom, { href: '#/profil/' + p.id, cls: 'sm ghost', arrow: true })}</article>`;
   };
   const CTRL = {
     media: ['Selfie de contrôle validé', 'Comparé aux photos publiées. Le prochain aura lieu dans 90 jours au plus tard.'],
@@ -93,7 +109,7 @@
         </div>
       </section>
 
-      <section class="stories" aria-label="À la une"><div class="wrap">${V.carousel(stories.map(storyItem).join(''), 'strip')}</div></section>
+      <section class="stories" aria-label="Stories"><div class="wrap"><div class="st-rail">${stories.map(storyItem).join('')}</div></div></section>
 
       <section class="section-sm"><div class="wrap">
         <div class="sec-head"><div>${H2('Derniers statuts')}<p class="sec-note">Ce que les escortes ont publié ces dernières heures.</p></div><a class="link d-only" href="#/profils?tri=dispo">Tout voir</a></div>
@@ -117,8 +133,8 @@
         </section></div>
         <div class="stack-gap" aria-hidden="true"></div>
         <section class="over section"><div class="wrap">
-          <div class="sec-head"><div>${H2('Derniers contrôles')}<p class="sec-note">Ce que l’équipe a vérifié récemment, profil par profil.</p></div><a class="link d-only" href="#/verifications">Nos vérifications</a></div>
-          ${V.carousel(controls(L, 9).map(ctrlCard).join(''), 'wide')}
+          <div class="sec-head"><div>${H2('Derniers avis')}<p class="sec-note">Ce que les clients ont partagé après leur rendez-vous.</p></div></div>
+          ${V.carousel(REVIEWS.map(reviewCard).join(''), 'wide')}
         </div></section>
       </div>
 
@@ -573,7 +589,7 @@
     if (!p || !V.visible(p)) { location.replace('#/'); return; }
     V.S.stSeen = V.S.stSeen || [];
     if (!V.S.stSeen.includes(p.id)) { V.S.stSeen.push(p.id); V.save(); }
-    $$(`.st-card[href="#/story/${p.id}"]`).forEach((a) => a.classList.add('seen'));
+    $$(`.st-item[href="#/story/${p.id}"]`).forEach((a) => a.classList.add('seen'));
     V.overlay.open('story', storyHTML(p), (ov) => storyAfter(ov, p));
   }, { overlay: true });
   function storyHTML(p) {
