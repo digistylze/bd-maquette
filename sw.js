@@ -1,5 +1,5 @@
 /* Velours — service worker : app installable et consultable hors connexion */
-const CACHE = 'velours-v8';
+const CACHE = 'velours-v9';
 const SHELL = [
 "./",
 "index.html",
