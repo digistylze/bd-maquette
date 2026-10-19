@@ -1,5 +1,5 @@
 /* Velours — service worker : app installable et consultable hors connexion */
-const CACHE = 'velours-v13';
+const CACHE = 'velours-v16';
 const SHELL = [
 "./",
 "index.html",
@@ -12,8 +12,10 @@ const SHELL = [
 "js/core.js",
 "js/data.js",
 "js/main.js",
+"js/preloader.js",
 "js/pro.js",
 "js/public.js",
+"js/carte.js",
 "js/ui.js",
 "icons/apple-touch-icon.png",
 "icons/icon-192.png",

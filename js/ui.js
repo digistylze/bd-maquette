@@ -8,7 +8,7 @@
 
   /* ---------- Barre du haut + onglets selon le mode (public / pro / admin) ---------- */
   const NAV = {
-    public: [['#/profils', 'Profils', '/profils'], ['#/profils?dispo=now', 'Disponibles', '/x'], ['#/verifications', 'Vérifications', '/verifications'], ['#/securite', 'Sécurité', '/securite'], ['#/rejoindre', 'Nous rejoindre', '/rejoindre']],
+    public: [['#/profils', 'Profils', '/profils'], ['#/profils?dispo=now', 'Disponibles', '/x'], ['#/carte', 'Carte', '/carte'], ['#/verifications', 'Vérifications', '/verifications'], ['#/securite', 'Sécurité', '/securite'], ['#/rejoindre', 'Nous rejoindre', '/rejoindre']],
     pro: [['#/pro', 'Tableau de bord', '/pro'], ['#/pro/statut', 'Statut', '/pro/statut'], ['#/pro/profil', 'Mon profil', '/pro/profil'], ['#/pro/stats', 'Statistiques', '/pro/stats'], ['#/pro/abonnement', 'Abonnement', '/pro/abonnement']],
     admin: [['#/admin', 'Vue d’ensemble', '/admin'], ['#/admin/candidatures', 'Candidatures', '/admin/candidatures'], ['#/admin/moderation', 'Modération', '/admin/moderation'], ['#/admin/signalements', 'Signalements', '/admin/signalements'], ['#/admin/facturation', 'Facturation', '/admin/facturation']],
   };
@@ -87,11 +87,12 @@
         <ul class="m-links">
           <li><a href="#/profils" data-m="/profils"><span class="n">01</span><span class="t">Tous les profils</span><span class="dot"></span></a></li>
           <li><a href="#/profils?dispo=now" data-m="now"><span class="n">02</span><span class="t">Disponibles maintenant</span><span class="dot"></span></a></li>
-          <li><a href="#/profils?tri=new" data-m="new"><span class="n">03</span><span class="t">Nouvelles arrivées</span><span class="dot"></span></a></li>
-          <li><a href="#/profils?cat=duo" data-m="duo"><span class="n">04</span><span class="t">Couples et duos</span><span class="dot"></span></a></li>
-          <li><a href="#/verifications" data-m="/verifications"><span class="n">05</span><span class="t">Comment nous vérifions</span><span class="dot"></span></a></li>
-          <li><a href="#/securite" data-m="/securite"><span class="n">06</span><span class="t">Sécurité et signalement</span><span class="dot"></span></a></li>
-          <li><a href="#/rejoindre" data-m="/rejoindre"><span class="n">07</span><span class="t">Nous rejoindre</span><span class="dot"></span></a></li>
+          <li><a href="#/carte" data-m="/carte"><span class="n">03</span><span class="t">Autour de moi, sur la carte</span><span class="dot"></span></a></li>
+          <li><a href="#/profils?tri=new" data-m="new"><span class="n">04</span><span class="t">Nouvelles arrivées</span><span class="dot"></span></a></li>
+          <li><a href="#/profils?cat=duo" data-m="duo"><span class="n">05</span><span class="t">Couples et duos</span><span class="dot"></span></a></li>
+          <li><a href="#/verifications" data-m="/verifications"><span class="n">06</span><span class="t">Comment nous vérifions</span><span class="dot"></span></a></li>
+          <li><a href="#/securite" data-m="/securite"><span class="n">07</span><span class="t">Sécurité et signalement</span><span class="dot"></span></a></li>
+          <li><a href="#/rejoindre" data-m="/rejoindre"><span class="n">08</span><span class="t">Nous rejoindre</span><span class="dot"></span></a></li>
         </ul></div>
       <div class="m-side m-fade">
         <div class="m-grid">

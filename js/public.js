@@ -11,7 +11,7 @@
   const storyItem = (p) => `<a class="st-item${(V.S.stSeen || []).includes(p.id) ? ' seen' : ''}" href="#/story/${p.id}"><span class="st-ph"><img src="${V.img(p.photos[0], 's')}" alt="Photo de ${esc(p.name)}" loading="lazy" draggable="false">${V.statusOf(p).t === 'now' ? '<i class="st-on" title="En ligne"></i>' : ''}</span><b>${esc(p.name)}</b><span>${V.communeTxt(p.commune)}</span></a>`;
   const MODE_TXT = { incall: 'Reçoit', outcall: 'Se déplace', both: 'Reçoit · déplace' };
   const statusCard = (p) => {
-    const langs = p.langs.slice(0, 3).map(([l]) => `<i class="lang">${l.toUpperCase()}</i>`).join('');
+    const langs = p.langs.slice(0, 3).map(([l]) => `<i class="lang">${flag(l)}${l.toUpperCase()}</i>`).join('');
     const tags = [p.attrs && p.attrs.Silhouette, MODE_TXT[p.mode]].filter(Boolean).map((t) => `<i class="ptag">${esc(t)}</i>`).join('');
     return `<article class="p-card"><a class="p-ph" href="#/profil/${p.id}" data-act="open" data-id="${p.id}"><img src="${V.img(p.photos[0], 's')}" alt="Photo de ${esc(p.name)}" loading="lazy" draggable="false">${V.statusPill(p, false, true)}<span class="p-ago">${V.agoTxt(V.statusOf(p).since)}</span><span class="p-grad"></span><b class="p-name">${esc(p.name)} <span>${V.ageShort(p)}</span>${V.i('badge-check', 'sm')}</b></a><div class="p-body"><div class="p-line">${V.i('map-pin', 'sm')}<span>${V.communeTxt(p.commune)}</span></div><div class="p-line p-langs">${V.i('languages', 'sm')}<span>${langs}</span></div><div class="p-tags">${tags}</div><div class="p-foot"><span class="p-price"><small>dès</small> <b>${p.from}.–</b></span>${V.btn('Voir le profil', { href: '#/profil/' + p.id, cls: 'sm dark', arrow: true })}</div></div></article>`;
   };
@@ -85,6 +85,7 @@
     let feats = ['valentina', 'alma', 'nina-sasha', 'maya'].map(V.byId).filter((p) => p && V.visible(p));
     if (feats.length < 2) feats = [...L.filter((p) => p.feat), ...L].filter((p, k, a) => a.indexOf(p) === k).slice(0, 4); // profils importés seuls
     const f0 = feats[0], f1 = feats[1] || feats[0];
+    const hot = L.slice().sort((x, y) => (y.likes || 0) - (x.likes || 0)).slice(0, 7);
     return {
       title: 'Accueil',
       html: `
@@ -106,6 +107,13 @@
       <section class="stories" aria-label="Stories"><div class="wrap">${V.carousel(stories.map(storyItem).join(''), 'stories')}</div></section>
 
       <section class="section-sm"><div class="wrap">
+        <div class="sec-head"><div>${H2('Nouvelles arrivées')}<p class="sec-note">Inscrites depuis moins de quatorze jours.</p></div><a class="link d-only" href="#/profils?tri=new">Tout voir</a></div>
+        ${V.carousel(news.map((p, k) => V.card(p, { i: k, noHide: true })).join(''))}
+      </div></section>
+
+      ${quickFilters(L)}
+
+      <section class="section-sm"><div class="wrap">
         <div class="sec-head"><div>${H2('Derniers statuts')}<p class="sec-note">Ce que les escortes ont publié ces dernières heures.</p></div><a class="link d-only" href="#/profils?tri=dispo">Tout voir</a></div>
         ${V.carousel(recent.map(statusCard).join(''))}
       </div></section>
@@ -115,26 +123,11 @@
         ${communeMarquee()}
       </div></section>
 
-      <div class="stack-wrap">
-        <div class="stack"><section class="hero" id="hero" data-i="0">
-          <div class="slide cur" data-act="open" data-id="${f0.id}"><img src="${V.img(f0.photos[0])}" alt="${esc(f0.name)}" class="protect" draggable="false"></div>
-          <div class="slide next" data-act="hero-next"><img src="${V.img(f1.photos[0])}" alt="" draggable="false"></div>
-          <div class="shade"></div>
-          <div class="top"><div><div class="eyebrow">À la une · mise en avant</div><div class="small" style="color:#e2dae6;margin-top:6px" id="heroSt">${V.statusInfo(f0).label}</div></div></div>
-          <h2 class="name" id="heroName"><small id="heroSub">${V.communeTxt(f0.commune)} · ${V.ageTxt(f0)}</small><span>${esc(f0.name)}</span></h2>
-          <div class="cta">${V.btn('Voir la fiche', { act: 'hero-open', cls: 'light', arrow: true })}${V.btn(`Disponibles maintenant · ${nowList.length}`, { href: '#/profils?dispo=now', cls: 'ghost', attrs: WHITE_GHOST })}</div>
-          <div class="prog">${feats.map((_, k) => `<i class="${k === 0 ? 'on' : ''}"></i>`).join('')}</div>
-        </section></div>
-        <div class="stack-gap" aria-hidden="true"></div>
-        <section class="over section"><div class="wrap">
-          <div class="sec-head"><div>${H2('Derniers avis')}<p class="sec-note">Ce que les clients ont partagé après leur rendez-vous.</p></div></div>
-          ${V.carousel(latestReviews().map(reviewCard).join(''), 'wide')}
-        </div></section>
-      </div>
+      ${coverflow(hot, nowList.length)}
 
       <section class="section-sm"><div class="wrap">
-        <div class="sec-head"><div>${H2('Nouvelles arrivées')}<p class="sec-note">Inscrites depuis moins de quatorze jours.</p></div><a class="link d-only" href="#/profils?tri=new">Tout voir</a></div>
-        ${V.carousel(news.map((p, k) => V.card(p, { i: k, noHide: true })).join(''))}
+        <div class="sec-head"><div>${H2('Derniers avis')}<p class="sec-note">Ce que les clients ont partagé après leur rendez-vous.</p></div></div>
+        ${V.carousel(latestReviews().map(reviewCard).join(''), 'wide')}
       </div></section>
 
       <section class="section-sm"><div class="wrap">
@@ -168,12 +161,107 @@
       after: (v) => {
         heroLoop(v, feats);
         liveCounters(v);
+        quickFiltersAfter(v);
+        coverflowAfter(v);
         V.ui.marquees(v);
         $('[data-seg="seo"]', v).addEventListener('seg', (e) => $$('.seo-pane', v).forEach((x) => x.classList.toggle('on', x.dataset.pane === e.detail)));
       },
     };
   });
 
+  /* ---------- À la une : coverflow 3D (port de slider-carrousel-studio « coverflow ») + photo floutée en fond ---------- */
+  const coverflow = (list, nowN) => {
+    if (!list.length) return '';
+    const f = list[0];
+    return `<section class="cf-hero" id="cfHero" aria-label="À la une" aria-roledescription="carrousel">
+      <div class="cf-bgs" aria-hidden="true">${list.map((p, k) => `<div class="cf-bg${k ? '' : ' on'}" style="background-image:url('${V.img(p.photos[0])}')"></div>`).join('')}</div>
+      <div class="cf-shade" aria-hidden="true"></div>
+      <div class="wrap cf-in">
+        <div class="cf-head"><div class="eyebrow">${I('flame', 'sm')}À la une · mises en avant</div><h2 class="cf-title">Les profils <em>hot</em> du moment</h2></div>
+        <div class="cf-stage" tabindex="0">
+          <div class="cf-track">${list.map((p, k) => `<article class="cf-card" data-i="${k}" data-id="${p.id}" data-act="open"><div class="cf-ph"><img src="${V.img(p.photos[0])}" alt="Photo de ${esc(p.name)}" draggable="false">${(p.likes || 0) > 2500 ? `<span class="cf-hot">${I('flame', 'sm')}Hot</span>` : `<span class="cf-hot soft">${I('flame', 'sm')}En vue</span>`}${V.statusPill(p, false, true)}<span class="cf-grad"></span><div class="cf-cap"><b>${esc(p.name)} <span>${V.ageShort(p)}</span>${I('badge-check', 'sm')}</b><small>${I('map-pin', 'sm')}${V.communeTxt(p.commune)} · dès ${p.from}.–</small></div></div></article>`).join('')}</div>
+          <button type="button" class="cf-nav prev" aria-label="Profil précédent">${I('chevron-left')}</button><button type="button" class="cf-nav next" aria-label="Profil suivant">${I('chevron-right')}</button>
+        </div>
+        <div class="cf-info">
+          <div class="cf-legend" id="cfLegend" aria-live="polite"></div>
+          <div class="cf-dots">${list.map((p, k) => `<button type="button" aria-label="${esc(p.name)}"${k ? '' : ' class="on"'}><i></i></button>`).join('')}</div>
+          <div class="cf-cta"><a class="btn light" id="cfCta" href="#/profil/${f.id}"><span class="roll"><span>Voir son profil</span><span aria-hidden="true">Voir son profil</span></span></a>${V.btn(`Disponibles maintenant · ${nowN}`, { href: '#/profils?dispo=now', cls: 'ghost', attrs: WHITE_GHOST })}</div>
+        </div>
+      </div>
+    </section>`;
+  };
+  function coverflowAfter(v) {
+    const root = $('#cfHero', v); if (!root) return;
+    const stage = $('.cf-stage', root), cards = $$('.cf-card', root), bgs = $$('.cf-bg', root), dots = $$('.cf-dots button', root);
+    const N = cards.length; if (!N) return;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let pos = 0, target = 0, active = -1, raf = 0, last = 0, cw = 288, holdUntil = 0;
+    const mod = (n) => ((n % N) + N) % N;
+    const near = (j) => { let d = mod(j - Math.round(target)); if (d > N / 2) d -= N; return Math.round(target) + d; };
+    const measure = () => { cw = cards[0].offsetWidth || 288; };
+    const setActive = (k) => {
+      bgs.forEach((b, j) => b.classList.toggle('on', j === k));
+      dots.forEach((b, j) => b.classList.toggle('on', j === k));
+      cards.forEach((c, j) => c.classList.toggle('cur', j === k));
+      const p = V.byId(cards[k].dataset.id);
+      $('#cfLegend', root).innerHTML = `<b>${esc(p.name)}, ${V.ageShort(p)} ans</b><span>${esc(p.type || V.modeTxt(p.mode))} · ${V.communeTxt(p.commune)}${p.likes ? ` · ${nf(p.likes)} likes` : ''}</span>`;
+      $('#cfCta', root).href = '#/profil/' + p.id;
+    };
+    const place = () => {
+      const mob = innerWidth <= 767, side = mob ? 0.5 : 0.62, restK = mob ? 0.2 : 0.3, ang = mob ? 40 : 50;
+      cards.forEach((c, j) => {
+        let d = mod(j - pos); if (d > N / 2) d -= N;
+        const a = Math.max(-1, Math.min(1, d)), rest = d - a, ad = Math.abs(d);
+        const x = (a * side + rest * restK) * cw, z = -Math.abs(a) * cw * 0.4 - Math.abs(rest) * cw * 0.06;
+        c.style.transform = `translate3d(${x.toFixed(1)}px,0,${z.toFixed(1)}px) rotateY(${(-a * ang).toFixed(2)}deg)`;
+        c.style.zIndex = String(100 - Math.round(ad * 10));
+        c.style.opacity = String(Math.max(0, Math.min(1, 4 - ad)) * Math.max(0, Math.min(1, N - 2 * ad)));
+        const vis = ad < 1.5; c.inert = !vis; c.setAttribute('aria-hidden', String(!vis));
+      });
+      const k = mod(Math.round(pos));
+      if (k !== active) { active = k; setActive(k); }
+    };
+    const tick = (t) => {
+      const dt = last ? Math.min(64, t - last) : 16.67; last = t;
+      pos += (target - pos) * (1 - Math.pow(1 - 0.08, dt / 16.67));
+      if (Math.abs(target - pos) < 0.0005) { pos = target; place(); raf = 0; last = 0; return; }
+      place(); raf = requestAnimationFrame(tick);
+    };
+    const go = (t) => { target = t; if (reduce) { pos = target; place(); return; } if (!raf) raf = requestAnimationFrame(tick); };
+    const hold = () => { holdUntil = Date.now() + 9000; };
+    $('.cf-nav.prev', root).addEventListener('click', () => { go(Math.round(target) - 1); hold(); });
+    $('.cf-nav.next', root).addEventListener('click', () => { go(Math.round(target) + 1); hold(); });
+    dots.forEach((b, j) => b.addEventListener('click', () => { go(near(j)); hold(); }));
+    stage.addEventListener('keydown', (e) => { if (e.key === 'ArrowLeft') { go(Math.round(target) - 1); hold(); } else if (e.key === 'ArrowRight') { go(Math.round(target) + 1); hold(); } });
+    // glisser (souris ou doigt), avec élan au lâcher
+    let drag = null, moved = false;
+    stage.addEventListener('pointerdown', (e) => { if (e.button || e.target.closest('.cf-nav')) return; drag = { x: e.clientX, y: e.clientY, p0: target, lx: e.clientX, t: e.timeStamp, v: 0, on: false, id: e.pointerId }; moved = false; });
+    stage.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if (!drag.on) { if (Math.abs(dx) < 6) return; if (Math.abs(dy) > Math.abs(dx)) { drag = null; return; } drag.on = true; moved = true; stage.setPointerCapture(drag.id); stage.classList.add('grab'); }
+      const inst = (e.clientX - drag.lx) / Math.max(1, e.timeStamp - drag.t);
+      drag.v = 0.8 * inst + 0.2 * drag.v; drag.lx = e.clientX; drag.t = e.timeStamp;
+      go(drag.p0 - dx / (cw * 0.55)); hold();
+    });
+    const end = (e) => { if (!drag) return; if (drag.on) { const v2 = e.timeStamp - drag.t > 80 ? 0 : drag.v; go(Math.round(target - (v2 * 160) / (cw * 0.55))); } drag = null; stage.classList.remove('grab'); };
+    stage.addEventListener('pointerup', end); stage.addEventListener('pointercancel', end);
+    // clic : une carte de côté vient au centre, la carte centrale ouvre la fiche
+    stage.addEventListener('click', (e) => {
+      if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; return; }
+      const c = e.target.closest('.cf-card'); if (!c) return;
+      if (+c.dataset.i !== active) { e.preventDefault(); e.stopPropagation(); go(near(+c.dataset.i)); hold(); }
+    }, true);
+    addEventListener('resize', () => { if (root.isConnected) { measure(); place(); } }, { passive: true });
+    // défilement automatique doux : un cran toutes les 5 s, suspendu 9 s après une action
+    clearInterval(V.cfTimer);
+    V.cfTimer = setInterval(() => {
+      if (!document.body.contains(root)) { clearInterval(V.cfTimer); return; }
+      if (document.hidden || Date.now() < holdUntil || drag) return;
+      go(Math.round(target) + 1);
+    }, 5000);
+    measure(); place();
+  }
   function heroLoop(v, feats) {
     const hero = $('#hero', v);
     if (!hero || feats.length < 2) return;
@@ -203,6 +291,93 @@
     V.heroStep = step;
     clearInterval(V.heroTimer);
     V.heroTimer = setInterval(() => { if (!document.hidden && $('#hero')) step(); else if (!$('#hero')) clearInterval(V.heroTimer); }, 5500);
+  }
+
+  /* ---------- Accueil : filtres en direct, la sélection se met à jour juste en dessous ---------- */
+  const QF_MAIN = [
+    ['dispo', 'Disponibilité', [['', 'Toutes'], ['now', 'Maintenant'], ['today', 'Aujourd’hui'], ['tomorrow', 'Demain']]],
+    ['mode', 'Rendez-vous', [['', 'Indifférent'], ['incall', 'Reçoit'], ['outcall', 'Se déplace']]],
+    ['prix', 'Budget pour 1 h', [['', 'Tous'], ['0-300', 'Jusqu’à 300'], ['300-400', '300 à 400'], ['400-1000', '400 et plus']]],
+  ];
+  const QF_ADV = [
+    ['age', 'Âge', [['', 'Tous'], ['18-25', '18 à 25'], ['26-30', '26 à 30'], ['31-40', '31 à 40'], ['41-99', '41 et plus']]],
+    ['sil', 'Silhouette', [['', 'Toutes'], ['mince', 'Mince'], ['sportive', 'Sportive'], ['pulpeuse', 'Pulpeuse']]],
+    ['hair', 'Cheveux', [['', 'Tous'], ['brun', 'Brun'], ['blond', 'Blond'], ['châtain', 'Châtain'], ['roux', 'Roux'], ['noir', 'Noir']]],
+  ];
+  const QF_SVC = ['s7', 'p2', 'p4', 'p14', 'p20', 'p23', 'p24', 's3', 's1'];
+  const QF_LANG = ['fr', 'en', 'es', 'pt', 'ru', 'de', 'it'];
+  const qfChips = (k, opts) => `<div class="qf-chips" data-qk="${k}">${opts.map(([v, l]) => `<button type="button" class="qf-c${v ? '' : ' on'}" data-qv="${v}">${l}</button>`).join('')}</div>`;
+  const qfGroup = (label, inner) => `<div class="qf-g"><span class="qf-l">${label}</span>${inner}</div>`;
+  const quickFilters = (L) => {
+    const communes = [...new Set(L.map((p) => p.commune))].map((id) => ({ id, label: V.communeTxt(id) })).sort((a, b) => a.label.localeCompare(b.label, 'fr'));
+    return `<section class="section-sm qf" id="qf"><div class="wrap">
+        <div class="sec-head"><div>${H2('Trouvez en un instant')}<p class="sec-note">Choisissez vos critères : la sélection se met à jour juste en dessous, sans quitter l’accueil.</p></div><a class="link" href="#/carte">${I('map-pin', 'sm')} Voir sur la carte</a></div>
+        <div class="qf-panel">
+          <div class="qf-top">
+            ${qfGroup('Catégorie', qfChips('cat', [['', 'Toutes'], ['femme', 'Femmes'], ['trans', 'Trans'], ['homme', 'Hommes'], ['duo', 'Couples']]))}
+            ${QF_MAIN.map(([k, l, o]) => qfGroup(l, qfChips(k, o))).join('')}
+            ${qfGroup('Quartier', `<label class="qf-sel">${I('map-pin', 'sm')}<select data-qs="commune" aria-label="Quartier"><option value="">Tout Genève</option>${communes.map((c) => `<option value="${c.id}">${esc(c.label)}</option>`).join('')}</select>${I('chevron-down', 'sm')}</label>`)}
+            ${qfGroup('Langue', `<div class="qf-chips" data-qm="lang">${QF_LANG.map((l) => `<button type="button" class="qf-c" data-qv="${l}">${flag(l)}${l.toUpperCase()}</button>`).join('')}</div>`)}
+          </div>
+          <div class="qf-adv" hidden>
+            ${QF_ADV.map(([k, l, o]) => qfGroup(l, qfChips(k, o))).join('')}
+            ${qfGroup('Pratiques', `<div class="qf-chips" data-qm="svc">${QF_SVC.map((s) => `<button type="button" class="qf-c" data-qv="${s}">${V.SERVICES[s]}</button>`).join('')}</div>`)}
+            ${qfGroup('Options', `<div class="qf-chips">${[['nosmoke', 'Non-fumeuse'], ['acc', 'Accepte les couples'], ['video', 'Avec vidéo'], ['face', 'Visage visible']].map(([k, l]) => `<button type="button" class="qf-c" data-qt="${k}">${l}</button>`).join('')}</div>`)}
+          </div>
+          <div class="qf-foot">
+            <span class="qf-count" id="qfCount"></span>
+            <span class="sp"></span>
+            <button type="button" class="txt-btn" data-qf-reset>Réinitialiser</button>
+            <label class="qf-sel">${I('sort', 'sm')}<select data-qs="tri" aria-label="Trier">${TRI.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select></label>
+            <button type="button" class="qf-adv-btn" data-qf-adv aria-expanded="false">${I('filter', 'sm')}Paramètres avancés<span class="qf-n" hidden></span>${I('chevron-down', 'sm')}</button>
+          </div>
+        </div>
+        <div class="qf-grid" id="qfGrid"></div>
+        <div class="qf-more" id="qfMore"></div>
+      </div></section>`;
+  };
+  function quickFiltersAfter(v) {
+    const box = $('#qf', v); if (!box) return;
+    const q = {}, multi = { lang: new Set(), svc: new Set() }, tog = new Set();
+    const grid = $('#qfGrid', box), count = $('#qfCount', box), more = $('#qfMore', box);
+    const build = () => {
+      const qq = { ...q };
+      if (multi.lang.size) qq.lang = [...multi.lang].join(',');
+      if (multi.svc.size) qq.svc = [...multi.svc].join(',');
+      tog.forEach((t) => { qq[t] = t === 'acc' ? 'Couples' : '1'; });
+      return qq;
+    };
+    const render = () => {
+      const qq = build();
+      const L = V.filterList(qq);
+      count.innerHTML = `<b>${L.length}</b> profil${L.length > 1 ? 's' : ''} ${L.length > 1 ? 'correspondent' : 'correspond'}`;
+      grid.innerHTML = L.length ? L.slice(0, 8).map((p, k) => V.card(p, { i: k, noHide: true })).join('') : V.empty('search', 'Aucun profil pour ces critères', 'Retirez un critère pour élargir la sélection.', '');
+      const qs = new URLSearchParams(Object.entries(qq).filter(([, x]) => x)).toString();
+      more.innerHTML = L.length > 8 ? V.btn(`Voir les ${L.length} profils`, { href: '#/profils' + (qs ? '?' + qs : ''), cls: 'ghost', arrow: true }) : '';
+      const nAdv = ['age', 'sil', 'hair'].filter((k) => q[k]).length + multi.svc.size + tog.size;
+      const nb = $('.qf-n', box); nb.hidden = !nAdv; nb.textContent = nAdv;
+      grid.classList.remove('flash'); void grid.offsetWidth; grid.classList.add('flash');
+    };
+    box.addEventListener('click', (e) => {
+      const c = e.target.closest('.qf-c');
+      if (c) {
+        const g = c.parentElement;
+        if (g.dataset.qk) { $$('.qf-c', g).forEach((x) => x.classList.toggle('on', x === c)); q[g.dataset.qk] = c.dataset.qv; }
+        else if (g.dataset.qm) { const s = multi[g.dataset.qm]; if (c.classList.toggle('on')) s.add(c.dataset.qv); else s.delete(c.dataset.qv); }
+        else if (c.dataset.qt) { if (c.classList.toggle('on')) tog.add(c.dataset.qt); else tog.delete(c.dataset.qt); }
+        render(); return;
+      }
+      const adv = e.target.closest('[data-qf-adv]');
+      if (adv) { const pane = $('.qf-adv', box); pane.hidden = !pane.hidden; adv.setAttribute('aria-expanded', String(!pane.hidden)); adv.classList.toggle('on', !pane.hidden); return; }
+      if (e.target.closest('[data-qf-reset]')) {
+        Object.keys(q).forEach((k) => delete q[k]); multi.lang.clear(); multi.svc.clear(); tog.clear();
+        $$('.qf-chips', box).forEach((g) => $$('.qf-c', g).forEach((x, j) => x.classList.toggle('on', !!g.dataset.qk && j === 0)));
+        $$('select[data-qs]', box).forEach((s) => { s.selectedIndex = 0; });
+        render();
+      }
+    });
+    $$('select[data-qs]', box).forEach((s) => s.addEventListener('change', () => { q[s.dataset.qs] = s.value; render(); }));
+    render();
   }
 
   V.footer = () => `<footer class="footer"><div class="wrap">
@@ -857,32 +1032,62 @@
     <div class="pp"><div class="price"><b>${pl.price}</b><span>CHF / mois</span></div>${o.btn ? o.btn(pl) : ''}</div>
   </div>`;
 
-  V.route(/^\/rejoindre$/, () => ({
-    title: 'Nous rejoindre',
-    html: `<section class="dark-band section"><div class="wrap">
+  /* Nous rejoindre : contenu enrichi des offres (éléments clés en gras) */
+  const PLAN_RICH = {
+    essentiel: { ico: 'badge-check', feats: ['<b>Profil vérifié</b> : âge, identité, photos et indépendance', '<b>8 photos</b> filigranées', '<b>Statut express</b> en un geste', '<b>Statistiques</b> de base', '<b>Masquage immédiat</b> à tout moment'] },
+    visibilite: { ico: 'trending', feats: ['<b>Tout Présence</b>, et en plus :', '<b>20 photos</b> et <b>1 vidéo</b> de présentation', '<b>2 jours de mise en avant</b> par mois', '<b>Statistiques détaillées</b> et conseils', 'Traduction relue en <b>5 langues</b>', '<b>Alertes</b> si vos photos apparaissent ailleurs'] },
+    premium: { ico: 'star', feats: ['<b>Tout Visibilité</b>, et en plus :', '<b>6 jours de mise en avant</b> par mois', '<b>Shooting photo annuel offert</b> (valeur CHF 450)', '<b>Rédaction du profil</b> par notre équipe', 'Assistance WhatsApp <b>prioritaire 7 j/7</b>'] },
+  };
+  const planCard = (pl) => {
+    const r = PLAN_RICH[pl.id] || { ico: 'check', feats: pl.feats };
+    return `<article class="pc${pl.reco ? ' reco' : ''}">
+      ${pl.reco ? `<span class="pc-tag">${I('flame', 'sm')}La plus choisie</span>` : ''}
+      <div class="pc-top"><span class="pc-ic">${I(r.ico)}</span><h3>${pl.name}</h3><p>${pl.pitch}</p></div>
+      <div class="pc-price"><b>${pl.price}</b><span>CHF<br>par mois</span></div>
+      <p class="pc-offer">${I('gift', 'sm')}<span><b>2 mois offerts</b> avec le code LANCEMENT2M</span></p>
+      <ul class="pc-feats">${r.feats.map((f) => `<li>${I('check', 'sm')}<span>${f}</span></li>`).join('')}</ul>
+      <div class="pc-cta">${V.btn('Choisir ' + pl.name, { href: '#/pro/inscription/1?plan=' + pl.id, cls: (pl.reco ? 'gold' : 'dark') + ' block', arrow: true })}</div>
+    </article>`;
+  };
+  V.route(/^\/rejoindre$/, () => {
+    const L = vis();
+    return {
+      title: 'Nous rejoindre',
+      html: `<section class="rj-hero"><div class="rj-bg" aria-hidden="true">${L.slice(0, 6).map((p) => `<img src="${V.img(p.photos[0], 's')}" alt="">`).join('')}</div><div class="wrap rj-in">
         <div class="eyebrow">Escortes indépendantes à Genève</div>
-        <h1 class="h1" style="margin-top:14px;max-width:20ch">149 francs par mois. Rien sur vos rendez-vous.</h1>
-        <p class="lead" style="margin-top:18px">Vous payez un forfait, sans engagement. Ce que vous gagnez avec vos clients ne nous regarde pas. Deux mois offerts au lancement, sans carte bancaire.</p>
-        <div class="row wrapr" style="margin-top:28px">${V.btn('Commencer ma candidature', { href: '#/pro/inscription/1', cls: 'gold lg', arrow: true })}${V.btn('Voir les tarifs', { href: '#/rejoindre', act: 'scroll-tarifs', cls: 'ghost lg', attrs: WHITE_GHOST })}</div>
+        <h1 class="rj-title">Votre talent, <em>votre prix.</em><br>Zéro commission.</h1>
+        <p class="lead rj-lead">Un forfait mensuel sans engagement, et c’est tout. Ce que vous gagnez avec vos clients ne nous regarde pas. <b>Deux mois offerts</b> au lancement, sans carte bancaire.</p>
+        <div class="row wrapr" style="margin-top:28px">${V.btn('Commencer ma candidature', { href: '#/pro/inscription/1', cls: 'gold lg', arrow: true })}${V.btn('Voir les offres', { href: '#/rejoindre', act: 'scroll-tarifs', cls: 'ghost lg', attrs: WHITE_GHOST })}</div>
+        <div class="rj-proof"><span class="avs">${L.slice(0, 5).map((p) => `<img src="${V.img(p.photos[0], 's')}" alt="">`).join('')}</span><span><b>${L.length} escortes vérifiées</b> sont déjà en ligne</span></div>
+        <div class="rj-stats">${[['0 %', 'de commission sur vos rendez-vous'], ['2 mois', 'offerts au lancement'], ['24 h', 'pour être en ligne après vérification'], ['100 %', 'des données hébergées en Suisse']].map(([n, l]) => `<div><b>${n}</b><span>${l}</span></div>`).join('')}</div>
       </div></section>
+
       <section class="section"><div class="wrap">
-        <div class="sec-head"><h2 class="h2">Ce que le forfait vous donne</h2></div>
-        <div class="ed-list">
-          <div><b>Une galerie sans page 12</b><p>Pas de pagination, un ordre qui ne bouge pas pendant la visite et des filtres précis. Quelqu’un qui cherche une escorte parlant portugais à Carouge vous trouve.</p></div>
-          <div><b>Le statut en un geste</b><p>« Disponible maintenant » ou « ce soir à 21 h », depuis l’écran d’accueil du téléphone. Sans mise à jour, il expire au bout de trois heures.</p></div>
-          <div><b>Un profil masqué en moins d’une minute</b><p>Depuis l’espace pro, à tout moment. Vos photos sont filigranées et surveillées sur le web ; votre adresse exacte n’apparaît jamais.</p></div>
-          <div><b>Des chiffres lisibles</b><p>Vues, ajouts en sélection, clics par canal de contact, comparés à la moyenne des profils de votre catégorie.</p></div>
-        </div>
+        <div class="sec-head"><div>${H2('Ce que le forfait vous donne')}<p class="sec-note">Tout ce qu’il faut pour être trouvée, contactée et protégée.</p></div></div>
+        <div class="rj-why">${[
+          ['grid', 'Une galerie sans page 12', 'Pas de pagination, un ordre stable et des <b>filtres précis</b> : quelqu’un qui cherche une escorte parlant portugais à Carouge vous trouve.'],
+          ['zap', 'Le statut en un geste', '<b>« Disponible maintenant »</b> ou « ce soir à 21 h », depuis l’écran d’accueil du téléphone. Il expire seul au bout de trois heures.'],
+          ['eye-off', 'Masquée en moins d’une minute', 'Depuis l’espace pro, à tout moment. Photos <b>filigranées et surveillées</b> sur le web ; votre adresse n’apparaît jamais.'],
+          ['chart', 'Des chiffres lisibles', 'Vues, ajouts en sélection, <b>clics par canal de contact</b>, comparés à la moyenne de votre catégorie.'],
+          ['heart', 'Avis, likes et abonnés', 'Vos clients vous <b>suivent</b> et sont prévenus de vos nouveaux statuts. Les avis sont modérés avant publication.'],
+          ['shield', 'Vérifiée, donc crédible', 'Âge, identité et photos <b>contrôlés</b> : le badge vérifié rassure et fait la différence dans la galerie.'],
+        ].map(([ic, t, d]) => `<article class="rj-card"><span class="rj-ic">${I(ic)}</span><h3>${t}</h3><p>${d}</p></article>`).join('')}</div>
       </div></section>
+
       <section class="section-sm" id="tarifs"><div class="wrap">
-        <div class="sec-head" style="flex-wrap:wrap"><div><div class="eyebrow">CHF par mois, sans engagement</div><h2 class="h2" style="margin-top:10px">Tarifs</h2></div>
-          <p class="offer-line"><b>Deux mois offerts</b> avec le code LANCEMENT2M, sans carte bancaire.</p></div>
-        <div class="plans">${V.PLANS.map((pl) => V.planRow(pl, { btn: (x) => V.btn('Choisir ' + x.name, { href: '#/pro/inscription/1?plan=' + x.id, cls: x.reco ? 'sm' : 'sm ghost', arrow: true }) })).join('')}
-          <div class="plan"><div><h3>Duo ou couple</h3><p class="pitch">${V.PLAN_DUO.note}</p></div><p class="ink2" style="font-size:14.5px">Les deux personnes sont vérifiées, et chacune garde son profil individuel.</p><div class="pp"><div class="price"><b>${V.PLAN_DUO.price}</b><span>CHF / mois</span></div>${V.btn('Créer un duo', { href: '#/pro/duo', cls: 'sm ghost' })}</div></div>
-        </div>
+        <div class="sec-head" style="flex-wrap:wrap"><div><div class="eyebrow">CHF par mois, sans engagement</div><h2 class="h2" style="margin-top:10px">Nos offres</h2></div>
+          <p class="offer-line">${I('gift', 'sm')} <b>Deux mois offerts</b> avec le code LANCEMENT2M, sans carte bancaire.</p></div>
+        <div class="pcs">${V.PLANS.map(planCard).join('')}</div>
+        <article class="pc-duo"><span class="pc-ic">${I('users')}</span><div class="sp"><h3>Duo ou couple</h3><p>${V.PLAN_DUO.note} <b>Les deux personnes sont vérifiées</b> et chacune garde son profil individuel.</p></div><div class="pc-price sm"><b>${V.PLAN_DUO.price}</b><span>CHF<br>par mois</span></div>${V.btn('Créer un duo', { href: '#/pro/duo', cls: 'ghost', arrow: true })}</article>
         <h3 class="h3" style="margin:44px 0 14px">Options à l’unité</h3>
-        <div class="addons">${V.ADDONS.map((a) => `<div class="addon${a.soon ? ' soon' : ''}"><b>${a.name}</b><span class="p">${a.price}<small>${a.unit}</small></span><p class="small ink2">${a.desc}</p></div>`).join('')}</div>
+        <div class="rj-addons">${V.ADDONS.map((a) => `<article class="rj-addon${a.soon ? ' soon' : ''}"><span class="rj-ic">${I(a.ico || 'plus')}</span><div><b>${a.name}</b><span class="p">${a.price} <small>${a.unit}</small></span><p>${a.desc}</p></div></article>`).join('')}</div>
       </div></section>
+
+      <section class="section"><div class="wrap">
+        <div class="sec-head"><div>${H2('En ligne en trois étapes')}<p class="sec-note">Comptez cinq minutes pour la candidature, le reste est fait pour vous.</p></div></div>
+        <ol class="rj-steps">${[['Votre candidature', 'Prénom de travail, photos, tarifs et disponibilités. <b>5 minutes</b>, depuis votre téléphone.'], ['La vérification', 'Pièce d’identité et <b>selfie vivant</b> chez un prestataire suisse, puis un court entretien avec notre équipe.'], ['Vous êtes en ligne', 'Votre profil apparaît dans la galerie avec le <b>badge vérifié</b>. Vous gérez tout depuis l’espace pro.']].map(([t, d], k) => `<li><span class="rj-n">${k + 1}</span><h3>${t}</h3><p>${d}</p></li>`).join('')}</ol>
+      </div></section>
+
       <section class="section"><div class="wrap" style="max-width:860px">
         <h2 class="h2">Questions fréquentes</h2><div style="margin-top:18px">
         ${[['Prenez-vous une commission sur mes rendez-vous ?', 'Non, jamais. Vous payez un forfait mensuel et, si vous le voulez, des options. Vos rendez-vous, vos tarifs et vos clients ne regardent que vous.'],
@@ -891,9 +1096,10 @@
           ['Dois-je indiquer mon origine ?', 'Non. C’est facultatif, vous choisissez la mention et vous pouvez la retirer quand vous voulez.'],
           ['Où sont stockées mes données ?', 'En Suisse, sans exception. Votre pièce d’identité reste chez le prestataire de vérification : nous ne gardons que le résultat et votre date de naissance.'],
           ['Puis-je proposer un duo ?', 'Oui. Vous invitez votre partenaire depuis l’espace pro, elle accepte, et vos deux profils sont liés. Chacune est vérifiée.']].map(([t, d]) => `<details class="acc"><summary>${t}<span class="pm">${I('plus', 'sm')}</span></summary><div class="acc-b">${d}</div></details>`).join('')}
-        </div><div style="margin-top:30px">${V.btn('Commencer ma candidature', { href: '#/pro/inscription/1', arrow: true, cls: 'lg' })}</div>
+        </div><div style="margin-top:30px">${V.btn('Commencer ma candidature', { href: '#/pro/inscription/1', arrow: true, cls: 'gold lg' })}</div>
       </div></section>${V.footer()}`,
-  }));
+    };
+  });
 
   /* =================================================================== PAGE COMMUNE OU QUARTIER (SEO) */
   V.route(/^\/geneve\/([\w-]+)$/, (m) => {
