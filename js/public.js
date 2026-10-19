@@ -309,6 +309,7 @@
     const communes = [...new Set(L.map((p) => p.commune))].map((id) => ({ id, label: V.communeTxt(id) })).sort((a, b) => a.label.localeCompare(b.label, 'fr'));
     return `<section class="section-sm qf" id="qf"><div class="wrap">
         <div class="sec-head"><div>${H2('Selon vos envies')}<p class="sec-note">Quartier, langue, budget, disponibilité : choisissez, la sélection s’affiche juste en dessous.</p></div><a class="link" href="#/carte">${I('map-pin', 'sm')} Voir sur la carte</a></div>
+        <div class="qf-box">
         <div class="qf-panel">
           <div class="qf-top">
             ${qfGroup('Catégorie', qfChips('cat', [['', 'Toutes'], ['femme', 'Femmes'], ['trans', 'Trans'], ['homme', 'Hommes'], ['duo', 'Couples']]))}
@@ -321,16 +322,21 @@
             ${qfGroup('Pratiques', `<div class="qf-chips" data-qm="svc">${QF_SVC.map((s) => `<button type="button" class="qf-c" data-qv="${s}">${V.SERVICES[s]}</button>`).join('')}</div>`)}
             ${qfGroup('Options', `<div class="qf-chips">${[['nosmoke', 'Non-fumeuse'], ['acc', 'Accepte les couples'], ['video', 'Avec vidéo'], ['face', 'Visage visible']].map(([k, l]) => `<button type="button" class="qf-c" data-qt="${k}">${l}</button>`).join('')}</div>`)}
           </div>
-          <div class="qf-foot">
-            <span class="qf-count" id="qfCount"></span>
-            <span class="sp"></span>
+          <div class="qf-acts">
             <button type="button" class="txt-btn" data-qf-reset>Réinitialiser</button>
-            <label class="qf-sel">${I('sort', 'sm')}<select data-qs="tri" aria-label="Trier">${TRI.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select></label>
             <button type="button" class="qf-adv-btn" data-qf-adv aria-expanded="false">${I('filter', 'sm')}Paramètres avancés<span class="qf-n" hidden></span>${I('chevron-down', 'sm')}</button>
           </div>
         </div>
-        <div class="qf-grid" id="qfGrid"></div>
-        <div class="qf-more" id="qfMore"></div>
+        <div class="qf-res" aria-live="polite">
+          <div class="qf-foot">
+            <span class="qf-count" id="qfCount"></span>
+            <span class="sp"></span>
+            <label class="qf-sel">${I('sort', 'sm')}<select data-qs="tri" aria-label="Trier">${TRI.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select></label>
+          </div>
+          <div class="qf-grid" id="qfGrid"></div>
+          <div class="qf-more" id="qfMore"></div>
+        </div>
+        </div>
       </div></section>`;
   };
   function quickFiltersAfter(v) {
@@ -346,11 +352,12 @@
     };
     const render = () => {
       const qq = build();
-      const L0 = V.filterList(qq), sp = V.sponsoredFor(qq, L0).slice(0, 1), L = V.arrangeSponsored(L0, sp);
-      count.innerHTML = `<b>${L.length}</b> profil${L.length > 1 ? 's' : ''} ${L.length > 1 ? 'correspondent' : 'correspond'}${sp.length ? ' <span class="qf-sp">· dont 1 sponsorisé</span>' : ''}`;
-      grid.innerHTML = L.length ? L.slice(0, sp.length ? 7 : 8).map((p, k) => V.card(p, { i: k, noHide: true, feat: sp.includes(p) })).join('') : V.empty('search', 'Aucun profil pour ces critères', 'Retirez un critère pour élargir la sélection.', '');
+      const L = V.filterList(qq); // ici, que des cartes simples : les placements sponsorisés restent sur la page Profils
+      count.innerHTML = `<i class="dot-live"></i><span><b>${L.length}</b> profil${L.length > 1 ? 's' : ''} ${L.length > 1 ? 'correspondent' : 'correspond'} à vos critères</span>`;
+      grid.innerHTML = L.length ? L.slice(0, 8).map((p, k) => V.card(p, { i: k, noHide: true })).join('') : V.empty('search', 'Aucun profil pour ces critères', 'Retirez un critère pour élargir la sélection.', '');
       const qs = new URLSearchParams(Object.entries(qq).filter(([, x]) => x)).toString();
-      more.innerHTML = L.length > 8 ? V.btn(`Voir les ${L.length} profils`, { href: '#/profils' + (qs ? '?' + qs : ''), cls: 'ghost', arrow: true }) : '';
+      more.innerHTML = L.length > 4 ? V.btn(`Voir les ${L.length} profils`, { href: '#/profils' + (qs ? '?' + qs : ''), cls: 'ghost', arrow: true }) : '';
+      more.classList.toggle('m-only', L.length <= 8); // sur mobile on n'affiche que 4 cartes
       const nAdv = ['age', 'sil', 'hair'].filter((k) => q[k]).length + multi.svc.size + tog.size;
       const nb = $('.qf-n', box); nb.hidden = !nAdv; nb.textContent = nAdv;
       grid.classList.remove('flash'); void grid.offsetWidth; grid.classList.add('flash');

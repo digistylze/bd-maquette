@@ -114,9 +114,9 @@
     const on = V.isSel(p.id);
     const seen = V.S.seen.includes(p.id) && !o.noSeen;
     const feat = o.feat;
+    const mos = feat && p.photos.length > 1; // carte sponsorisée : deux ou trois photos verticales côte à côte
     const chg = V.S.chg;
     const badges = [];
-    if (feat) badges.push(`<span class="badge goldfill feat-tag" title="Placement payant, affiché seulement s’il correspond à votre recherche">${V.i('sparkles', 'sm')}Sponsorisé</span>`);
     if (p.duoVerified) badges.push('<span class="badge dark">Duo vérifié</span>');
     if (p.isNew || chg.arrive.includes(p.id)) badges.push('<span class="badge goldfill">Nouveau</span>');
     if (p.isUpd || chg.upd.includes(p.id)) badges.push('<span class="badge dark">Mis à jour</span>');
@@ -125,8 +125,10 @@
     const tags = [p.attrs && p.attrs.Silhouette, MODE_TAG[p.mode]].filter(Boolean).map((t) => `<i class="ptag">${V.esc(t)}</i>`).join('');
     return `<article class="card p-card${feat ? ' feat' : ''}${seen ? ' seen' : ''}" data-id="${p.id}" style="animation-delay:${(o.i || 0) % 8 * 45}ms">
       <div class="p-ph protect" data-act="open" data-id="${p.id}">
-        <img src="${V.img(p.photos[0], feat ? '' : 's')}" srcset="${V.img(p.photos[0], 's')} 360w, ${V.img(p.photos[0])} 900w" sizes="${feat ? '(min-width:1024px) 40vw, 100vw' : '(min-width:1024px) 22vw, 50vw'}" alt="Photo de ${V.esc(p.name)}" loading="lazy" draggable="false">
+        ${mos ? `<div class="p-mos">${p.photos.slice(0, 3).map((ph, k) => `<span><img src="${V.img(ph, 's')}" srcset="${V.img(ph, 's')} 360w, ${V.img(ph)} 900w" sizes="(min-width:640px) 16vw, 50vw" alt="${k ? '' : 'Photos de ' + V.esc(p.name)}" loading="lazy" draggable="false"></span>`).join('')}</div>`
+          : `<img src="${V.img(p.photos[0], 's')}" srcset="${V.img(p.photos[0], 's')} 360w, ${V.img(p.photos[0])} 900w" sizes="${feat ? '(min-width:1024px) 40vw, 100vw' : '(min-width:1024px) 22vw, 50vw'}" alt="Photo de ${V.esc(p.name)}" loading="lazy" draggable="false">`}
         ${V.statusPill(p, false, true)}
+        ${feat ? `<span class="p-spon" title="Placement payant, affiché seulement s’il correspond à votre recherche">${V.i('sparkles', 'sm')}Sponsorisé</span>` : ''}
         ${badges.length ? `<div class="p-badges">${badges.join('')}</div>` : ''}
         <span class="p-grad"></span>
         <b class="p-name">${V.esc(p.name)} <span>${V.ageShort(p)}</span>${V.i('badge-check', 'sm')}</b>
