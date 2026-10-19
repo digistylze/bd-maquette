@@ -8,8 +8,13 @@
 
   /* =================================================================== ACCUEIL */
   /* Briques de l'accueil */
-  const storyItem = (p) => `<a class="st-item${(V.S.stSeen || []).includes(p.id) ? ' seen' : ''}" href="#/story/${p.id}"><span class="st-ph"><img src="${V.img(p.photos[0], 's')}" alt="" loading="lazy" draggable="false"></span><b>${esc(p.name)}</b><span>${V.communeTxt(p.commune)}</span></a>`;
-  const statusCard = (p) => `<article class="s-card"><div class="ph protect" data-act="open" data-id="${p.id}"><img src="${V.img(p.photos[0], 's')}" alt="Photo de ${esc(p.name)}" loading="lazy" draggable="false">${V.statusPill(p, false, true)}<span class="ago">${V.agoTxt(V.statusOf(p).since)}</span></div><div class="nm">${esc(p.name)} <span>${V.ageShort(p)}</span></div><div class="where">${V.communeTxt(p.commune)}</div>${V.NOTES[p.id] ? `<p class="note">« ${esc(V.NOTES[p.id])} »</p>` : ''}</article>`;
+  const storyItem = (p) => `<a class="st-card${(V.S.stSeen || []).includes(p.id) ? ' seen' : ''}" href="#/story/${p.id}"><span class="st-card-ph"><img src="${V.img(p.photos[0], 's')}" alt="Photo de ${esc(p.name)}" loading="lazy" draggable="false">${V.statusPill(p, false, true)}<span class="st-card-grad"></span><b class="st-card-name">${esc(p.name)}${V.i('badge-check', 'sm')}</b></span><span class="st-card-where">${V.i('map-pin', 'sm')}${V.communeTxt(p.commune)}</span></a>`;
+  const MODE_TXT = { incall: 'Reçoit', outcall: 'Se déplace', both: 'Reçoit · déplace' };
+  const statusCard = (p) => {
+    const langs = p.langs.slice(0, 3).map(([l]) => `<i class="lang">${l.toUpperCase()}</i>`).join('');
+    const tags = [p.attrs && p.attrs.Silhouette, MODE_TXT[p.mode]].filter(Boolean).map((t) => `<i class="ptag">${esc(t)}</i>`).join('');
+    return `<article class="p-card"><a class="p-ph" href="#/profil/${p.id}" data-act="open" data-id="${p.id}"><img src="${V.img(p.photos[0], 's')}" alt="Photo de ${esc(p.name)}" loading="lazy" draggable="false">${V.statusPill(p, false, true)}<span class="p-ago">${V.agoTxt(V.statusOf(p).since)}</span><span class="p-grad"></span><b class="p-name">${esc(p.name)} <span>${V.ageShort(p)}</span>${V.i('badge-check', 'sm')}</b></a><div class="p-body"><div class="p-line">${V.i('map-pin', 'sm')}<span>${V.communeTxt(p.commune)}</span></div><div class="p-line p-langs">${V.i('languages', 'sm')}<span>${langs}</span></div><div class="p-tags">${tags}</div><div class="p-foot"><span class="p-price"><small>dès</small> <b>${p.from}.–</b></span>${V.btn('Voir le profil', { href: '#/profil/' + p.id, cls: 'sm dark', arrow: true })}</div></div></article>`;
+  };
   const CTRL = {
     media: ['Selfie de contrôle validé', 'Comparé aux photos publiées. Le prochain aura lieu dans 90 jours au plus tard.'],
     id: ['Âge et identité vérifiés', 'Pièce d’identité et selfie vivant, chez un prestataire suisse.'],
@@ -30,11 +35,7 @@
   const communeTile = (c, dup) => `<a class="c-tile" href="#/geneve/${c.id}"${dup ? ' aria-hidden="true" tabindex="-1"' : ''}><img src="img/armoiries/${c.id}.webp" alt="" loading="lazy" draggable="false" width="96" height="112"><b>${c.label}</b><span>${c.n ? `${c.n} profil${c.n > 1 ? 's' : ''}` : ''}</span></a>`;
   const communeTiles = (skip) => communeList(skip).map((c) => communeTile(c)).join('');
   // deux rangées en boucle (contenu doublé pour un défilement sans couture), sens opposés
-  const communeMarquee = () => {
-    const list = communeList(); const half = Math.ceil(list.length / 2);
-    const row = (part, dir) => `<div class="c-row" data-dir="${dir}"><div class="c-track">${part.map((c) => communeTile(c)).join('')}${part.map((c) => communeTile(c, true)).join('')}</div></div>`;
-    return `<div class="c-marq rv" data-marq>${row(list.slice(0, half), 1)}${row(list.slice(half), -1)}</div>`;
-  };
+  const communeMarquee = () => V.carousel(communeList().map((c) => communeTile(c)).join(''), 'commune');
   // mur de profils du hero : trois colonnes en boucle (contenu doublé), décor cliquable à la souris
   const wallCard = (p) => { const s = V.statusInfo(p); return `<a class="wcard" href="#/profil/${p.id}" tabindex="-1"><img src="${V.img(p.photos[0], 's')}" srcset="${V.img(p.photos[0], 's')} 360w, ${V.img(p.photos[0])} 900w" sizes="(min-width:1024px) 18vw, 34vw" alt="" draggable="false"><span class="wc-st ${s.cls}"><i></i>${s.short}</span><b>${esc(p.name)} <span>${V.ageShort(p)}</span></b><small>${V.communeTxt(p.commune)}</small></a>`; };
   const profileWall = (L) => {
@@ -92,11 +93,11 @@
         </div>
       </section>
 
-      <section class="stories" aria-label="Stories"><div class="wrap"><div class="st-rail">${stories.map(storyItem).join('')}</div></div></section>
+      <section class="stories" aria-label="À la une"><div class="wrap">${V.carousel(stories.map(storyItem).join(''), 'strip')}</div></section>
 
       <section class="section-sm"><div class="wrap">
         <div class="sec-head"><div>${H2('Derniers statuts')}<p class="sec-note">Ce que les escortes ont publié ces dernières heures.</p></div><a class="link d-only" href="#/profils?tri=dispo">Tout voir</a></div>
-        ${V.carousel(recent.map(statusCard).join(''))}
+        ${V.carousel(recent.map(statusCard).join(''), 'wide')}
       </div></section>
 
       <section class="section-sm"><div class="wrap">
@@ -572,7 +573,7 @@
     if (!p || !V.visible(p)) { location.replace('#/'); return; }
     V.S.stSeen = V.S.stSeen || [];
     if (!V.S.stSeen.includes(p.id)) { V.S.stSeen.push(p.id); V.save(); }
-    $$(`.st-item[href="#/story/${p.id}"]`).forEach((a) => a.classList.add('seen'));
+    $$(`.st-card[href="#/story/${p.id}"]`).forEach((a) => a.classList.add('seen'));
     V.overlay.open('story', storyHTML(p), (ov) => storyAfter(ov, p));
   }, { overlay: true });
   function storyHTML(p) {

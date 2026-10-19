@@ -1159,17 +1159,52 @@ main#view:has(> .footer:last-child) { padding-bottom: 0; }
 @keyframes flatten { from { border-radius: 44px 44px 0 0; } to { border-radius: 0; } }
 
 /* ---------- Accueil : stories ---------- */
-.stories { padding: 14px 0 4px; }
-.st-rail { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; padding: 4px 16px 10px; margin: 0 -16px; scroll-snap-type: x proximity; }
-.st-rail::-webkit-scrollbar { display: none; }
-@media (min-width: 1024px) { .st-rail { justify-content: center; margin: 0; padding: 4px 0 10px; } }
-.st-item { flex: none; width: 78px; text-align: center; scroll-snap-align: start; }
-.st-ph { display: block; width: 78px; height: 104px; border-radius: 18px; padding: 3px; box-shadow: inset 0 0 0 2px var(--gold-2); transition: transform .5s var(--spring), box-shadow .3s; }
-.st-item.seen .st-ph { box-shadow: inset 0 0 0 2px var(--line-2); }
-.st-item:hover .st-ph { transform: translateY(-3px) rotate(-2deg); }
-.st-ph img { width: 100%; height: 100%; object-fit: cover; border-radius: 15px; }
-.st-item b { display: block; margin-top: 7px; font-size: 12.5px; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.st-item span { display: block; font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stories { padding: 16px 0 4px; }
+.stories .car { position: relative; }
+/* Carte "à la une" : plus grande, cadre doré, statut, nom sur la photo + badge vérifié */
+.st-card { display: flex; flex-direction: column; min-width: 0; scroll-snap-align: start; }
+.st-card-ph { position: relative; display: block; aspect-ratio: 3 / 4; border-radius: 20px; padding: 4px; box-shadow: inset 0 0 0 2px var(--gold-2); transition: transform .5s var(--spring), box-shadow .3s; }
+.st-card.seen .st-card-ph { box-shadow: inset 0 0 0 2px var(--line-2); }
+.st-card:hover .st-card-ph { transform: translateY(-4px); }
+.st-card-ph > img { width: 100%; height: 100%; object-fit: cover; border-radius: 16px; }
+.st-card-ph .status { position: absolute; left: 10px; top: 10px; z-index: 3; }
+.st-card-grad { position: absolute; left: 4px; right: 4px; bottom: 4px; height: 46%; border-radius: 0 0 16px 16px; background: linear-gradient(transparent, rgba(15, 12, 17, .72)); z-index: 1; }
+.st-card-name { position: absolute; left: 12px; right: 10px; bottom: 10px; z-index: 2; display: flex; align-items: center; gap: 4px; color: #fff; font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
+.st-card-name .ico { width: 15px; height: 15px; color: var(--gold-2); flex: none; }
+.st-card-where { display: flex; align-items: center; gap: 4px; margin-top: 9px; font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; }
+.st-card-where .ico { width: 14px; height: 14px; flex: none; }
+.car-track.strip { grid-auto-columns: 46%; }
+@media (min-width: 640px) { .car-track.strip { grid-auto-columns: 28%; } }
+@media (min-width: 1024px) { .car-track.strip { grid-auto-columns: calc(16.666% - 12px); } }
+@media (min-width: 1024px) {
+  .stories .car-foot { justify-content: center; margin-top: 12px; }
+  .stories .car-nav { position: absolute; inset: 0 -6px; height: auto; align-items: center; justify-content: space-between; z-index: 6; pointer-events: none; }
+  .stories .car-nav button { pointer-events: auto; background: var(--bg); box-shadow: 0 8px 24px rgba(15, 12, 17, .22); }
+}
+/* ---------- Cartes profil détaillées (Derniers statuts) ---------- */
+.p-card { display: flex; flex-direction: column; min-width: 0; scroll-snap-align: start; border: 1px solid var(--line); border-radius: 20px; overflow: hidden; background: var(--bg); transition: border-color .3s, transform .5s var(--spring), box-shadow .3s; }
+.p-card:hover { border-color: var(--line-2); transform: translateY(-4px); box-shadow: 0 16px 40px rgba(15, 12, 17, .1); }
+.p-ph { position: relative; display: block; aspect-ratio: 4 / 5; overflow: hidden; background: var(--bg-3); }
+.p-ph > img { width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s var(--ease-out); }
+.p-card:hover .p-ph > img { transform: scale(1.05); }
+.p-ph .status { position: absolute; left: 10px; top: 10px; z-index: 3; }
+.p-ago { position: absolute; right: 10px; top: 10px; z-index: 3; font-size: 11px; font-weight: 600; color: #fff; background: rgba(15, 12, 17, .6); padding: 3px 9px; border-radius: 999px; }
+.p-grad { position: absolute; inset: 42% 0 0; background: linear-gradient(transparent, rgba(15, 12, 17, .84)); z-index: 1; }
+.p-name { position: absolute; left: 14px; right: 12px; bottom: 12px; z-index: 2; display: flex; align-items: center; gap: 5px; color: #fff; font-size: 19px; font-weight: 700; letter-spacing: -.02em; }
+.p-name > span { font-weight: 500; opacity: .82; font-size: 14.5px; }
+.p-name .ico { width: 17px; height: 17px; color: var(--gold-2); flex: none; }
+.p-body { display: flex; flex-direction: column; gap: 8px; padding: 13px 14px 14px; }
+.p-line { display: flex; align-items: center; gap: 7px; font-size: 13.5px; color: var(--ink-2); min-width: 0; }
+.p-line > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p-line .ico { width: 16px; height: 16px; color: var(--muted); flex: none; }
+.p-langs .lang { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .02em; color: var(--ink-2); background: var(--bg-2); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; margin-right: 4px; }
+.p-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.p-tags .ptag { font-size: 11.5px; color: var(--muted); background: var(--bg-2); border-radius: 999px; padding: 3px 10px; }
+.p-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 4px; }
+.p-price { font-size: 13px; color: var(--muted); } .p-price small { font-size: 11px; } .p-price b { font-size: 18px; color: var(--ink); font-weight: 700; letter-spacing: -.01em; }
+/* ---------- Par commune : une seule ligne, slider manuel (flèches + glisse) ---------- */
+.car-track.commune { grid-auto-columns: 112px; }
+@media (min-width: 1024px) { .car-track.commune { grid-auto-columns: 138px; } }
 /* Visionneuse de story */
 .story { position: absolute; inset: 0; background: #000; color: #fff; overflow: hidden; transform: translateY(100%); transition: transform .55s var(--ease-out); }
 .ov.on .story { transform: none; }
