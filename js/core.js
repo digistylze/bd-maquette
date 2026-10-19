@@ -63,7 +63,7 @@
   V.communeTxt = (id) => (V.COMMUNES.find((c) => c.id === id) || V.COMMUNES_GE.find((c) => c.id === id) || { label: id }).label;
   V.communeOf = (p) => (V.COMMUNES.find((c) => c.id === p.commune) || {}).c || p.commune;
   V.langTxt = (p, n = 3) => p.langs.slice(0, n).map(([l, lv]) => `${V.LANGS[l]} ${lv}`).join(' · ');
-  V.visible = (p) => !(p.id === 'alma' && V.L.pro.hidden) && !(p.arrival && !V.S.chg.arrive.includes(p.id)) && !(p.members && p.members.includes('alma') && V.L.pro.hidden);
+  V.visible = (p) => !p.cache && !(p.id === 'alma' && V.L.pro.hidden) && !(p.arrival && !V.S.chg.arrive.includes(p.id)) && !(p.members && p.members.includes('alma') && V.L.pro.hidden);
 
   /* ---------- Typographie française : espace insécable avant : ; ! ? et dans les guillemets ---------- */
   V.typo = (root) => {

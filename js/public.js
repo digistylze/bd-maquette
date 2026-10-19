@@ -38,7 +38,8 @@
   // mur de profils du hero : trois colonnes en boucle (contenu doublé), décor cliquable à la souris
   const wallCard = (p) => { const s = V.statusInfo(p); return `<a class="wcard" href="#/profil/${p.id}" tabindex="-1"><img src="${V.img(p.photos[0], 's')}" srcset="${V.img(p.photos[0], 's')} 360w, ${V.img(p.photos[0])} 900w" sizes="(min-width:1024px) 18vw, 34vw" alt="" draggable="false"><span class="wc-st ${s.cls}"><i></i>${s.short}</span><b>${esc(p.name)} <span>${V.ageShort(p)}</span></b><small>${V.communeTxt(p.commune)}</small></a>`; };
   const profileWall = (L) => {
-    const cols = [[], [], []]; L.forEach((p, k) => cols[k % 3].push(p));
+    let src = L; while (src.length && src.length < 12) src = src.concat(L); // peu de profils (démo importée) : le mur se remplit quand même
+    const cols = [[], [], []]; src.forEach((p, k) => cols[k % 3].push(p));
     return `<div class="h3-wall" aria-hidden="true">${cols.map((c, k) => `<div class="h3-col${k === 1 ? ' dn' : ''}" style="--d:${[46, 54, 50][k]}s">${c.map(wallCard).join('')}${c.map(wallCard).join('')}</div>`).join('')}</div>`;
   };
   // compteurs « en ligne » (chiffres fictifs de la maquette) : montée au chargement, puis petites variations
@@ -70,8 +71,9 @@
     const news = L.filter((p) => p.isNew || V.S.chg.arrive.includes(p.id));
     const stories = V.STORIES.map(V.byId).filter((p) => p && L.includes(p));
     const recent = L.slice().sort((a, b) => V.statusOf(b).since - V.statusOf(a).since).slice(0, 8);
-    const feats = ['valentina', 'alma', 'nina-sasha', 'maya'].map(V.byId).filter((p) => V.visible(p));
-    const f0 = feats[0], f1 = feats[1];
+    let feats = ['valentina', 'alma', 'nina-sasha', 'maya'].map(V.byId).filter((p) => p && V.visible(p));
+    if (feats.length < 2) feats = [...L.filter((p) => p.feat), ...L].filter((p, k, a) => a.indexOf(p) === k).slice(0, 4); // profils importés seuls
+    const f0 = feats[0], f1 = feats[1] || feats[0];
     return {
       title: 'Accueil',
       html: `
