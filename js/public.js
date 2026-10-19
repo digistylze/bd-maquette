@@ -10,11 +10,7 @@
   /* Briques de l'accueil */
   const storyItem = (p) => `<a class="st-item${(V.S.stSeen || []).includes(p.id) ? ' seen' : ''}" href="#/story/${p.id}"><span class="st-ph"><img src="${V.img(p.photos[0], 's')}" alt="Photo de ${esc(p.name)}" loading="lazy" draggable="false">${V.statusOf(p).t === 'now' ? '<i class="st-on" title="En ligne"></i>' : ''}</span><b>${esc(p.name)}</b><span>${V.communeTxt(p.commune)}</span></a>`;
   const MODE_TXT = { incall: 'Reçoit', outcall: 'Se déplace', both: 'Reçoit · déplace' };
-  const statusCard = (p) => {
-    const langs = p.langs.slice(0, 3).map(([l]) => `<i class="lang">${flag(l)}${l.toUpperCase()}</i>`).join('');
-    const tags = [p.attrs && p.attrs.Silhouette, MODE_TXT[p.mode]].filter(Boolean).map((t) => `<i class="ptag">${esc(t)}</i>`).join('');
-    return `<article class="p-card"><a class="p-ph" href="#/profil/${p.id}" data-act="open" data-id="${p.id}"><img src="${V.img(p.photos[0], 's')}" alt="Photo de ${esc(p.name)}" loading="lazy" draggable="false">${V.statusPill(p, false, true)}<span class="p-ago">${V.agoTxt(V.statusOf(p).since)}</span><span class="p-grad"></span><b class="p-name">${esc(p.name)} <span>${V.ageShort(p)}</span>${V.i('badge-check', 'sm')}</b></a><div class="p-body"><div class="p-line">${V.i('map-pin', 'sm')}<span>${V.communeTxt(p.commune)}</span></div><div class="p-line p-langs">${V.i('languages', 'sm')}<span>${langs}</span></div><div class="p-tags">${tags}</div><div class="p-foot"><span class="p-price"><small>dès</small> <b>${p.from}.–</b></span>${V.btn('Voir le profil', { href: '#/profil/' + p.id, cls: 'sm dark', arrow: true })}</div></div></article>`;
-  };
+  const statusCard = (p) => V.card(p, { ago: true, noHide: true });
   /* Avis de démonstration (js/profils-details.js) : les plus récents, un par profil, pour l'accueil */
   const latestReviews = (n = 8) => {
     const seen = new Set();
@@ -94,13 +90,13 @@
         ${profileWall(L)}
         <div class="h3-shade"></div>
         <div class="wrap h3-in">
-          <div class="h2-live"><i class="dot-live"></i>Annonces d’escortes à Genève</div>
-          <h1 class="h2-title">Escortes indépendantes vérifiées à Genève</h1>
-          <p class="h2-sub">Des femmes, des hommes et des couples qui reçoivent ou se déplacent à Genève. Photos contrôlées et contact direct, sans compte.</p>
-          <div class="h2-cta">${V.btn('Voir les profils en ligne', { href: '#/profils?dispo=now', cls: 'gold lg', arrow: true })}${V.btn('Je suis escorte', { href: '#/rejoindre', cls: 'ghost lg d-only', attrs: WHITE_GHOST })}<a class="h3-pro m-only" href="#/rejoindre">Vous êtes escorte ? Créer votre profil</a></div>
+          <div class="h2-live"><i class="dot-live"></i>Genève · profils vérifiés</div>
+          <h1 class="h2-title">Escortes vérifiées à Genève, <em>disponibles ce soir.</em></h1>
+          <p class="h2-sub">Profils contrôlés, disponibilités en temps réel et contact direct. Sans compte, sans intermédiaire, en toute discrétion.</p>
+          <div class="h2-cta">${V.btn('Voir qui est disponible', { href: '#/profils?dispo=now', cls: 'gold lg', arrow: true })}${V.btn('Publier mon profil', { href: '#/rejoindre', cls: 'ghost lg d-only', attrs: WHITE_GHOST })}<a class="h3-pro m-only" href="#/rejoindre">Escorte à Genève ? Publiez votre profil</a></div>
           <div class="h2-stats">
-            <div class="h2-stat"><span class="avs">${nowList.slice(0, 4).map((p) => `<img src="${V.img(p.photos[0], 's')}" alt="">`).join('')}</span><span><b data-count="18">18</b><small>modèles en ligne</small></span></div>
-            <div class="h2-stat"><i class="dot-live"></i><span><b data-count="1284">1’284</b><small>visiteurs en ligne</small></span></div>
+            <div class="h2-stat"><span class="avs">${nowList.slice(0, 4).map((p) => `<img src="${V.img(p.photos[0], 's')}" alt="">`).join('')}</span><span><b data-count="18">18</b><small>disponibles en ce moment</small></span></div>
+            <div class="h2-stat"><i class="dot-live"></i><span><b data-count="1284">1’284</b><small>visiteurs en ce moment</small></span></div>
           </div>
         </div>
       </section>
@@ -108,31 +104,31 @@
       <section class="stories" aria-label="Stories"><div class="wrap">${V.carousel(stories.map(storyItem).join(''), 'stories')}</div></section>
 
       <section class="section-sm"><div class="wrap">
-        <div class="sec-head"><div>${H2('Nouvelles arrivées')}<p class="sec-note">Inscrites depuis moins de quatorze jours.</p></div><a class="link d-only" href="#/profils?tri=new">Tout voir</a></div>
+        <div class="sec-head"><div>${H2('Nouveaux visages')}<p class="sec-note">Arrivées sur BD ces deux dernières semaines, toutes vérifiées.</p></div><a class="link d-only" href="#/profils?tri=new">Tout voir</a></div>
         ${V.carousel(news.map((p, k) => V.card(p, { i: k, noHide: true })).join(''))}
       </div></section>
 
       ${quickFilters(L)}
 
       <section class="section-sm"><div class="wrap">
-        <div class="sec-head"><div>${H2('Derniers statuts')}<p class="sec-note">Ce que les escortes ont publié ces dernières heures.</p></div><a class="link d-only" href="#/profils?tri=dispo">Tout voir</a></div>
+        <div class="sec-head"><div>${H2('En ce moment')}<p class="sec-note">Les derniers statuts publiés : qui est libre maintenant, ce soir ou demain.</p></div><a class="link d-only" href="#/profils?tri=dispo">Tout voir</a></div>
         ${V.carousel(recent.map(statusCard).join(''))}
       </div></section>
 
       <section class="section-sm"><div class="wrap">
-        <div class="sec-head"><div>${H2('Par commune')}<p class="sec-note">Les 45 communes du canton, à faire glisser. Chaque profil indique où il reçoit, jamais l’adresse.</p></div></div>
+        <div class="sec-head"><div>${H2('Près de chez vous')}<p class="sec-note">Les 45 communes du canton. Chaque profil indique son quartier, jamais son adresse.</p></div></div>
         ${communeMarquee()}
       </div></section>
 
       ${coverflow(hot, nowList.length)}
 
       <section class="section-sm"><div class="wrap">
-        <div class="sec-head"><div>${H2('Derniers avis')}<p class="sec-note">Ce que les clients ont partagé après leur rendez-vous.</p></div></div>
+        <div class="sec-head"><div>${H2('Ils en parlent')}<p class="sec-note">Les derniers avis laissés après un rendez-vous.</p></div></div>
         ${V.carousel(latestReviews().map(reviewCard).join(''), 'wide')}
       </div></section>
 
       <section class="section-sm"><div class="wrap">
-        <div class="sec-head"><div>${H2('Partenaires')}<p class="sec-note">Emplacements de démonstration : un encart sur l’accueil, au forfait mensuel.</p></div><a class="link d-only" href="#/rejoindre">Devenir partenaire</a></div>
+        <div class="sec-head"><div>${H2('Nos partenaires')}<p class="sec-note">Des adresses de confiance à Genève. Emplacements de démonstration, au forfait mensuel.</p></div><a class="link d-only" href="#/rejoindre">Devenir partenaire</a></div>
         <div class="partners rv-st">${[['Hôtel partenaire', 'Chambres à la journée, entrée discrète'], ['Studio photo', 'Séances pour profils vérifiés'], ['Prévention et santé', 'Dépistage anonyme et conseils'], ['Emplacement libre', 'Votre encart ici']].map(([t, d]) => `<a class="partner" href="#/rejoindre"><b>${t}</b><span>${d}</span></a>`).join('')}</div>
       </div></section>
 
@@ -178,7 +174,7 @@
       <div class="cf-bgs" aria-hidden="true">${list.map((p, k) => `<div class="cf-bg${k ? '' : ' on'}" style="background-image:url('${V.img(p.photos[0])}')"></div>`).join('')}</div>
       <div class="cf-shade" aria-hidden="true"></div>
       <div class="wrap cf-in">
-        <div class="cf-head"><div class="eyebrow">${I('sparkles', 'sm')}À la une · placements sponsorisés</div><h2 class="cf-title">Mises en <em>avant</em></h2><p class="cf-note">Emplacements payants, étiquetés et limités par zone. Ils ne remplacent jamais les résultats de votre recherche.</p></div>
+        <div class="cf-head"><div class="eyebrow">${I('sparkles', 'sm')}Cette semaine sur BD</div><h2 class="cf-title">Les profils <em>à la une</em></h2></div>
         <div class="cf-stage" tabindex="0">
           <div class="cf-track">${list.map((p, k) => `<article class="cf-card" data-i="${k}" data-id="${p.id}" data-act="open"><div class="cf-ph"><img src="${V.img(p.photos[0])}" alt="Photo de ${esc(p.name)}" draggable="false"><span class="cf-hot">${I('sparkles', 'sm')}Sponsorisé</span>${V.statusPill(p, false, true)}<span class="cf-grad"></span><div class="cf-cap"><b>${esc(p.name)} <span>${V.ageShort(p)}</span>${I('badge-check', 'sm')}</b><small>${I('map-pin', 'sm')}${V.communeTxt(p.commune)} · dès ${p.from}.–</small></div></div></article>`).join('')}</div>
           <button type="button" class="cf-nav prev" aria-label="Profil précédent">${I('chevron-left')}</button><button type="button" class="cf-nav next" aria-label="Profil suivant">${I('chevron-right')}</button>
@@ -312,7 +308,7 @@
   const quickFilters = (L) => {
     const communes = [...new Set(L.map((p) => p.commune))].map((id) => ({ id, label: V.communeTxt(id) })).sort((a, b) => a.label.localeCompare(b.label, 'fr'));
     return `<section class="section-sm qf" id="qf"><div class="wrap">
-        <div class="sec-head"><div>${H2('Trouvez en un instant')}<p class="sec-note">Choisissez vos critères : la sélection se met à jour juste en dessous, sans quitter l’accueil.</p></div><a class="link" href="#/carte">${I('map-pin', 'sm')} Voir sur la carte</a></div>
+        <div class="sec-head"><div>${H2('Selon vos envies')}<p class="sec-note">Quartier, langue, budget, disponibilité : choisissez, la sélection s’affiche juste en dessous.</p></div><a class="link" href="#/carte">${I('map-pin', 'sm')} Voir sur la carte</a></div>
         <div class="qf-panel">
           <div class="qf-top">
             ${qfGroup('Catégorie', qfChips('cat', [['', 'Toutes'], ['femme', 'Femmes'], ['trans', 'Trans'], ['homme', 'Hommes'], ['duo', 'Couples']]))}
@@ -460,7 +456,7 @@
       title: 'Profils', keepScroll: true,
       html: `<div class="wrap">
         <div class="g-head"><div class="eyebrow">Genève · ${P.filter((p) => V.visible(p)).length} profils vérifiés</div>
-          <h1 style="margin-top:10px">${q.cat && q.cat !== 'all' ? `${catLbl}, à Genève.` : q.dispo === 'now' ? 'Disponibles, maintenant.' : 'Les profils, dès l’ouverture.'}</h1></div>
+          <h1 style="margin-top:10px">${q.cat && q.cat !== 'all' ? `${catLbl}, à Genève.` : q.dispo === 'now' ? 'Disponibles, maintenant.' : 'Tous les profils, à Genève.'}</h1></div>
         <div class="g-tools" id="gTools">
           ${V.seg('cat', V.CATS.map((c) => [c.id, c.label]), q.cat || 'all')}
           <div class="row2"><div class="chips scroll">
@@ -630,23 +626,7 @@
     return s;
   };
   /* ---------- Fiche : aides d'affichage (drapeaux en SVG car Windows n'affiche pas les émojis drapeaux) ---------- */
-  const FLAGS = {
-    fr: '<rect width="30" height="20" fill="#ED2939"/><rect width="20" height="20" fill="#fff"/><rect width="10" height="20" fill="#002395"/>',
-    it: '<rect width="30" height="20" fill="#CE2B37"/><rect width="20" height="20" fill="#fff"/><rect width="10" height="20" fill="#009246"/>',
-    de: '<rect width="30" height="20" fill="#FFCE00"/><rect width="30" height="13.33" fill="#DD0000"/><rect width="30" height="6.67" fill="#000"/>',
-    es: '<rect width="30" height="20" fill="#AA151B"/><rect y="5" width="30" height="10" fill="#F1BF00"/>',
-    ru: '<rect width="30" height="20" fill="#D52B1E"/><rect width="30" height="13.33" fill="#0039A6"/><rect width="30" height="6.67" fill="#fff"/>',
-    pt: '<rect width="30" height="20" fill="#FF0000"/><rect width="12" height="20" fill="#006600"/><circle cx="12" cy="10" r="4" fill="#FFCC00"/>',
-    en: '<rect width="30" height="20" fill="#012169"/><path d="M0 0 30 20M30 0 0 20" stroke="#fff" stroke-width="4"/><path d="M0 0 30 20M30 0 0 20" stroke="#C8102E" stroke-width="1.6"/><path d="M15 0v20M0 10h30" stroke="#fff" stroke-width="6"/><path d="M15 0v20M0 10h30" stroke="#C8102E" stroke-width="3.6"/>',
-    uk: '<rect width="30" height="20" fill="#FFD700"/><rect width="30" height="10" fill="#0057B7"/>',
-    sv: '<rect width="30" height="20" fill="#006AA7"/><rect x="9" width="4" height="20" fill="#FECC00"/><rect y="8" width="30" height="4" fill="#FECC00"/>',
-    zh: '<rect width="30" height="20" fill="#DE2910"/><path d="M5 2.5l1.2 3.6h3.8L6.9 8.3l1.2 3.6L5 9.7l-3.1 2.2 1.2-3.6L0 6.1h3.8z" fill="#FFDE00"/>',
-    th: '<rect width="30" height="20" fill="#A51931"/><rect y="3.33" width="30" height="13.33" fill="#F4F5F8"/><rect y="6.67" width="30" height="6.67" fill="#2D2A4A"/>',
-    ca: '<rect width="30" height="20" fill="#FCDD09"/><g fill="#DA121A"><rect y="2.2" width="30" height="2.2"/><rect y="6.7" width="30" height="2.2"/><rect y="11.1" width="30" height="2.2"/><rect y="15.6" width="30" height="2.2"/></g>',
-    ln: '<rect width="30" height="20" fill="#007FFF"/><path d="M0 17 25 0h5v3L5 20H0Z" fill="#F7D618"/><path d="M0 18.5 27.5 0H30v1.5L2.5 20H0Z" fill="#CE1021"/>',
-    ar: '<rect width="30" height="20" fill="#1f6f47"/><text x="15" y="15" font-size="12" text-anchor="middle" fill="#fff" font-family="serif">ع</text>',
-  };
-  const flag = (l) => `<svg class="flag" viewBox="0 0 30 20" aria-hidden="true">${FLAGS[l] || `<rect width="30" height="20" fill="#2a2430"/><text x="15" y="14" font-size="9" font-weight="700" text-anchor="middle" fill="#e2c68d" font-family="sans-serif">${l.toUpperCase()}</text>`}</svg>`;
+  const flag = (l) => V.flag(l); // drapeaux SVG : voir core.js
   const LV_TXT = { C2: 'Parfait', C1: 'Courant', B2: 'Très bien', B1: 'Bien', A2: 'Notions', A1: 'Débutant' };
   const LV_N = { C2: 5, C1: 4, B2: 3, B1: 3, A2: 2, A1: 1 };
   const starsRow = (n, max) => Array.from({ length: max }, (_, j) => `<i class="${j < n ? 'on' : ''}">${I('star', 'sm')}</i>`).join('');
@@ -1058,7 +1038,7 @@
       title: 'Nous rejoindre',
       html: `<section class="rj-hero"><div class="rj-bg" aria-hidden="true">${L.slice(0, 6).map((p) => `<img src="${V.img(p.photos[0], 's')}" alt="">`).join('')}</div><div class="wrap rj-in">
         <div class="eyebrow">Escortes indépendantes à Genève</div>
-        <h1 class="rj-title">Votre talent, <em>votre prix.</em><br>Zéro commission.</h1>
+        <h1 class="rj-title">Vos tarifs. Votre agenda.<br><em>Zéro commission.</em></h1>
         <p class="lead rj-lead">Un forfait mensuel sans engagement, et c’est tout. Ce que vous gagnez avec vos clients ne nous regarde pas. <b>Deux mois offerts</b> au lancement, sans carte bancaire.</p>
         <div class="row wrapr" style="margin-top:28px">${V.btn('Commencer ma candidature', { href: '#/pro/inscription/1', cls: 'gold lg', arrow: true })}${V.btn('Voir les offres', { href: '#/rejoindre', act: 'scroll-tarifs', cls: 'ghost lg', attrs: WHITE_GHOST })}</div>
         <div class="rj-proof"><span class="avs">${L.slice(0, 5).map((p) => `<img src="${V.img(p.photos[0], 's')}" alt="">`).join('')}</span><span><b>${L.length} escortes vérifiées</b> sont déjà en ligne</span></div>
@@ -1066,7 +1046,7 @@
       </div></section>
 
       <section class="section"><div class="wrap">
-        <div class="sec-head"><div>${H2('Ce que le forfait vous donne')}<p class="sec-note">Tout ce qu’il faut pour être trouvée, contactée et protégée.</p></div></div>
+        <div class="sec-head"><div>${H2('Ce que BD fait pour vous')}<p class="sec-note">Tout ce qu’il faut pour être trouvée, contactée et protégée.</p></div></div>
         <div class="rj-why">${[
           ['grid', 'Une galerie sans page 12', 'Pas de pagination, un ordre stable et des <b>filtres précis</b> : quelqu’un qui cherche une escorte parlant portugais à Carouge vous trouve.'],
           ['zap', 'Le statut en un geste', '<b>« Disponible maintenant »</b> ou « ce soir à 21 h », depuis l’écran d’accueil du téléphone. Il expire seul au bout de trois heures.'],

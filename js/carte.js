@@ -12,6 +12,7 @@
     vernier: [46.2170, 6.0850], veyrier: [46.1670, 6.1850], 'plan-les-ouates': [46.1670, 6.1170], bernex: [46.1760, 6.0750],
   };
   const CENTER = [46.2033, 6.1466]; // place du Molard
+  const PIN = { w: 92, h: 70, lw: 44, lh: 50 }; // taille du marqueur (normal, puis vue éloignée)
   const RADII = [['', 'Tout le canton'], ['1', '1 km'], ['2', '2 km'], ['5', '5 km']];
   /* Décalage stable par profil (environ 150 à 450 m) : on ne pointe jamais un immeuble */
   const jitter = (id) => { let h = 0; for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0; const a = (h % 360) * Math.PI / 180, r = 0.0015 + (h % 1000) / 1000 * 0.0025; return [Math.sin(a) * r, Math.cos(a) * r * 1.45]; };
@@ -53,7 +54,7 @@
     const P = V.PROFILES.filter((p) => V.visible(p) && !V.hidden().includes(p.id));
     const st = { me: CENTER.slice(), r: '', now: false, sel: null };
     let map = null, meMk = null, ring = null, zone = null;
-    const marks = {};
+    const marks = {}, off = {};
     if (L && document.body.contains(box)) {
       if (V._map) { try { V._map.remove(); } catch (e) { /* carte précédente déjà retirée */ } }
       const dark = document.documentElement.dataset.theme === 'dark';
@@ -63,17 +64,52 @@
       const esri = (n) => `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_${dark ? 'Dark' : 'Light'}_Gray_${n}/MapServer/tile/{z}/{y}/{x}`;
       L.tileLayer(esri('Base'), { maxZoom: 16, attribution: 'Fond &copy; Esri, HERE, Garmin, &copy; contributeurs OpenStreetMap' }).addTo(map);
       L.tileLayer(esri('Reference'), { maxZoom: 16 }).addTo(map);
-      meMk = L.marker(st.me, { draggable: true, zIndexOffset: 1000, icon: L.divIcon({ className: 'mp-you', html: '<span></span><b>Vous</b>', iconSize: [64, 64], iconAnchor: [32, 32] }) }).addTo(map);
+      meMk = L.marker(st.me, { draggable: true, zIndexOffset: 1000, icon: L.divIcon({ className: 'mp-you', html: '<span></span><b>Vous</b>', iconSize: [22, 22], iconAnchor: [11, 11] }) }).addTo(map);
       meMk.on('dragend', () => { st.me = [meMk.getLatLng().lat, meMk.getLatLng().lng]; render(); hideHint(); });
       map.on('click', (e) => { st.me = [e.latlng.lat, e.latlng.lng]; meMk.setLatLng(st.me); render(); hideHint(); });
       P.forEach((p) => {
         const now = V.statusOf(p).t === 'now';
-        const m = L.marker(posOf(p), { icon: L.divIcon({ className: 'mp-mk', html: `<span class="mp-av${now ? ' on' : ''}"><img src="${V.img(p.photos[0], 's')}" alt=""></span><b>${p.from}.–</b>`, iconSize: [56, 70], iconAnchor: [28, 62] }) }).addTo(map);
+        const m = L.marker(posOf(p), { title: `${p.name}, dès ${p.from}.–`, riseOnHover: true, icon: L.divIcon({ className: 'mp-mk', html: `<div class="mp-pin${now ? ' on' : ''}"><i class="mp-ph" style="background-image:url('${V.img(p.photos[0], 's')}')"></i><span class="mp-tag"><b>${esc(p.name)}</b>${p.from}.–</span><i class="mp-tip"></i></div>`, iconSize: [PIN.w, PIN.h], iconAnchor: [PIN.w / 2, PIN.h] }) }).addTo(map);
         m.on('click', () => select(p.id, true));
         marks[p.id] = m;
       });
-      setTimeout(() => map.invalidateSize(), 120);
+      map.on('zoomend', declutter);
+      setTimeout(() => { map.invalidateSize(); declutter(); }, 120);
     }
+    /* Écarte les marqueurs qui se chevauchent à l'écran (décalage visuel seulement, la position reste celle du quartier) */
+    function declutter() {
+      if (!map) return;
+      const lo = map.getZoom() <= 12; box.classList.toggle('mp-lo', lo);
+      const W = lo ? PIN.lw : PIN.w + 4, H = lo ? PIN.lh : PIN.h - 4;
+      const it = Object.entries(marks).filter(([, m]) => { const el = m.getElement(); return el && !el.classList.contains('dim'); })
+        .map(([k, m], n) => { const pt = map.latLngToLayerPoint(m.getLatLng()); return { k, m, x: pt.x, y: pt.y, ox: 0, oy: 0, n }; });
+      const me = meMk ? map.latLngToLayerPoint(meMk.getLatLng()) : null; // le repère « Vous » ne bouge pas : les profils s'en écartent
+      for (let pass = 0; pass < 60; pass++) {
+        let hit = false;
+        if (me) it.forEach((A) => {
+          const dx = A.x + A.ox - me.x, dy = A.y + A.oy - H / 2 - (me.y - 12);
+          const px = (W + 56) / 2 - Math.abs(dx), py = (H + 50) / 2 - Math.abs(dy);
+          if (px <= 0 || py <= 0) return;
+          hit = true;
+          if (px / W < py / H) A.ox += (dx >= 0 ? 1 : -1) * (px + .5); else A.oy += (dy >= 0 ? 1 : -1) * (py + .5);
+        });
+        for (let a = 0; a < it.length; a++) for (let b = a + 1; b < it.length; b++) {
+          const A = it[a], B = it[b];
+          let dx = B.x + B.ox - A.x - A.ox, dy = B.y + B.oy - A.y - A.oy;
+          const px = W - Math.abs(dx), py = H - Math.abs(dy);
+          if (px <= 0 || py <= 0) continue;
+          hit = true;
+          if (!dx && !dy) dx = B.n > A.n ? 1 : -1;
+          if (px / W < py / H) { const d = (dx >= 0 ? 1 : -1) * (px / 2 + .5); A.ox -= d; B.ox += d; } else { const d = (dy >= 0 ? 1 : -1) * (py / 2 + .5); A.oy -= d; B.oy += d; }
+        }
+        if (!hit) break;
+      }
+      Object.keys(off).forEach((k) => delete off[k]);
+      it.forEach(({ k, m, ox, oy }) => { off[k] = [ox, oy]; const pin = m.getElement().firstElementChild; if (pin) pin.style.translate = `${ox.toFixed(1)}px ${oy.toFixed(1)}px`; });
+      Object.entries(marks).forEach(([k, m]) => { if (!off[k]) { const pin = m.getElement() && m.getElement().firstElementChild; if (pin) pin.style.translate = ''; } });
+      if (st.sel && marks[st.sel]) { const pp = marks[st.sel].getPopup(); if (pp && pp.isOpen()) { pp.options.offset = popOff(st.sel); pp.update(); } }
+    }
+    const popOff = (id) => { const o = off[id] || [0, 0]; return L.point(o[0], o[1] - (box.classList.contains('mp-lo') ? PIN.lh : PIN.h) + 4); };
     const hideHint = () => { const h = $('#mpHint', v); if (h) h.classList.add('off'); };
     const popup = (p, d) => `<div class="mp-pop"><img src="${V.img(p.photos[0], 's')}" alt=""><div><b>${esc(p.name)} <span>${V.ageShort(p)}</span></b><small>${V.communeTxt(p.commune)} · à ${kmTxt(d)}</small>${V.statusPill(p, true, true)}<a class="mp-go" href="#/profil/${p.id}">Voir le profil ${I('arrow-right', 'sm')}</a></div></div>`;
     function select(id, fromMap) {
@@ -84,7 +120,7 @@
         Object.entries(marks).forEach(([k, m]) => { const el = m.getElement(); if (el) el.classList.toggle('sel', k === id); });
         if (zone) zone.remove();
         zone = L.circle(posOf(p), { radius: 420, color: '#cfae6c', weight: 1.5, dashArray: '4 5', fillColor: '#cfae6c', fillOpacity: .14 }).addTo(map);
-        marks[id].bindPopup(popup(p, d), { closeButton: false, offset: [0, -54], className: 'mp-popup' }).openPopup();
+        marks[id].bindPopup(popup(p, d), { closeButton: false, offset: popOff(id), className: 'mp-popup', autoPanPadding: [24, 24] }).openPopup();
         if (!fromMap) map.flyTo(posOf(p), Math.max(map.getZoom(), 14), { duration: .8 });
       }
       if (fromMap) { const it = $(`.mp-it[data-id="${id}"]`, v); if (it) it.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
@@ -94,7 +130,12 @@
         .filter((x) => (!st.r || x.d <= +st.r) && (!st.now || V.statusOf(x.p).t === 'now'))
         .sort((a, b) => a.d - b.d);
       const ids = new Set(list.map((x) => x.p.id));
+      if (st.sel && !ids.has(st.sel)) { // le profil sélectionné sort du filtre : on le désélectionne
+        if (map) { marks[st.sel].closePopup(); const el = marks[st.sel].getElement(); if (el) el.classList.remove('sel'); if (zone) { zone.remove(); zone = null; } }
+        st.sel = null;
+      }
       Object.entries(marks).forEach(([k, m]) => { const el = m.getElement(); if (el) el.classList.toggle('dim', !ids.has(k)); });
+      declutter();
       $('#mpCount', v).innerHTML = `<b>${list.length}</b> profil${list.length > 1 ? 's' : ''}${st.r ? ` à moins de ${st.r} km` : ''}`;
       $('#mpList', v).innerHTML = list.length ? list.map(({ p, d }) => `<button type="button" class="mp-it${st.sel === p.id ? ' on' : ''}" data-id="${p.id}"><img src="${V.img(p.photos[0], 's')}" alt=""><span class="mp-tx"><b>${esc(p.name)} <span>${V.ageShort(p)}</span>${I('badge-check', 'sm')}</b><small>${I('map-pin', 'sm')}${V.communeTxt(p.commune)} · ${kmTxt(d)}</small>${V.statusPill(p, true, true)}</span><span class="mp-pr">dès<b>${p.from}.–</b></span></button>`).join('') : `<p class="small muted" style="padding:16px 4px">Aucun profil dans ce rayon. Élargissez la zone ou déplacez-vous sur la carte.</p>`;
       if (map) {

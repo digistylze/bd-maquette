@@ -91,29 +91,55 @@
   V.sponsoredFor = (q, L) => { const ids = new Set(L.map((p) => p.id)); const com = (q.commune || '').split(',').filter(Boolean); const seen = new Set(); return V.sponsoredNow().filter((c) => ids.has(c.pid) && (c.zone === 'canton' || com.includes(c.zone)) && !seen.has(c.pid) && seen.add(c.pid)).map((c) => c.p); };
   // un placement sponsorisé en tête de chaque lot de 8 ; le profil n'apparaît plus à sa place organique
   V.arrangeSponsored = (L, sp, per = 8) => { const s = new Set(sp.map((p) => p.id)); const org = L.filter((p) => !s.has(p.id)); const out = []; let i = 0, k = 0; while (i < org.length || k < sp.length) { if (k < sp.length) out.push(sp[k++]); for (let j = 0; j < per - 1 && i < org.length; j++) out.push(org[i++]); } return out; };
+  V.FLAGS = {
+    fr: '<rect width="30" height="20" fill="#ED2939"/><rect width="20" height="20" fill="#fff"/><rect width="10" height="20" fill="#002395"/>',
+    it: '<rect width="30" height="20" fill="#CE2B37"/><rect width="20" height="20" fill="#fff"/><rect width="10" height="20" fill="#009246"/>',
+    de: '<rect width="30" height="20" fill="#FFCE00"/><rect width="30" height="13.33" fill="#DD0000"/><rect width="30" height="6.67" fill="#000"/>',
+    es: '<rect width="30" height="20" fill="#AA151B"/><rect y="5" width="30" height="10" fill="#F1BF00"/>',
+    ru: '<rect width="30" height="20" fill="#D52B1E"/><rect width="30" height="13.33" fill="#0039A6"/><rect width="30" height="6.67" fill="#fff"/>',
+    pt: '<rect width="30" height="20" fill="#FF0000"/><rect width="12" height="20" fill="#006600"/><circle cx="12" cy="10" r="4" fill="#FFCC00"/>',
+    en: '<rect width="30" height="20" fill="#012169"/><path d="M0 0 30 20M30 0 0 20" stroke="#fff" stroke-width="4"/><path d="M0 0 30 20M30 0 0 20" stroke="#C8102E" stroke-width="1.6"/><path d="M15 0v20M0 10h30" stroke="#fff" stroke-width="6"/><path d="M15 0v20M0 10h30" stroke="#C8102E" stroke-width="3.6"/>',
+    uk: '<rect width="30" height="20" fill="#FFD700"/><rect width="30" height="10" fill="#0057B7"/>',
+    sv: '<rect width="30" height="20" fill="#006AA7"/><rect x="9" width="4" height="20" fill="#FECC00"/><rect y="8" width="30" height="4" fill="#FECC00"/>',
+    zh: '<rect width="30" height="20" fill="#DE2910"/><path d="M5 2.5l1.2 3.6h3.8L6.9 8.3l1.2 3.6L5 9.7l-3.1 2.2 1.2-3.6L0 6.1h3.8z" fill="#FFDE00"/>',
+    th: '<rect width="30" height="20" fill="#A51931"/><rect y="3.33" width="30" height="13.33" fill="#F4F5F8"/><rect y="6.67" width="30" height="6.67" fill="#2D2A4A"/>',
+    ca: '<rect width="30" height="20" fill="#FCDD09"/><g fill="#DA121A"><rect y="2.2" width="30" height="2.2"/><rect y="6.7" width="30" height="2.2"/><rect y="11.1" width="30" height="2.2"/><rect y="15.6" width="30" height="2.2"/></g>',
+    ln: '<rect width="30" height="20" fill="#007FFF"/><path d="M0 17 25 0h5v3L5 20H0Z" fill="#F7D618"/><path d="M0 18.5 27.5 0H30v1.5L2.5 20H0Z" fill="#CE1021"/>',
+    ar: '<rect width="30" height="20" fill="#1f6f47"/><text x="15" y="15" font-size="12" text-anchor="middle" fill="#fff" font-family="serif">ع</text>',
+  };
+  V.flag = (l) => `<svg class="flag" viewBox="0 0 30 20" aria-hidden="true">${V.FLAGS[l] || `<rect width="30" height="20" fill="#2a2430"/><text x="15" y="14" font-size="9" font-weight="700" text-anchor="middle" fill="#e2c68d" font-family="sans-serif">${l.toUpperCase()}</text>`}</svg>`;
+  /* Carte profil commune à tout le site : photo avec statut, badges et nom, puis localisation, langues, repères, prix et accès à la fiche */
+  const MODE_TAG = { incall: 'Reçoit', outcall: 'Se déplace', both: 'Reçoit · déplace' };
   V.card = (p, o = {}) => {
     const on = V.isSel(p.id);
     const seen = V.S.seen.includes(p.id) && !o.noSeen;
     const feat = o.feat;
     const chg = V.S.chg;
     const badges = [];
+    if (feat) badges.push(`<span class="badge goldfill feat-tag" title="Placement payant, affiché seulement s’il correspond à votre recherche">${V.i('sparkles', 'sm')}Sponsorisé</span>`);
     if (p.duoVerified) badges.push('<span class="badge dark">Duo vérifié</span>');
     if (p.isNew || chg.arrive.includes(p.id)) badges.push('<span class="badge goldfill">Nouveau</span>');
     if (p.isUpd || chg.upd.includes(p.id)) badges.push('<span class="badge dark">Mis à jour</span>');
     if (p.faceHidden) badges.push('<span class="badge dark">Visage masqué</span>');
-    return `<article class="card${feat ? ' feat' : ''}${seen ? ' seen' : ''}" data-id="${p.id}" style="animation-delay:${(o.i || 0) % 8 * 45}ms">
-      <div class="ph protect" data-act="open" data-id="${p.id}">
-        <img src="${V.img(p.photos[0], feat ? '' : 's')}" srcset="${V.img(p.photos[0], 's')} 360w, ${V.img(p.photos[0])} 900w" sizes="${feat ? '(min-width:1024px) 40vw, 100vw' : '(min-width:1024px) 22vw, 50vw'}" alt="Photo de ${V.esc(p.name)}" loading="lazy" decoding="async" draggable="false">
-        <div class="tl">${V.statusPill(p, false, !feat)}</div>
-        ${feat ? `<span class="badge goldfill feat-tag" title="Placement payant, affiché seulement s’il correspond à votre recherche">${V.i('sparkles', 'sm')}Sponsorisé</span>` : `<div class="bl">${badges.join('')}</div>`}
-        <span class="wm">BD</span>
+    const langs = p.langs.slice(0, 3).map(([l]) => `<i class="lang">${V.flag(l)}${l.toUpperCase()}</i>`).join('');
+    const tags = [p.attrs && p.attrs.Silhouette, MODE_TAG[p.mode]].filter(Boolean).map((t) => `<i class="ptag">${V.esc(t)}</i>`).join('');
+    return `<article class="card p-card${feat ? ' feat' : ''}${seen ? ' seen' : ''}" data-id="${p.id}" style="animation-delay:${(o.i || 0) % 8 * 45}ms">
+      <div class="p-ph protect" data-act="open" data-id="${p.id}">
+        <img src="${V.img(p.photos[0], feat ? '' : 's')}" srcset="${V.img(p.photos[0], 's')} 360w, ${V.img(p.photos[0])} 900w" sizes="${feat ? '(min-width:1024px) 40vw, 100vw' : '(min-width:1024px) 22vw, 50vw'}" alt="Photo de ${V.esc(p.name)}" loading="lazy" draggable="false">
+        ${V.statusPill(p, false, true)}
+        ${badges.length ? `<div class="p-badges">${badges.join('')}</div>` : ''}
+        <span class="p-grad"></span>
+        <b class="p-name">${V.esc(p.name)} <span>${V.ageShort(p)}</span>${V.i('badge-check', 'sm')}</b>
+        ${seen ? '<span class="p-seen">Déjà vu</span>' : '<span class="wm">BD</span>'}
       </div>
       <button class="heart${on ? ' on' : ''}" data-act="fav" data-id="${p.id}" aria-label="${on ? 'Retirer de' : 'Ajouter à'} ma sélection" aria-pressed="${on}">${V.i('heart')}</button>
-      <div class="body">
-        <div class="nm" data-act="open" data-id="${p.id}">${V.esc(p.name)}<span class="age">${V.ageShort(p)}</span><span class="vf" title="Profil vérifié">${V.i('badge-check', 'sm')}</span></div>
-        <div class="meta">${V.communeTxt(p.commune)} · ${V.langTxt(p, feat ? 4 : 2)}</div>
-        <div class="price"><b>Dès ${p.from} CHF</b> · ${V.modeTxt(p.mode)}</div>
-        ${o.noHide ? '' : `<div class="foot"><button class="hide-link" data-act="hide" data-id="${p.id}">${V.i('eye-off', 'sm')}Ne plus afficher</button></div>`}
+      <div class="p-body">
+        <div class="p-line">${V.i('map-pin', 'sm')}<span>${V.communeTxt(p.commune)}</span></div>
+        <div class="p-line p-langs">${V.i('languages', 'sm')}<span>${langs}</span></div>
+        <div class="p-tags">${tags}</div>
+        ${o.ago ? `<div class="p-line p-agoline">${V.i('clock', 'sm')}<span>Statut publié ${V.agoTxt(V.statusOf(p).since)}</span></div>` : ''}
+        <div class="p-foot"><span class="p-price"><small>dès</small> <b>${p.from}.–</b></span>${V.btn('Voir le profil', { href: '#/profil/' + p.id, cls: 'sm dark', arrow: true })}</div>
+        ${o.noHide ? '' : `<button class="hide-link" data-act="hide" data-id="${p.id}">${V.i('eye-off', 'sm')}Ne plus afficher</button>`}
       </div>
     </article>`;
   };
