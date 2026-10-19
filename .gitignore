@@ -2,3 +2,4 @@
 # profils réels importés pour la démo privée : jamais dans git
 img/p/imp-*
 js/profils-importes.js
+.env*
