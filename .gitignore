@@ -1,5 +1,4 @@
 .vercel
-# profils réels importés pour la démo privée : jamais dans git
-img/p/imp-*
-js/profils-importes.js
 .env*
+# Profils de démo inclus volontairement dans ce dépôt privé (choix du 19.10.2026).
+# Ils restent exclus des déploiements Vercel via .vercelignore.
