@@ -4,7 +4,7 @@
   const { $, $$ } = V;
   const ui = V.ui = {};
 
-  ui.brand = (href = '#/') => `<a class="brand" href="${href}" aria-label="BD, accueil"><img class="brand-mark" src="img/logo-b-s.webp" alt="" width="101" height="112"><span>BD</span><small>Genève</small></a>`;
+  ui.brand = (href = '#/') => `<a class="brand" href="${href}" aria-label="BD, accueil"><img class="brand-mark" src="img/logo-b-s.webp" alt="" width="101" height="112"><span>BD</span></a>`;
 
   /* ---------- Barre du haut + onglets selon le mode (public / pro / admin) ---------- */
   const NAV = {
