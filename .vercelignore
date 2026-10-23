@@ -1,5 +1,6 @@
-# outils et profils réels importés : jamais mis en ligne
+# jamais mis en ligne : outils, livrables pour le client et la vidéo, secrets
 outils/
-img/p/imp-*
-js/profils-importes.js
-js/profils-details.js
+livrables/
+.env*
+.claude/
+# Les vrais profils importés sont mis en ligne depuis le 23.10.2026 : la maquette est protégée par mot de passe (middleware.js).

@@ -1,6 +1,6 @@
 .vercel
 .env*
 # Profils de démo inclus volontairement dans ce dépôt privé (choix du 19.10.2026).
-# Ils restent exclus des déploiements Vercel via .vercelignore.
+# Depuis le 23.10.2026, ils sont aussi sur Vercel, derrière le mot de passe de middleware.js.
 
 livrables/
