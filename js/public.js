@@ -44,11 +44,13 @@
     const els = $$('[data-count]', v);
     const tween = (el, to) => {
       const from = +el.dataset.val || 0; el.dataset.val = to; const t0 = performance.now();
+      if (location.search.includes('capture')) { el.textContent = V.nf(to); return; } // captures : valeur finale directe
       const step = (t) => { const k = Math.min(1, (t - t0) / 1200); el.textContent = V.nf(Math.round(from + (to - from) * (1 - Math.pow(1 - k, 3)))); if (k < 1) requestAnimationFrame(step); };
       requestAnimationFrame(step);
     };
     els.forEach((el) => tween(el, +el.dataset.count));
     clearInterval(V.liveTimer);
+    if (location.search.includes('capture')) return; // captures d'écran : compteur figé
     V.liveTimer = setInterval(() => {
       if (!els[0].isConnected) return clearInterval(V.liveTimer);
       const [m, u] = els;
