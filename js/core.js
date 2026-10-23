@@ -65,7 +65,22 @@
   V.communeTxt = (id) => (V.COMMUNES.find((c) => c.id === id) || V.COMMUNES_GE.find((c) => c.id === id) || { label: id }).label;
   V.communeOf = (p) => (V.COMMUNES.find((c) => c.id === p.commune) || {}).c || p.commune;
   V.langTxt = (p, n = 3) => p.langs.slice(0, n).map(([l, lv]) => `${V.LANGS[l]} ${lv}`).join(' · ');
-  V.visible = (p) => !p.cache && !(p.id === 'alma' && V.L.pro.hidden) && !(p.arrival && !V.S.chg.arrive.includes(p.id)) && !(p.members && p.members.includes('alma') && V.L.pro.hidden);
+  /* Mode « profils fictifs » (?fictifs dans l'adresse) : pour les captures de la vidéo, on montre les profils
+     fictifs à la place des 12 vrais profils. Sans ce paramètre, la maquette du client reste inchangée. */
+  V.FICTIFS = /[?&]fictifs\b/.test(location.search);
+  if (V.FICTIFS) {
+    V.PROFILES.forEach((p) => { p.cache = !!p.importe; });
+    V.STORIES = ['valentina', 'alma', 'nora', 'maya', 'camille', 'luna', 'lina', 'jade', 'sofia', 'adrien', 'clara-hugo', 'zoe'];
+    V.SPONSORED = [{ pid: 'valentina', zone: 'canton', from: -2, to: 4 }, { pid: 'nora', zone: 'canton', from: -3, to: 3 }, { pid: 'camille', zone: 'vieille-ville', from: -1, to: 5 }, { pid: 'maya', zone: 'champel', from: 0, to: 2 }, { pid: 'alma', zone: 'eaux-vives', from: -1, to: 6 }];
+    const CLF = ['oui', 'discuter', 'non'];
+    V.PROFILES.filter((p) => !p.importe).forEach((p, k) => { p.clients = p.clients || { solo: 'oui', couple: CLF[k % 3], multi: CLF[(k + 2) % 3], pro: CLF[(k + 1) % 3] }; });
+    const set = (id, o) => { const p = V.PROFILES.find((x) => x.id === id); if (p) Object.assign(p, o); };
+    set('valentina', { online: true, links: [{ k: 'instagram', h: '@valentina.geneve' }, { k: 'onlyfans', h: 'valentina_ge' }] });
+    set('nora', { links: [{ k: 'webcam', h: 'Nora en direct' }, { k: 'onlyfans', h: 'nora.swiss' }] });
+    set('maya', { newPhoto: true, links: [{ k: 'onlyfans', h: 'maya_champel' }] });
+    set('zoe', { tourLeft: 2 }); set('lina', { newPhoto: true }); ['alma', 'luna', 'jade'].forEach((id) => set(id, { online: true }));
+  }
+  V.visible = (p) => !p.cache &&!(p.id === 'alma' && V.L.pro.hidden) && !(p.arrival && !V.S.chg.arrive.includes(p.id)) && !(p.members && p.members.includes('alma') && V.L.pro.hidden);
 
   /* ---------- Typographie française : espace insécable avant : ; ! ? et dans les guillemets ---------- */
   V.typo = (root) => {
