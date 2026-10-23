@@ -87,15 +87,6 @@
     'kyc-scan': () => V.kycRun(),
     'reg-add': () => { const R = V.S.reg; const crops = [{ pos: 'center 12%', z: 1.45 }, { pos: 'center 72%', z: 1.25 }, { pos: '30% 30%', z: 1.6 }, { pos: '70% 40%', z: 1.3 }]; if (R.photos.length >= 5) return V.toast('Assez pour la démo : 5 photos.', { icon: 'info' }); R.photos.push(Object.assign({ src: 'daria' }, crops[(R.photos.length - 1) % crops.length])); V.save(); V.render(); setTimeout(() => { const u = $$('#regUpl .u:not(.add)').pop(); if (u) u.classList.add('uploading'); }, 40); },
     'reg-blur': (el) => { const p = V.S.reg.photos[+el.dataset.k]; p.blur = !p.blur; V.save(); el.closest('.u').classList.toggle('blurf', p.blur); },
-    /* back-office */
-    'adm-decide': (el) => V.admDecide(el.dataset.id, el.dataset.d),
-    'adm-mod': (el) => V.admMod(el.dataset.id, el.dataset.d),
-    'adm-rep': (el) => V.admRep(el.dataset.id),
-    'adm-promo': () => { const sh = V.sheet.open({ title: 'Nouveau code', body: `<div class="stack">${V.field('Code', { value: 'NOEL2026' })}${V.field('Avantage', { type: 'select', value: '1 mois offert', options: ['1 mois offert', '2 mois offerts', '-20 % pendant 3 mois', 'Shooting à CHF 290'] })}${V.field('Utilisations maximum', { type: 'number', value: '40' })}</div>`, foot: V.btn('Créer', { cls: 'sm block', attrs: 'data-ok' }) }); $('[data-ok]', sh).onclick = () => { V.sheet.close(); V.toast('Code NOEL2026 créé.', { icon: 'gift' }); }; },
-    'adm-csv': () => download('bd-statistiques.csv', 'filtre;part\n' + V.ADMIN.topFilters.map(([a, b]) => `${a};${b}`).join('\n'), 'text/csv'),
-    'adm-invite': () => V.toast('Démo : invitation envoyée, double authentification exigée à la première connexion.', { icon: 'mail', ms: 4000 }),
-    'ref-add': () => { const inp = $('input[name="newsvc"]'); const v = (inp.value || '').trim(); if (!v) return; $('#refSvc').insertAdjacentHTML('beforeend', `<span class="chip sm x on">${esc(v)}<button data-act="ref-del" aria-label="Retirer">${I('x', 'sm')}</button></span>`); inp.value = ''; V.toast('Ajouté au catalogue. À traduire dans les 8 langues avant publication.', { icon: 'languages', ms: 4000 }); },
-    'ref-del': (el) => { el.closest('.chip').remove(); V.toast('Retiré du catalogue (démo).', { icon: 'trash', ms: 2000 }); },
   };
 
   document.addEventListener('click', (e) => {

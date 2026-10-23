@@ -1,5 +1,5 @@
 /* BD — service worker : app installable et consultable hors connexion */
-const CACHE = 'bd-v26';
+const CACHE = 'bd-v27';
 const SHELL = [
 "./",
 "index.html",
@@ -8,6 +8,7 @@ const SHELL = [
 "img/logo-b-s.webp",
 "manifest.webmanifest",
 "js/account.js",
+"js/admin-data.js",
 "js/admin.js",
 "js/core.js",
 "js/data.js",

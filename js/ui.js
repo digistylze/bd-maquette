@@ -10,7 +10,7 @@
   const NAV = {
     public: [['#/profils', 'Profils', '/profils'], ['#/profils?dispo=now', 'Disponibles', '/x'], ['#/carte', 'Carte', '/carte'], ['#/verifications', 'Vérifications', '/verifications'], ['#/securite', 'Sécurité', '/securite'], ['#/rejoindre', 'Nous rejoindre', '/rejoindre']],
     pro: [['#/pro', 'Tableau de bord', '/pro'], ['#/pro/statut', 'Statut', '/pro/statut'], ['#/pro/profil', 'Mon profil', '/pro/profil'], ['#/pro/stats', 'Statistiques', '/pro/stats'], ['#/pro/abonnement', 'Abonnement', '/pro/abonnement']],
-    admin: [['#/admin', 'Vue d’ensemble', '/admin'], ['#/admin/candidatures', 'Candidatures', '/admin/candidatures'], ['#/admin/moderation', 'Modération', '/admin/moderation'], ['#/admin/signalements', 'Signalements', '/admin/signalements'], ['#/admin/facturation', 'Facturation', '/admin/facturation']],
+    admin: [['#/admin', 'Tableau de bord', '/admin'], ['#/admin/candidatures', 'Candidatures', '/admin/candidatures'], ['#/admin/moderation', 'Modération', '/admin/moderation'], ['#/admin/signalements', 'Signalements', '/admin/signalements'], ['#/admin/facturation', 'Facturation', '/admin/facturation']],
   };
   const TABS = {
     public: [['#/', 'home', 'Accueil', (p) => p === '/'], ['#/profils', 'grid', 'Profils', (p) => p.startsWith('/profils') || p.startsWith('/geneve')], ['session'], ['#/compte', 'user', 'Compte', (p) => p.startsWith('/compte')], ['menu', 'menu', 'Menu']],
