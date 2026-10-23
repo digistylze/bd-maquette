@@ -1,5 +1,5 @@
 /* BD — service worker : app installable et consultable hors connexion */
-const CACHE = 'bd-v32';
+const CACHE = 'bd-v33';
 const SHELL = [
 "./",
 "index.html",

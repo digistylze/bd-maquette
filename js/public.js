@@ -111,6 +111,7 @@
       </div></section>
 
       ${coverflow(hot, nowList.length)}
+      ${V.hdSpaces ? V.hdSpaces() : ''}
 
       <section class="section-sm"><div class="wrap"><div class="fb-band">
         <div class="fb-ic">${I('shield')}</div>
@@ -388,7 +389,7 @@
         <div class="row">${V.btn('Créer mon profil', { href: '#/pro/inscription/1', cls: 'gold sm', arrow: true })}${V.btn('Espace pro', { href: '#/pro', cls: 'ghost sm', attrs: WHITE_GHOST })}</div></div>
       <div><h5>Liens rapides</h5><ul><li><a href="#/profils">Tous les profils</a></li><li><a href="#/profils?dispo=now">Disponibles maintenant</a></li><li><a href="#/profils?tri=new">Nouvelles arrivées</a></li><li><a href="#/profils?cat=duo">Duos et couples</a></li><li><a href="#/masques">Profils masqués</a></li></ul></div>
       <div><h5>Quartiers</h5><ul>${V.COMMUNES.slice(0, 6).map((c) => `<li><a href="#/geneve/${c.id}">${c.label}</a></li>`).join('')}</ul><h5 style="margin-top:18px">Bientôt</h5><ul><li><a href="#/ville/lausanne">Lausanne</a></li><li><a href="#/ville/zurich">Zurich</a></li></ul></div>
-      <div><h5>À propos</h5><ul><li><a href="#/verifications">Comment nous vérifions</a></li><li><a href="#/securite">Sécurité et signalement</a></li><li><a href="#/rejoindre">Nous rejoindre</a></li><li><a href="#/hors-devis">Hors devis (démo)</a></li><li><a href="#/legal/cg-visiteurs">Conditions d’utilisation</a></li><li><a href="#/legal/confidentialite">Confidentialité</a></li><li><a href="#/legal/mentions">Mentions légales</a></li></ul></div>
+      <div><h5>À propos</h5><ul><li><a href="#/verifications">Comment nous vérifions</a></li><li><a href="#/securite">Sécurité et signalement</a></li><li><a href="#/rejoindre">Nous rejoindre</a></li><li><a href="#/legal/cg-visiteurs">Conditions d’utilisation</a></li><li><a href="#/legal/confidentialite">Confidentialité</a></li><li><a href="#/legal/mentions">Mentions légales</a></li></ul></div>
     </div>
     <div class="legal"><span>© ${new Date().getFullYear()} BD · maquette, profils fictifs</span><span class="swiss"><i></i>Données hébergées en Suisse</span><span>Police 117 · Urgences 144</span></div>
   </div></footer>`;
@@ -506,6 +507,7 @@
             <button class="chip filter${q.mode ? ' has' : ''}" data-act="filters" data-g="mode">Modalité${I('chevron-down', 'sm')}</button>
             <button class="chip filter${q.svc ? ' has' : ''}" data-act="filters" data-g="svc">Service${I('chevron-down', 'sm')}</button>
             <button class="chip filter${q.origin ? ' has' : ''}" data-act="filters" data-g="origin">Origine${I('chevron-down', 'sm')}</button>
+            <a class="chip filter" href="#/tarifs">${I('banknote', 'sm')}Grille de tarifs${V.hdTag ? V.hdTag('ID03') : ''}</a>
             <button class="chip filter" data-act="sort">${I('sort', 'sm')}${(TRI.find((t) => t[0] === (q.tri || 'maj')) || TRI[0])[1]}</button>
             ${V.L.account ? `<button class="chip filter" data-act="save-search">${I('bookmark', 'sm')}Enregistrer</button>` : ''}
           </div></div>

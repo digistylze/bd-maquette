@@ -101,7 +101,6 @@
           <a class="m-tile" href="#/pro"><b>Espace pro</b><span>Démo : connectée en tant qu’Alma</span></a>
           <a class="m-tile" href="#/pro/inscription/1"><b>Inscription escorte</b><span>Quatre étapes, vérification simulée</span></a>
           <a class="m-tile" href="#/admin"><b>Back-office</b><span>Adresse séparée en production</span></a>
-          <a class="m-tile" href="#/hors-devis"><b>Hors devis</b><span>Fonctions montrées pour en discuter</span></a>
         </div>
         <div class="m-foot">
           <button class="m-chip" data-act="theme">${V.i('moon', 'sm')}<span data-theme-label>Thème sombre</span></button>
