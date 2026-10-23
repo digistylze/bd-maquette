@@ -1543,6 +1543,25 @@ main#view:has(> .footer:last-child) { padding-bottom: 0; }
 .qf-sel select:focus { outline: none; }
 .qf-sel:focus-within { border-color: var(--ink); }
 .qf-sel .ico { color: var(--muted); flex: none; }
+/* Liste déroulante maison (V.ddHTML) */
+.dd { position: relative; align-self: flex-start; max-width: 100%; }
+.dd.open { z-index: 40; }
+.dd-btn { font-size: 13.5px; font-weight: 500; color: var(--ink); transition: border-color .2s; }
+.dd-btn:hover { border-color: var(--ink-2); }
+.dd-v { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dd-btn > .ico:last-child { transition: transform .3s var(--spring); }
+.dd.open .dd-btn { border-color: var(--ink); }
+.dd.open .dd-btn > .ico:last-child { transform: rotate(180deg); }
+.dd-menu { position: absolute; top: calc(100% + 6px); left: 0; min-width: 100%; width: max-content; max-width: min(300px, 84vw); max-height: 312px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--line-2) transparent; padding: 6px; border-radius: 16px; border: 1px solid var(--line); background: var(--bg); box-shadow: var(--shadow-3); animation: ddIn .2s ease-out; }
+:root[data-theme="dark"] .dd-menu { background: #1f1a24; border-color: rgba(255, 255, 255, .08); }
+.dd.end .dd-menu { left: auto; right: 0; }
+.dd-o { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; padding: 9px 12px; border-radius: 10px; font-size: 13.5px; font-weight: 500; color: var(--ink-2); text-align: left; white-space: nowrap; }
+.dd-o:hover, .dd-o:focus-visible { background: var(--bg-3); color: var(--ink); outline: none; }
+:root[data-theme="dark"] .dd-o:hover, :root[data-theme="dark"] .dd-o:focus-visible { background: rgba(255, 255, 255, .07); }
+.dd-o .ico { flex: none; color: var(--gold); opacity: 0; }
+.dd-o.on { color: var(--ink); font-weight: 600; }
+.dd-o.on .ico { opacity: 1; }
+@keyframes ddIn { from { opacity: 0; transform: translateY(-4px); } }
 .qf-foot { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
 .qf-count { display: inline-flex; align-items: center; gap: 9px; font-size: 14px; color: var(--ink-2); }
 .qf-count .dot-live { width: 8px; height: 8px; flex: none; animation: stLive 2s ease-out infinite; }
@@ -1768,6 +1787,7 @@ main#view:has(> .footer:last-child) { padding-bottom: 0; }
   .qf .sec-head { flex-wrap: wrap; gap: 8px 16px; }
   .qf .sec-head .link { white-space: nowrap; }
   .qf-panel { overflow: hidden; }
+  @supports (overflow-x: clip) { .qf-panel { overflow: visible; overflow-x: clip; } } /* la liste des quartiers peut dépasser vers le bas */
   .qf-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -18px; padding: 0 18px 2px; scroll-padding: 18px; }
   .qf-chips::-webkit-scrollbar { display: none; }
   .qf-c { flex: none; }

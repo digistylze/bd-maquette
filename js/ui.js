@@ -253,6 +253,42 @@
     a.oninput = b.oninput = () => { upd(); el.dispatchEvent(new CustomEvent('range', { bubbles: true })); };
     upd();
   };
+  /* ---------- Liste déroulante maison : tout le bouton ouvre la liste, stylée comme le site (le <select> natif ne s'ouvrait qu'au clic sur le texte) ---------- */
+  // opts : [[valeur, libellé déjà échappé]] ; la première est la valeur par défaut. Au choix, la liste émet l'événement « dd » ({ key, value }).
+  V.ddHTML = (key, opts, o = {}) => `<div class="dd${o.cls ? ' ' + o.cls : ''}" data-dd="${key}">
+      <button type="button" class="qf-sel dd-btn" aria-haspopup="listbox" aria-expanded="false" aria-label="${o.label || ''}">${o.icon ? V.i(o.icon, 'sm') : ''}<span class="dd-v">${opts[0][1]}</span>${V.i('chevron-down', 'sm')}</button>
+      <div class="dd-menu" role="listbox" aria-label="${o.label || ''}" hidden>${opts.map(([v, l], k) => `<button type="button" role="option" class="dd-o${k ? '' : ' on'}" data-v="${v}" aria-selected="${!k}"><span>${l}</span>${V.i('check', 'sm')}</button>`).join('')}</div>
+    </div>`;
+  ui.ddOpen = (d, on) => {
+    d.classList.toggle('open', on);
+    $('.dd-menu', d).hidden = !on;
+    $('.dd-btn', d).setAttribute('aria-expanded', String(on));
+    if (on) { const cur = $('.dd-o.on', d); if (cur) { cur.scrollIntoView({ block: 'nearest' }); cur.focus({ preventScroll: true }); } }
+  };
+  ui.ddSet = (d, v, silent) => {
+    let pick = null;
+    $$('.dd-o', d).forEach((x) => { const on = x.dataset.v === v; x.classList.toggle('on', on); x.setAttribute('aria-selected', String(on)); if (on) pick = x; });
+    if (!pick) return;
+    $('.dd-v', d).textContent = pick.textContent;
+    if (!silent) d.dispatchEvent(new CustomEvent('dd', { bubbles: true, detail: { key: d.dataset.dd, value: v } }));
+  };
+  document.addEventListener('click', (e) => {
+    const t = e.target instanceof Element ? e.target : null;
+    $$('.dd.open').forEach((d) => { if (!t || !d.contains(t)) ui.ddOpen(d, false); });
+    if (!t) return;
+    const b = t.closest('.dd-btn'), o = t.closest('.dd-o');
+    if (b) ui.ddOpen(b.parentElement, !b.parentElement.classList.contains('open'));
+    else if (o) { const d = o.closest('.dd'); ui.ddSet(d, o.dataset.v); ui.ddOpen(d, false); $('.dd-btn', d).focus(); }
+  });
+  // flèches haut et bas dans la liste ouverte ; Tab ailleurs la referme (Échap reste la sortie rapide)
+  document.addEventListener('keydown', (e) => {
+    const d = e.target instanceof Element && e.target.closest('.dd.open');
+    if (!d || !['ArrowDown', 'ArrowUp'].includes(e.key)) return;
+    e.preventDefault();
+    const os = $$('.dd-o', d), k = os.indexOf(document.activeElement);
+    os[Math.max(0, Math.min(os.length - 1, k + (e.key === 'ArrowDown' ? 1 : -1)))].focus();
+  });
+  document.addEventListener('focusin', (e) => { $$('.dd.open').forEach((d) => { if (!d.contains(e.target)) ui.ddOpen(d, false); }); });
   V.rangeHTML = (name, min, max, lo, hi, unit, o = {}) => `<div class="range-vals"></div><div class="range" data-name="${name}" data-unit="${unit}" data-gap="${o.gap || 1}" ${o.plus ? 'data-plus="1"' : ''}><div class="track"></div><div class="fill"></div><input type="range" min="${min}" max="${max}" step="${o.step || 1}" value="${lo}" aria-label="${name} minimum"><input type="range" min="${min}" max="${max}" step="${o.step || 1}" value="${hi}" aria-label="${name} maximum"></div>`;
 
   /* ---------- Sélection (cœur) et masquage ---------- */

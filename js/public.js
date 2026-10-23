@@ -309,7 +309,7 @@
             ${qfGroup('Catégorie', qfChips('cat', [['', 'Toutes'], ['femme', 'Femmes'], ['trans', 'Trans'], ['homme', 'Hommes'], ['masseuse', 'Masseuses'], ['bdsm', 'BDSM'], ['duo', 'Duos et couples']]))}
             ${QF_MAIN.map(([k, l, o]) => qfGroup(l, qfChips(k, o))).join('')}
             ${qfGroup('Budget pour 1 h', `<div class="qf-range">${V.rangeHTML('prix', 200, 1000, 200, 1000, ' CHF', { step: 50, gap: 50, plus: 1 })}</div><div class="qf-chips"><button type="button" class="qf-c" data-qt="prixnr">Inclure « tarif non renseigné »</button></div>`)}
-            ${qfGroup('Quartier', `<label class="qf-sel">${I('map-pin', 'sm')}<select data-qs="commune" aria-label="Quartier"><option value="">Tout Genève</option>${communes.map((c) => `<option value="${c.id}">${esc(c.label)}</option>`).join('')}</select>${I('chevron-down', 'sm')}</label>`)}
+            ${qfGroup('Quartier', V.ddHTML('commune', [['', 'Tout Genève'], ...communes.map((c) => [c.id, esc(c.label)])], { icon: 'map-pin', label: 'Quartier' }))}
             ${qfGroup('Langue', `<div class="qf-chips" data-qm="lang">${QF_LANG.map((l) => `<button type="button" class="qf-c" data-qv="${l}">${flag(l)}${l.toUpperCase()}</button>`).join('')}</div>`)}
           </div>
           <div class="qf-adv" hidden>
@@ -328,7 +328,7 @@
           <div class="qf-foot">
             <span class="qf-count" id="qfCount"></span>
             <span class="sp"></span>
-            <label class="qf-sel">${I('sort', 'sm')}<select data-qs="tri" aria-label="Trier">${TRI.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select></label>
+            ${V.ddHTML('tri', TRI, { icon: 'sort', label: 'Trier', cls: 'end' })}
           </div>
           <div class="qf-grid" id="qfGrid"></div>
           <div class="qf-more" id="qfMore"></div>
@@ -375,11 +375,11 @@
         Object.keys(q).forEach((k) => delete q[k]); multi.lang.clear(); multi.svc.clear(); multi.cl.clear(); tog.clear();
         $$('.range', box).forEach((r) => { const [a, b] = $$('input', r); a.value = a.min; b.value = b.max; V.ui.range(r); });
         $$('.qf-chips', box).forEach((g) => $$('.qf-c', g).forEach((x, j) => x.classList.toggle('on', !!g.dataset.qk && j === 0)));
-        $$('select[data-qs]', box).forEach((s) => { s.selectedIndex = 0; });
+        $$('.dd', box).forEach((d) => V.ui.ddSet(d, $('.dd-o', d).dataset.v, true));
         render();
       }
     });
-    $$('select[data-qs]', box).forEach((s) => s.addEventListener('change', () => { q[s.dataset.qs] = s.value; render(); }));
+    box.addEventListener('dd', (e) => { q[e.detail.key] = e.detail.value; render(); });
     box.addEventListener('range', (e) => { const r = e.target.closest('.range'); const [a, b] = $$('input', r); const k = r.dataset.name; const full = +a.value === +a.min && +b.value === +b.max; q[k] = full ? '' : `${a.value}-${b.value}`; render(); });
     render();
   }
