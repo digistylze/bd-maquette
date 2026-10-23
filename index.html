@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400..800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=20261023c">
+<link rel="stylesheet" href="css/app.css?v=20261023e">
 </head>
 <body class="lock">
 
@@ -133,6 +133,7 @@
 <div class="toasts" id="toasts" aria-live="polite"></div>
 <div class="wipe" id="wipe" aria-hidden="true"><i></i><i></i></div>
 
+<script>if (location.hash === '#/info') document.title = 'Météo à Genève · Genève Info';</script>
 <div class="pre" id="pre" aria-hidden="true">
   <div class="pre-in">
     <div class="pre-logo"><img src="img/logo-b.webp" alt="" width="504" height="560"><i class="shine"></i></div>
@@ -141,18 +142,20 @@
   </div>
 </div>
 
-<script src="js/data.js?v=20261023c"></script>
-<script src="js/profils-importes.js?v=20261023c"></script>
-<script src="js/profils-details.js?v=20261023c"></script>
-<script src="js/core.js?v=20261023c"></script>
-<script src="js/ui.js?v=20261023c"></script>
-<script src="js/public.js?v=20261023c"></script>
-<script src="js/carte.js?v=20261023c"></script>
-<script src="js/pages-plus.js?v=20261023c"></script>
-<script src="js/account.js?v=20261023c"></script>
-<script src="js/pro.js?v=20261023c"></script>
-<script src="js/admin-data.js?v=20261023c"></script>
-<script src="js/admin.js?v=20261023c"></script>
-<script src="js/main.js?v=20261023c"></script>
+<script>if (location.hash === '#/info') { var pr = document.getElementById('pre'); if (pr) pr.remove(); }</script>
+<script src="js/data.js?v=20261023e"></script>
+<script src="js/profils-importes.js?v=20261023e"></script>
+<script src="js/profils-details.js?v=20261023e"></script>
+<script src="js/core.js?v=20261023e"></script>
+<script src="js/ui.js?v=20261023e"></script>
+<script src="js/public.js?v=20261023e"></script>
+<script src="js/carte.js?v=20261023e"></script>
+<script src="js/pages-plus.js?v=20261023e"></script>
+<script src="js/vitrine.js?v=20261023e"></script>
+<script src="js/account.js?v=20261023e"></script>
+<script src="js/pro.js?v=20261023e"></script>
+<script src="js/admin-data.js?v=20261023e"></script>
+<script src="js/admin.js?v=20261023e"></script>
+<script src="js/main.js?v=20261023e"></script>
 </body>
 </html>

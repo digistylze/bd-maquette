@@ -31,6 +31,7 @@
         <a class="icon-btn d-only" href="#/compte" aria-label="Mon compte">${V.i('user')}</a>
         <a class="btn sm dark d-only" href="#/pro" style="margin-left:6px"><span class="roll"><span>Espace pro</span><span aria-hidden="true">Espace pro</span></span></a>`
         : `<a class="btn sm ghost d-only" href="#/"><span class="roll"><span>Voir le site</span><span aria-hidden="true">Voir le site</span></span></a>`}
+        <button class="icon-btn qx" data-act="panic" aria-label="Sortie rapide (touche Échap)" title="Sortie rapide (Échap)">${V.i('door')}</button>
         <button class="menu-toggle" data-act="menu" aria-label="Ouvrir le menu" aria-expanded="false"><span class="lines"><i></i><i></i><i></i></span></button>`;
       $('#tabbar').innerHTML = TABS[mode].map((t) => {
         if (t[0] === 'session') return `<button class="tab" data-act="session">${V.i('heart')}<span>Ma session</span><span class="count" id="fabCount">0</span></button>`;
@@ -105,7 +106,7 @@
           <button class="m-chip" data-act="theme">${V.i('moon', 'sm')}<span data-theme-label>Thème sombre</span></button>
           <button class="m-chip" data-act="lang">${V.i('globe', 'sm')}Français · 8 langues</button>
           <button class="m-chip" data-act="demo-news">${V.i('zap', 'sm')}Démo : simuler une nouveauté</button>
-          <button class="m-chip" data-act="panic">${V.i('door', 'sm')}Sortie rapide</button>
+          <button class="m-chip" data-act="panic">${V.i('door', 'sm')}Sortie rapide · Échap</button>
         </div>
       </div>
     </div></div>`;

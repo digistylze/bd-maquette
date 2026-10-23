@@ -36,7 +36,7 @@
     feedback: (el) => V.openFeedback(el.dataset.id),
     'ext-link': (el, e) => { e.preventDefault(); V.toast(`Lien externe (${el.dataset.h}) : s’ouvrirait dans un nouvel onglet. BD n’intègre aucun contenu de ce site.`, { icon: 'link', ms: 4200 }); },
     'demo-news': () => { V.ui.menu(false); V.ui.demoNews(); },
-    panic: () => location.replace('https://www.google.ch'),
+    panic: () => V.vitrine(),
     filters: (el) => V.openFilters(el.dataset.g),
     sort: () => V.openSort(),
     search: () => V.openSearch(),
@@ -161,16 +161,12 @@
     V.sheet.open({ title: standalone ? 'Déjà installée' : 'Installer l’application', body: standalone ? '<p class="ink2">BD est déjà installée sur cet appareil.</p>' : `<div class="stack"><div class="panel soft"><b>iPhone · Safari</b><p class="small ink2" style="margin-top:6px">Touchez ${I('share', 'sm')} Partager, puis « Sur l’écran d’accueil ».</p></div><div class="panel soft"><b>Android · Chrome</b><p class="small ink2" style="margin-top:6px">Menu ⋮, puis « Installer l’application ».</p></div><p class="hint">L’app s’ouvre en plein écran, fonctionne hors connexion pour les pages déjà vues et peut recevoir vos alertes.</p></div>` });
   }
 
-  /* ---------- Clavier : Échap ferme, deux fois = sortie rapide ---------- */
-  let lastEsc = 0;
+  /* ---------- Clavier : Échap = sortie rapide, la vitrine « Genève Info » glisse par-dessus le site ---------- */
   document.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape') return;
-    if (V.lb && document.body.contains(V.lb)) { V.lb.querySelector('button').click(); return; }
-    if (V.sheet.el) { V.sheet.close(); return; }
-    if (V.overlay.any()) { V.overlay.back(); return; }
-    if (document.body.classList.contains('menu-open')) { V.ui.menu(false); return; }
-    if (Date.now() - lastEsc < 600) location.replace('https://www.google.ch');
-    lastEsc = Date.now();
+    if (e.key !== 'Escape' || document.getElementById('vitrine')) return;
+    e.preventDefault();
+    if (V.lb && document.body.contains(V.lb)) V.lb.remove();
+    V.vitrine();
   });
 
   /* ---------- Navigation ---------- */
@@ -212,10 +208,13 @@
     // ?direct : lien de présentation qui saute le préchargement et l'avertissement d'âge
     const direct = location.search.includes('direct');
     if (direct) V.L.ageOk = V.L.ageOk || Date.now();
-    await V.wait(direct ? 0 : 2500);
-    if (location.search.includes('capture')) pre.remove(); // captures d'écran : sans écran de démarrage
-    else { pre.classList.add('go'); setTimeout(() => pre.remove(), 1200); }
+    // rechargement sur la vitrine : rien de BD ne doit apparaître (ni écran de démarrage, ni avertissement d'âge)
+    const vit = location.hash === '#/info';
+    await V.wait(direct || vit ? 0 : 2500);
+    if (pre) { if (vit || location.search.includes('capture')) pre.remove(); else { pre.classList.add('go'); setTimeout(() => pre.remove(), 1200); } }
     const okAge = V.L.ageOk && Date.now() - V.L.ageOk < 30 * D.DAY;
+    V.gateIfNeeded = () => { if (!(V.L.ageOk && Date.now() - V.L.ageOk < 30 * D.DAY) && !$('.gate')) gate(); };
+    if (vit) return;
     if (!okAge) gate(); else { document.body.classList.remove('lock'); if (!location.search.includes('capture')) setTimeout(cookieNote, 1500); } // ?capture : captures d'écran sans le bandeau cookies
   }
   /* Porte d'âge : le site reste visible derrière un flou, avec les conditions et la question oui / non */

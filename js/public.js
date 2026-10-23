@@ -711,7 +711,7 @@
       <div class="f-top"><button class="icon-btn" data-act="close-ov" aria-label="Fermer">${I('arrow-left')}</button><div class="ttl">${esc(p.name)}, ${V.ageShort(p)}</div><span class="sp"></span>
         <button class="icon-btn" data-act="share" data-id="${p.id}" aria-label="Partager">${I('share')}</button>
         <button class="icon-btn" data-act="fav" data-id="${p.id}" aria-label="Sélection"><span style="color:${on ? 'var(--violet)' : 'inherit'}">${I('heart')}</span></button>
-        <button class="icon-btn" data-act="close-ov" aria-label="Fermer la fiche (Échap)">${I('x')}</button></div>
+        <button class="icon-btn" data-act="close-ov" aria-label="Fermer la fiche">${I('x')}</button></div>
       <div class="f-grid">
         <div class="f-media protect">
           <div class="f-track" id="fTrack">${slides.map((s, j) => `<div class="f-slide"><img src="${s.src}" alt="Photo ${j + 1} de ${esc(p.name)}" style="object-position:${s.pos};${s.zoom ? `transform:scale(${s.zoom});transform-origin:${s.pos}` : ''}" draggable="false"><span class="wm">BD · photo vérifiée</span></div>`).join('')}</div>
@@ -1045,7 +1045,7 @@
       </div>
       <div class="grid-2" style="margin-top:28px">
         <div class="panel"><h3>Faire un signalement</h3><p class="ink2" style="margin:8px 0 16px">Faux profil, personne qui semble mineure, contrainte, arnaque, comportement dangereux. Réponse sous 24 h, immédiate si c’est grave.</p>${V.btn('Signaler un problème', { act: 'report' })}<p class="hint">${V.L.reports ? `${V.L.reports} signalement${V.L.reports > 1 ? 's' : ''} envoyé${V.L.reports > 1 ? 's' : ''} depuis cet appareil.` : 'Aucun signalement envoyé depuis cet appareil.'}</p></div>
-        <div class="panel ink"><h3>Discrétion par défaut</h3><ul class="svc" style="margin-top:10px;grid-template-columns:1fr">${['Aucun compte obligatoire pour naviguer', 'Sélection effacée à la fermeture du navigateur', 'Aucun traceur publicitaire, mesure d’audience sans cookie', 'Toutes les données hébergées en Suisse', 'Sortie rapide : deux fois la touche Échap'].map((x) => `<li style="border-color:rgba(255,255,255,.12)">${x}</li>`).join('')}</ul></div>
+        <div class="panel ink"><h3>Discrétion par défaut</h3><ul class="svc" style="margin-top:10px;grid-template-columns:1fr">${['Aucun compte obligatoire pour naviguer', 'Sélection effacée à la fermeture du navigateur', 'Aucun traceur publicitaire, mesure d’audience sans cookie', 'Toutes les données hébergées en Suisse', 'Sortie rapide : la touche Échap affiche aussitôt une page météo neutre'].map((x) => `<li style="border-color:rgba(255,255,255,.12)">${x}</li>`).join('')}</ul></div>
       </div>
       <section class="section-sm"><div class="grid-2">
         <div><div class="eyebrow">Pour les visiteurs</div><div style="margin-top:8px">${['Cherchez le numéro dans la recherche : s’il ne correspond à aucun profil vérifié, méfiez-vous.', 'Ne versez jamais d’acompte à quelqu’un que vous ne connaissez pas.', 'Les consignes et les limites indiquées sur la fiche ne se négocient pas sur place.'].map((t, k) => `<details class="acc"><summary>${['Vérifier un numéro', 'Arnaques à l’acompte', 'Consentement et limites'][k]}<span class="pm">${I('plus', 'sm')}</span></summary><div class="acc-b">${t}</div></details>`).join('')}</div></div>
