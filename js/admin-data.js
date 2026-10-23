@@ -97,7 +97,7 @@
   /* Contrôles planifiés : BD propose une date, la professionnelle confirme ou reporte */
   const PLANNED = [
     ['imp-marion', 2, 14, 0, 'confirmé', 'Bureau'], ['bianca', 1, 11, 30, 'reporté', 'Visio'], ['imp-sarah', 5, 16, 0, 'proposé', 'Visio'], ['elena', 3, 10, 0, 'confirmé', 'Bureau'],
-    ['imp-lou', 8, 15, 30, 'proposé', 'Visio'], ['x-vera', 6, 9, 30, 'proposé', 'Bureau'], ['clara-hugo', 4, 18, 0, 'confirmé', 'Bureau'], ['kiara', 9, 13, 0, 'reporté', 'Visio'],
+    ['imp-lou', 8, 15, 30, 'proposé', 'Visio'], ['x-vera', 6, 9, 30, 'proposé', 'Bureau'], ['clara-hugo', 4, 18, 0, 'confirmé', 'Bureau'], ['kiara', 9, 13, 0, 'reporté', 'Visio'], ['alma', 5, 14, 0, 'proposé', 'Visio'],
   ].map(([id, d, h, m, state, mode], k) => ({ id, when: at(d, h, m), state, mode, kind: k % 3 === 1 ? 'Entretien d’indépendance' : 'Contrôle médias (selfie)', from: state === 'reporté' ? at(d - 3, h, m) : null, by: state === 'proposé' ? 'BD' : 'La professionnelle' }));
 
   /* ---------- Candidatures et admission ---------- */
@@ -319,12 +319,9 @@
   const CITIES = [
     { name: 'Genève', state: 'Ouverte', since: at(-30, 0, 0), pros: PROS.filter((p) => p.city === 'Genève').length, pre: 0 },
     { name: 'Lausanne', state: 'Ouverture prochainement', since: at(75, 0, 0), pros: 3, pre: 23 },
-    { name: 'Montreux · Vevey', state: 'Ouverture prochainement', since: at(140, 0, 0), pros: 0, pre: 6 },
-    { name: 'Neuchâtel', state: 'Fermée', since: null, pros: 0, pre: 4 },
-    { name: 'Fribourg', state: 'Fermée', since: null, pros: 0, pre: 2 },
-    { name: 'Sion', state: 'Fermée', since: null, pros: 0, pre: 1 },
+    { name: 'Zurich', state: 'Ouverture prochainement', since: at(200, 0, 0), pros: 0, pre: 11 },
   ];
-  const PRE = ['Lia', 'Romane', 'Kira', 'Sun', 'Mila', 'Hana', 'Zara', 'Eva', 'Nadia', 'Tamara', 'Joy', 'Elsa'].map((n, k) => ({ name: n, city: k < 9 ? 'Lausanne' : 'Montreux · Vevey', cat: pick(['Escorte', 'Escorte', 'Masseuse', 'Escorte trans', 'BDSM'], k + 121), at: at(-(2 + k * 4), 18, 30), src: pick(['Page « Nous rejoindre »', 'Parrainage', 'Bouche-à-oreille'], k + 127) }));
+  const PRE = ['Lia', 'Romane', 'Kira', 'Sun', 'Mila', 'Hana', 'Zara', 'Eva', 'Nadia', 'Tamara', 'Joy', 'Elsa'].map((n, k) => ({ name: n, city: k < 9 ? 'Lausanne' : 'Zurich', cat: pick(['Escorte', 'Escorte', 'Masseuse', 'Escorte trans', 'BDSM'], k + 121), at: at(-(2 + k * 4), 18, 30), src: pick(['Page « Nous rejoindre »', 'Parrainage', 'Bouche-à-oreille'], k + 127) }));
   const LANGS = ['fr', 'en', 'de', 'it', 'es', 'pt', 'ru', 'ar'];
   const PAGES = [['Accueil', 0], ['Nous rejoindre', 0], ['Sécurité', 1], ['Vérifications', 1], ['Conditions d’utilisation', 2], ['Confidentialité', 2], ['FAQ visiteurs (14 questions)', 3], ['FAQ professionnelles (18 questions)', 4]].map(([t, s]) => ({ t, st: LANGS.map((l, k) => (k < 2 ? 'ok' : k < 6 - s % 3 ? (R(s * 9 + k) > .3 ? 'ok' : 'rev') : R(s * 13 + k) > .5 ? 'rev' : 'miss')) }));
 

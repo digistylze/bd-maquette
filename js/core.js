@@ -32,7 +32,8 @@
     const o = (V.S.ov && V.S.ov[p.id]) || V.L.pro.statuses[p.id];
     const s = o || p.status;
     const since = s.since || Date.now();
-    if (s.t === 'now' && Date.now() - since > 3 * 3600e3) return { t: 'request', since: since + 3 * 3600e3, expired: true };
+    if (s.t === 'now' && Date.now() - since > 60 * 60e3) return { t: 'request', since: since + 60 * 60e3, expired: true };
+    if (s.t === 'busy' && Date.now() - since > 2 * 3600e3) return { t: 'request', since: since + 2 * 3600e3, expired: true };
     return s;
   };
   V.agoTxt = (ts) => {
@@ -46,6 +47,7 @@
     const D = V.date;
     switch (s.t) {
       case 'now': return { cls: 'now', label: 'Disponible maintenant', short: 'Disponible', sub: V.agoTxt(s.since) };
+      case 'busy': return { cls: 'busy', label: 'Occupée', short: 'Occupée', sub: V.agoTxt(s.since) };
       case 'today': return { cls: 'soon', label: `Aujourd’hui dès ${s.at}`, short: `Dès ${s.at}`, sub: V.agoTxt(s.since) };
       case 'tonight': return { cls: 'soon', label: `Ce soir à ${s.at}`, short: `Ce soir ${s.at}`, sub: V.agoTxt(s.since) };
       case 'tomorrow': return { cls: 'soon', label: `Demain dès ${s.at}`, short: `Demain ${s.at}`, sub: V.agoTxt(s.since) };
@@ -54,7 +56,7 @@
       default: return { cls: 'req', label: 'Sur demande', short: 'Sur demande', sub: s.expired ? 'statut expiré automatiquement' : V.agoTxt(s.since) };
     }
   };
-  V.statusRank = { now: 0, today: 1, tonight: 2, tomorrow: 3, request: 4, arrive: 5, away: 6 };
+  V.statusRank = { now: 0, today: 1, tonight: 2, tomorrow: 3, busy: 4, request: 5, arrive: 6, away: 7 };
   V.statusPill = (p, flat, short) => { const s = V.statusInfo(p); return `<span class="status ${s.cls}${flat ? ' flat' : ''}"><i></i>${short ? s.short : s.label}</span>`; };
 
   V.ageTxt = (p) => (Array.isArray(p.age) ? p.age.join(' et ') + ' ans' : p.age + ' ans');
@@ -79,6 +81,7 @@
   V.splitRoll = (root) => root.querySelectorAll('.roll > span:not([data-s])').forEach((s) => {
     if (s.children.length) return;
     s.dataset.s = '1';
+    if (/[\u0590-\u08ff]/.test(s.textContent)) return; // arabe, hébreu : les lettres doivent rester liées
     s.innerHTML = [...s.textContent].map((ch, k) => `<i style="--i:${k}">${V.esc(ch)}</i>`).join('');
   });
   new MutationObserver((ms) => ms.forEach((m) => m.addedNodes.forEach((n) => { if (n.nodeType === 1) { V.typo(n); V.splitRoll(n); } else if (n.nodeType === 3 && n.parentElement) V.typo(n.parentElement); })))
@@ -109,6 +112,10 @@
   };
   V.flag = (l) => `<svg class="flag" viewBox="0 0 30 20" aria-hidden="true">${V.FLAGS[l] || `<rect width="30" height="20" fill="#2a2430"/><text x="15" y="14" font-size="9" font-weight="700" text-anchor="middle" fill="#e2c68d" font-family="sans-serif">${l.toUpperCase()}</text>`}</svg>`;
   /* Carte profil commune à tout le site : photo avec statut, badges et nom, puis localisation, langues, repères, prix et accès à la fiche */
+  /* Libellé des encarts payants : choisi par BD, réglable dans Back-office › Paramètres */
+  V.sponLabel = () => ((V.L.adm2 && V.L.adm2.params && V.L.adm2.params.sponLabel) || 'Mise en avant');
+  /* Tarif de départ : « non renseigné » reste distinct de zéro */
+  V.fromTxt = (p) => (p.from ? `dès ${p.from}.–` : 'tarif non renseigné');
   const MODE_TAG = { incall: 'Reçoit', outcall: 'Se déplace', both: 'Reçoit · déplace' };
   V.card = (p, o = {}) => {
     const on = V.isSel(p.id);
@@ -121,6 +128,9 @@
     if (p.isNew || chg.arrive.includes(p.id)) badges.push('<span class="badge goldfill">Nouveau</span>');
     if (p.isUpd || chg.upd.includes(p.id)) badges.push('<span class="badge dark">Mis à jour</span>');
     if (p.faceHidden) badges.push('<span class="badge dark">Visage masqué</span>');
+    if (p.tourLeft) badges.push(`<span class="badge pst-tour">Plus que ${p.tourLeft} jour${p.tourLeft > 1 ? 's' : ''}</span>`);
+    if (p.newPhoto) badges.push('<span class="badge pst-photo">Nouvelle photo</span>');
+    if (p.online) badges.push('<span class="badge pst-online"><i></i>En ligne</span>');
     const langs = p.langs.slice(0, 3).map(([l]) => `<i class="lang">${V.flag(l)}${l.toUpperCase()}</i>`).join('');
     const tags = [p.attrs && p.attrs.Silhouette, MODE_TAG[p.mode]].filter(Boolean).map((t) => `<i class="ptag">${V.esc(t)}</i>`).join('');
     return `<article class="card p-card${feat ? ' feat' : ''}${seen ? ' seen' : ''}" data-id="${p.id}" style="animation-delay:${(o.i || 0) % 8 * 45}ms">
@@ -128,7 +138,7 @@
         ${mos ? `<div class="p-mos">${p.photos.slice(0, 3).map((ph, k) => `<span><img src="${V.img(ph, 's')}" srcset="${V.img(ph, 's')} 360w, ${V.img(ph)} 900w" sizes="(min-width:640px) 16vw, 50vw" alt="${k ? '' : 'Photos de ' + V.esc(p.name)}" loading="lazy" draggable="false"></span>`).join('')}</div>`
           : `<img src="${V.img(p.photos[0], 's')}" srcset="${V.img(p.photos[0], 's')} 360w, ${V.img(p.photos[0])} 900w" sizes="${feat ? '(min-width:1024px) 40vw, 100vw' : '(min-width:1024px) 22vw, 50vw'}" alt="Photo de ${V.esc(p.name)}" loading="lazy" draggable="false">`}
         ${V.statusPill(p, false, true)}
-        ${feat ? `<span class="p-spon" title="Placement payant, affiché seulement s’il correspond à votre recherche">${V.i('sparkles', 'sm')}Sponsorisé</span>` : ''}
+        ${feat ? `<span class="p-spon" title="Placement payant, affiché seulement s’il correspond à votre recherche">${V.i('sparkles', 'sm')}${V.esc(V.sponLabel())}</span>` : ''}
         ${badges.length ? `<div class="p-badges">${badges.join('')}</div>` : ''}
         <span class="p-grad"></span>
         <b class="p-name">${V.esc(p.name)} <span>${V.ageShort(p)}</span>${V.i('badge-check', 'sm')}</b>
@@ -140,7 +150,7 @@
         <div class="p-line p-langs">${V.i('languages', 'sm')}<span>${langs}</span></div>
         <div class="p-tags">${tags}</div>
         ${o.ago ? `<div class="p-line p-agoline">${V.i('clock', 'sm')}<span>Statut publié ${V.agoTxt(V.statusOf(p).since)}</span></div>` : ''}
-        <div class="p-foot"><span class="p-price"><small>dès</small> <b>${p.from}.–</b></span>${V.btn('Voir le profil', { href: '#/profil/' + p.id, cls: 'sm dark', arrow: true })}</div>
+        <div class="p-foot"><span class="p-price">${p.from ? `<small>dès</small> <b>${p.from}.–</b>` : '<small>Tarif</small> <b class="nr">non renseigné</b>'}</span>${V.btn('Voir le profil', { href: '#/profil/' + p.id, cls: 'sm dark', arrow: true })}</div>
         ${o.noHide ? '' : `<button class="hide-link" data-act="hide" data-id="${p.id}">${V.i('eye-off', 'sm')}Ne plus afficher</button>`}
       </div>
     </article>`;

@@ -31,7 +31,10 @@
     contact: (el) => V.openContact(el.dataset.id, el.dataset.ch || 'wa'),
     theme: (el) => V.ui.toggleTheme(el),
     menu: () => V.ui.menu(),
-    lang: () => V.toast('Démo en français. V1 : français, anglais, espagnol, portugais, russe ; puis allemand, italien, arabe.', { icon: 'globe', ms: 4500 }),
+    lang: () => V.openLang(),
+    'lang-set': (el) => V.setLang(el.dataset.l),
+    feedback: (el) => V.openFeedback(el.dataset.id),
+    'ext-link': (el, e) => { e.preventDefault(); V.toast(`Lien externe (${el.dataset.h}) : s’ouvrirait dans un nouvel onglet. BD n’intègre aucun contenu de ce site.`, { icon: 'link', ms: 4200 }); },
     'demo-news': () => { V.ui.menu(false); V.ui.demoNews(); },
     panic: () => location.replace('https://www.google.ch'),
     filters: (el) => V.openFilters(el.dataset.g),
@@ -85,8 +88,8 @@
     'reg-next': (el) => V.regNext(+el.dataset.id),
     'otp-send': () => V.otpSend(),
     'kyc-scan': () => V.kycRun(),
-    'reg-add': () => { const R = V.S.reg; const crops = [{ pos: 'center 12%', z: 1.45 }, { pos: 'center 72%', z: 1.25 }, { pos: '30% 30%', z: 1.6 }, { pos: '70% 40%', z: 1.3 }]; if (R.photos.length >= 5) return V.toast('Assez pour la démo : 5 photos.', { icon: 'info' }); R.photos.push(Object.assign({ src: 'daria' }, crops[(R.photos.length - 1) % crops.length])); V.save(); V.render(); setTimeout(() => { const u = $$('#regUpl .u:not(.add)').pop(); if (u) u.classList.add('uploading'); }, 40); },
-    'reg-blur': (el) => { const p = V.S.reg.photos[+el.dataset.k]; p.blur = !p.blur; V.save(); el.closest('.u').classList.toggle('blurf', p.blur); },
+    'reg-add': () => { const R = V.L.reg; const crops = [{ pos: 'center 12%', z: 1.45 }, { pos: 'center 72%', z: 1.25 }, { pos: '30% 30%', z: 1.6 }, { pos: '70% 40%', z: 1.3 }]; if (R.photos.length >= 5) return V.toast('Assez pour la démo : 5 photos.', { icon: 'info' }); R.photos.push(Object.assign({ src: 'daria' }, crops[(R.photos.length - 1) % crops.length])); V.save(); V.render(); setTimeout(() => { const u = $$('#regUpl .u:not(.add)').pop(); if (u) u.classList.add('uploading'); }, 40); },
+    'reg-blur': (el) => { const p = V.L.reg.photos[+el.dataset.k]; p.blur = !p.blur; V.save(); el.closest('.u').classList.toggle('blurf', p.blur); },
   };
 
   document.addEventListener('click', (e) => {
@@ -197,6 +200,7 @@
 
   /* ---------- Démarrage : préchargement, thème, porte d'âge ---------- */
   async function boot() {
+    if (location.search.includes('capture')) document.documentElement.classList.add('capture'); // captures d'écran : sans animation
     const qt = (location.search.match(/[?&]theme=(dark|light)/) || [])[1];
     V.ui.applyTheme(qt || V.L.theme || 'light');
     $('#menu').innerHTML = V.ui.menuHTML();
@@ -209,10 +213,10 @@
     const direct = location.search.includes('direct');
     if (direct) V.L.ageOk = V.L.ageOk || Date.now();
     await V.wait(direct ? 0 : 2500);
-    pre.classList.add('go');
-    setTimeout(() => pre.remove(), 1200);
+    if (location.search.includes('capture')) pre.remove(); // captures d'écran : sans écran de démarrage
+    else { pre.classList.add('go'); setTimeout(() => pre.remove(), 1200); }
     const okAge = V.L.ageOk && Date.now() - V.L.ageOk < 30 * D.DAY;
-    if (!okAge) gate(); else { document.body.classList.remove('lock'); setTimeout(cookieNote, 1500); }
+    if (!okAge) gate(); else { document.body.classList.remove('lock'); if (!location.search.includes('capture')) setTimeout(cookieNote, 1500); } // ?capture : captures d'écran sans le bandeau cookies
   }
   /* Porte d'âge : le site reste visible derrière un flou, avec les conditions et la question oui / non */
   function gate() {

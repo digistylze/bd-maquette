@@ -13,7 +13,7 @@
     ['Pilotage', [['', 'layout', 'Tableau de bord'], ['statut', 'zap', 'Statut express'], ['stats', 'chart', 'Statistiques'], ['messages', 'mail', 'Messages']]],
     ['Mon profil', [['profil', 'edit', 'Profil'], ['photos', 'image', 'Photos'], ['absences', 'calendar', 'Absences'], ['duo', 'users', 'Duo']]],
     ['Visibilité', [['visibilite', 'sparkles', 'Mise en avant'], ['abonnement', 'card', 'Abonnement et factures'], ['parrainage', 'gift', 'Parrainage']]],
-    ['Protection', [['securite', 'shield', 'Sécurité'], ['controles', 'badge-check', 'Contrôles'], ['parametres', 'settings', 'Paramètres']]],
+    ['Protection', [['securite', 'shield', 'Sécurité'], ['confidentialite', 'lock', 'Confidentialité'], ['controles', 'badge-check', 'Contrôles'], ['parametres', 'settings', 'Paramètres']]],
   ];
   const unread = () => PRO.messages.filter((m) => m.unread && !(V.L.pro.read || []).includes(m.subj)).length;
   const shell = (cur, inner) => `<div class="wrap"><div class="app-shell">
@@ -55,8 +55,8 @@
       title: 'Espace pro',
       html: shell('', `<div class="dash-head"><div><div class="eyebrow">Espace pro · démonstration</div><h1>${hello()}, Alma.</h1></div><div class="row">${V.btn('Voir ma fiche', { href: '#/profil/alma', cls: 'sm ghost', arrow: 'eye' })}</div></div>
         ${V.L.pro.hidden ? `<div class="big-hide" style="margin-bottom:14px"><b class="h4">Votre profil est masqué</b><span class="small ink2">Il n’apparaît nulle part sur le site. Votre abonnement continue.</span><div>${V.btn('Réactiver mon profil', { act: 'pro-unhide', cls: 'sm' })}</div></div>` : ''}
-        <div class="panel" style="margin-bottom:14px"><div class="row-b wrapr"><div><div class="eyebrow">Mon statut</div><div class="row" style="margin-top:8px">${V.statusPill(p, true)}<span class="small muted">${si.sub}${s.t === 'now' ? ` · expire à ${hhmm(s.since + 3 * 3600e3)}` : ''}</span></div></div>
-          <div class="chips"><button class="chip${s.t === 'now' ? ' on' : ''}" data-act="pro-st" data-v="now"><span class="ck">${I('check', 'sm')}</span>Disponible maintenant</button><button class="chip${s.t === 'tonight' ? ' on' : ''}" data-act="pro-st" data-v="tonight"><span class="ck">${I('check', 'sm')}</span>Ce soir à 21 h</button><button class="chip${s.t === 'request' ? ' on' : ''}" data-act="pro-st" data-v="request"><span class="ck">${I('check', 'sm')}</span>Sur demande</button><a class="chip" href="#/pro/statut">${I('plus', 'sm')}Plus</a></div></div></div>
+        <div class="panel" style="margin-bottom:14px"><div class="row-b wrapr"><div><div class="eyebrow">Mon statut</div><div class="row" style="margin-top:8px">${V.statusPill(p, true)}<span class="small muted">${si.sub}${s.t === 'now' ? ` · expire à ${hhmm(s.since + 60 * 60e3)}` : ''}</span></div></div>
+          <div class="chips"><button class="chip${s.t === 'now' ? ' on' : ''}" data-act="pro-st" data-v="now"><span class="ck">${I('check', 'sm')}</span>Disponible maintenant</button><button class="chip${s.t === 'tonight' ? ' on' : ''}" data-act="pro-st" data-v="tonight"><span class="ck">${I('check', 'sm')}</span>Ce soir à 21 h</button><button class="chip${s.t === 'request' ? ' on' : ''}" data-act="pro-st" data-v="request"><span class="ck">${I('check', 'sm')}</span>Sur demande</button><button class="chip${s.t === 'busy' ? ' on' : ''}" data-act="pro-st" data-v="busy"><span class="ck">${I('check', 'sm')}</span>Occupée</button><a class="chip" href="#/pro/statut">${I('plus', 'sm')}Plus</a></div></div></div>
         <div class="kpis">${kp('eye', 'Vues de votre carte · 30 j', st.views, 18)}${kp('image', 'Ouvertures de fiche', st.opens, 12)}${kp('heart', 'Ajouts en sélection', st.favs, 24)}<div class="kpi dark"><span class="l">${I('phone', 'sm')}Clics de contact</span><span class="v">${sum(Object.values(st.contacts))}</span><span class="xs" style="color:#d2c6de">WhatsApp ${st.contacts.WhatsApp} · appel ${st.contacts.Appel} · SMS ${st.contacts.SMS}</span><span class="d">+9 %</span></div></div>
         <div class="grid-2" style="margin-top:14px">
           <div class="panel"><div class="row-b"><h3>Vues de votre carte</h3><a class="link" href="#/pro/stats">Détails</a></div>${V.lineChart(st.views, { h: 200, labels: [[0, D.fmtD(D.addDays(-29), { day: 'numeric', month: 'short' })], [29, 'Aujourd’hui']], aria: 'Vues sur 30 jours' })}<p class="small muted">Votre fiche est consultée <b class="ok">32 % de plus</b> que la moyenne de la plateforme.</p></div>
@@ -82,7 +82,8 @@
       title: 'Statut express',
       html: shell('statut', `<div class="dash-head"><div><div class="eyebrow">Un geste, visible en moins de 60 s</div><h1>Statut express</h1></div><div class="row">${V.statusPill(p, true)}<span class="small muted">${V.statusInfo(p).sub}</span></div></div>
         <div class="express">
-          ${ex('now', 'zap', 'Disponible maintenant', `Expire seul après 3 h · ${nowLeft} passage${nowLeft > 1 ? 's' : ''} restant${nowLeft > 1 ? 's' : ''} aujourd’hui`, s.t === 'now')}
+          ${ex('now', 'zap', 'Disponible maintenant', `Expire seul après 60 min · ${nowLeft} passage${nowLeft > 1 ? 's' : ''} restant${nowLeft > 1 ? 's' : ''} aujourd’hui`, s.t === 'now')}
+          ${ex('busy', 'clock', 'Occupée', 'En rendez-vous · repasse seule à « Sur demande » après 2 h', s.t === 'busy')}
           ${ex('today', 'clock', 'Aujourd’hui dès…', 'Choisissez l’heure', s.t === 'today')}
           ${ex('tonight', 'moon', 'Ce soir à…', 'Choisissez l’heure', s.t === 'tonight')}
           ${ex('tomorrow', 'calendar', 'Demain dès…', 'Choisissez l’heure', s.t === 'tomorrow')}
@@ -104,6 +105,7 @@
             if (k === 'away') { location.hash = '#/pro/absences'; return; }
             if (k === 'now') { if (nowLeft <= 0) return V.toast('Limite de 6 passages par jour atteinte.', { icon: 'info' }); setStatus({ t: 'now' }, 'Disponible maintenant'); return V.render(); }
             if (k === 'request') { setStatus({ t: 'request' }, 'Sur demande'); return V.render(); }
+            if (k === 'busy') { setStatus({ t: 'busy' }, 'Occupée'); return V.render(); }
             pending = k; $$('.ex', v).forEach((x) => x.classList.toggle('on', x === b));
             const box = $('#hours', v); box.style.display = ''; box.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
@@ -120,6 +122,9 @@
     es: 'Arquitecta de formación, ginebrina de adopción. Me gustan las citas bien preparadas, las conversaciones que se alargan y las cenas junto al lago. Discreción absoluta, por ambas partes.',
     pt: 'Arquiteta de formação, genebrina por adoção. Gosto de encontros bem preparados, de conversas que se prolongam e de jantares à beira do lago. Discrição absoluta, de ambos os lados.',
     ru: 'Архитектор по образованию, женевка по выбору. Люблю продуманные встречи, долгие разговоры и ужины у озера. Полная конфиденциальность с обеих сторон.',
+    de: 'Architektin von Beruf, Genferin aus Überzeugung. Ich mag gut geplante Treffen, Gespräche, die andauern, und Abendessen am See. Absolute Diskretion, auf beiden Seiten.',
+    it: 'Architetta di formazione, ginevrina d’adozione. Amo gli incontri ben preparati, le conversazioni che durano e le cene in riva al lago. Discrezione assoluta, da entrambe le parti.',
+    ar: 'مهندسة معمارية بالتكوين، وجنيفية بالاختيار. أحب اللقاءات المُعدّة جيدًا، والأحاديث التي تطول، والعشاء على ضفاف البحيرة. سرية تامة من الطرفين.',
   };
   V.route(/^\/pro\/profil$/, () => {
     const p = ME();
@@ -129,12 +134,12 @@
       html: shell('profil', `<div class="dash-head"><div><div class="eyebrow">Éditeur · aperçu en direct</div><h1>Mon profil</h1></div>${V.btn('Prévisualiser ma fiche', { href: '#/profil/alma', cls: 'sm ghost', arrow: 'eye' })}</div>
         <div class="stack-lg">
           <div class="panel"><h3>Identité publique</h3><div class="form-grid two" style="margin-top:14px">
-            ${V.field('Pseudo', { value: 'Alma' })}${V.field('Catégorie', { type: 'select', value: 'Femme', options: ['Femme', 'Femme trans', 'Homme', 'Couple', 'Duo'] })}
+            ${V.field('Pseudo', { value: 'Alma' })}${V.field('Catégorie', { type: 'select', value: 'Femme', options: ['Femme', 'Femme trans', 'Homme', 'Masseuse', 'BDSM', 'Duo ou couple'] })}
             <div class="field"><input value="29 ans · âge réel vérifié" disabled style="opacity:.75"><label>Âge</label><span class="state muted">${I('lock', 'sm')}</span></div>
             ${V.field('Origine (facultative)', { type: 'select', value: p.origin, options: V.ORIGINS })}
           </div><p class="hint">L’âge provient de votre vérification d’identité : il n’est pas modifiable et se met à jour à votre anniversaire. L’origine est facultative, avec un consentement distinct ; vous pouvez la retirer à tout moment.</p></div>
           <div class="panel"><div class="row-b"><h3>Présentation</h3><span class="badge warn">${I('shield', 'sm')}Modérée</span></div><div style="margin-top:14px">${V.field('Votre présentation', { type: 'textarea', value: p.bio, max: 600 })}</div>
-            <div style="margin-top:14px"><div class="row-b"><b class="small">Traduction automatique, relue</b>${V.seg('tr', [['en', 'EN'], ['es', 'ES'], ['pt', 'PT'], ['ru', 'RU']], 'en')}</div><div class="panel soft" style="margin-top:10px;padding:16px" id="trBox"><p class="serif" style="font-size:18px">${TR.en}</p><p class="xs muted" style="margin-top:8px">Mention « traduit automatiquement » affichée sur la fiche · texte original accessible</p></div></div></div>
+            <div style="margin-top:14px"><div class="row-b"><b class="small">Traduction automatique, relue</b>${V.seg('tr', [['en', 'EN'], ['de', 'DE'], ['it', 'IT'], ['es', 'ES'], ['pt', 'PT'], ['ru', 'RU'], ['ar', 'AR']], 'en')}</div><div class="panel soft" style="margin-top:10px;padding:16px" id="trBox"><p class="serif" style="font-size:18px">${TR.en}</p><p class="xs muted" style="margin-top:8px">Mention « traduit automatiquement » affichée sur la fiche · texte original accessible</p></div></div></div>
           <div class="panel"><h3>À propos</h3><div class="form-grid two" style="margin-top:14px">
             ${sel('Taille', 'Taille', Array.from({ length: 41 }, (_, k) => (150 + k) + ' cm'))}${sel('Silhouette', 'Silhouette', ['Mince', 'Sportive', 'Normale', 'Pulpeuse', 'Ronde', 'Petite'])}
             ${sel('Cheveux', 'Cheveux', ['Blond', 'Châtain clair', 'Châtain', 'Brun', 'Brun foncé', 'Noir', 'Roux auburn'])}${sel('Yeux', 'Yeux', ['Bleu', 'Gris', 'Vert', 'Noisette', 'Marron', 'Noir'])}
@@ -149,12 +154,15 @@
           <div class="panel"><div class="row-b"><h3>Services et limites</h3><span class="badge warn">${I('shield', 'sm')}Modérés</span></div><p class="small muted" style="margin-top:4px">Catalogue fermé, identique dans toutes les langues. Pas de texte libre sur les pratiques.</p>
             <div class="chips" style="margin-top:12px">${Object.entries(V.SERVICES).map(([k, l]) => `<button class="chip sm${p.services.includes(k) ? ' on' : ''}" data-act="toggle-on"><span class="ck">${I('check', 'sm')}</span>${l}</button>`).join('')}</div>
             <p class="small b" style="margin:16px 0 8px">Ce que je ne fais pas</p><div class="chips">${Object.entries(V.LIMITS).map(([k, l]) => `<button class="chip sm${p.limits.includes(k) ? ' on' : ''}" data-act="toggle-on"><span class="ck">${I('check', 'sm')}</span>${l}</button>`).join('')}</div></div>
+          <div class="panel"><div class="row-b"><h3>Liens externes</h3><span class="badge">Facultatif</span></div><p class="small muted" style="margin-top:4px">Affichés en simples liens sur votre fiche. Aucune intégration ni synchronisation : les visiteurs quittent BD en cliquant.</p>
+            <div class="form-grid two" style="margin-top:12px">${V.field('Webcam (adresse de votre page)', { value: '', name: 'l-webcam' })}${V.field('OnlyFans', { value: 'onlyfans.com/alma', name: 'l-of' })}${V.field('Instagram', { value: '@alma.geneve', name: 'l-ig' })}</div>
+            <p class="hint">Les liens sont vérifiés en modération : pas de lien vers un autre site d’annonces ni de numéro.</p></div>
           <div class="panel"><h3>Contacts et consignes</h3>${V.sw('c-tel', true, 'Appels', p.tel)}${V.sw('c-wa', true, 'WhatsApp', 'Message pré-rempli proposé aux visiteurs')}${V.sw('c-sms', true, 'SMS', '')}${V.sw('c-tg', false, 'Telegram', '')}<div style="margin-top:12px">${V.field('Consignes affichées avant le contact', { type: 'textarea', value: p.rules, max: 200 })}</div>
             ${V.sw('seo', V.L.pro.seo !== false, 'Fiche visible dans les moteurs de recherche', 'Désactivez pour n’être trouvée que sur BD')}</div>
         </div>
         <div style="position:sticky;bottom:calc(var(--tab-h) + 20px);z-index:5;margin-top:16px"><div class="panel row-b wrapr" style="box-shadow:var(--shadow-2);padding:14px 18px"><span class="small ink2">${I('info', 'sm')} Les photos et les textes passent en modération, comptez moins de 2 h. Les tarifs et les horaires sont publiés tout de suite.</span>${V.btn('Enregistrer', { act: 'pro-save', cls: 'sm', arrow: 'check' })}</div></div>`),
       after: (v) => {
-        $('[data-seg="tr"]', v).addEventListener('seg', (e) => { $('#trBox p', v).textContent = TR[e.detail]; });
+        $('[data-seg="tr"]', v).addEventListener('seg', (e) => { const el = $('#trBox p', v); el.textContent = TR[e.detail]; el.dir = e.detail === 'ar' ? 'rtl' : 'ltr'; });
         v.firstElementChild.addEventListener('click', (e) => { const c = e.target.closest('[data-act="toggle-on"]'); if (c) c.classList.toggle('on'); });
       },
     };
@@ -171,7 +179,19 @@
         <div class="grid-2" style="margin-top:16px">
           <div class="panel soft"><h3>Protection automatique</h3><ul class="svc" style="margin-top:10px">${['Filigrane sur chaque photo affichée', 'Métadonnées supprimées (EXIF, GPS, appareil)', 'Clic droit et glisser-déposer désactivés', 'Recherche hebdomadaire de vos photos sur le web', 'Floutage du visage en un geste, au choix'].map((x) => `<li>${I('check')}${x}</li>`).join('')}</ul></div>
           <div class="panel soft"><h3>Modération et contrôle</h3><p class="small ink2" style="margin-top:8px">Chaque nouvelle photo est vérifiée avant publication : concordance avec votre selfie de contrôle et respect de la politique de contenu (photos suggestives oui, explicites non).</p><p class="small ink2" style="margin-top:8px">Un selfie de contrôle tous les 90 jours garde le badge « Photos récentes ».</p></div>
-        </div>`),
+        </div>
+        <div class="panel" style="margin-top:16px"><div class="row-b wrapr"><h3>Droits et consentement</h3><span class="small muted">Horodatés, révocables à tout moment</span></div>
+          <p class="small muted" style="margin-top:4px">Pour chaque photo ou vidéo : qui détient les droits, et votre consentement à la publication. Révoquer retire le média du site en moins d’une minute.</p>
+          <div class="tbl-wrap" style="margin-top:10px"><table class="tbl"><thead><tr><th>Média</th><th>Droits</th><th>Consentement</th><th>État</th><th></th></tr></thead><tbody>
+          ${[...ph.map((x, k) => ({ k, src: x.src, kind: 'Photo', rights: k === 2 ? 'Photographe partenaire · cession signée' : 'Moi-même (autoportrait)', at: Date.now() - (k + 2) * 864e5 * 9 - k * 37e5 })), { k: 'v', src: 'alma', kind: 'Vidéo · 0:24', rights: 'Moi-même', at: Date.now() - 5 * 864e5 }].map((m) => { const rev = (V.L.pro.revoked || {})[m.k]; return `<tr><td><div class="row" style="gap:10px"><img class="avatar sq" src="${V.img(m.src, 's')}" alt="" style="width:40px;height:48px;border-radius:8px"><span class="small b">${m.kind}${m.k === 'v' ? '' : ' ' + (m.k + 1)}</span></div></td><td class="small">${m.rights}</td><td class="small num">${rev ? `<span class="muted">Révoqué le ${new Date(rev).toLocaleString('fr-CH', { dateStyle: 'short', timeStyle: 'short' })}</span>` : `Donné le ${new Date(m.at).toLocaleString('fr-CH', { dateStyle: 'short', timeStyle: 'short' })}`}</td><td>${rev ? '<span class="badge">Retiré du site</span>' : '<span class="badge ok">Publié</span>'}</td><td class="r">${V.btn(rev ? 'Redonner' : 'Révoquer', { cls: 'xs ' + (rev ? '' : 'danger-ghost'), attrs: `data-rev="${m.k}"` })}</td></tr>`; }).join('')}
+          </tbody></table></div>
+          <p class="hint">Chaque consentement est conservé avec sa date et son heure (heure de Genève). Le retirer ne demande aucune justification.</p></div>`),
+      after: (v) => v.firstElementChild.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-rev]'); if (!b) return;
+        const r = (V.L.pro.revoked = V.L.pro.revoked || {}); const k = b.dataset.rev;
+        if (r[k]) { delete r[k]; V.toast('Consentement redonné : le média repasse en modération avant publication.', { icon: 'check' }); } else { r[k] = Date.now(); V.toast('Consentement révoqué : le média est retiré du site.', { icon: 'eye-off' }); }
+        V.save(); V.render();
+      }),
     };
   }, { mode: 'pro' });
 
@@ -250,7 +270,7 @@
         <div class="grid-2">
           <div class="panel">
             <h3>Programmer une mise en avant</h3>
-            <p class="small muted" style="margin:4px 0 16px">Votre profil apparaît en grand, étiqueté « Sponsorisé », en tête des recherches qui vous correspondent. Aucun crédit n’est débité sans place attribuée.</p>
+            <p class="small muted" style="margin:4px 0 16px">Votre profil apparaît en grand, étiqueté « ${esc(V.sponLabel())} », en tête des recherches qui vous correspondent. Aucun crédit n’est débité sans place attribuée.</p>
             <div class="cr-step"><span class="qf-l">Zone</span><div class="qf-chips" data-cr="zone">
               <button type="button" class="qf-c on" data-v="zone">${esc(V.communeTxt(ME().commune))} · ${V.CREDITS.cost.zone} crédits / jour</button>
               <button type="button" class="qf-c" data-v="canton">Tout le canton · ${V.CREDITS.cost.canton} crédits / jour</button></div></div>
@@ -307,7 +327,7 @@
       if (e.target.closest('[data-cr-go]')) {
         const c = cost();
         // contrôle au moment de la confirmation : place toujours libre et solde suffisant, sinon aucun débit
-        const sh = V.sheet.open({ title: 'Confirmer la mise en avant', body: `<dl class="kv"><dt>Zone</dt><dd>${esc(crZoneTxt(pr.zone))}</dd><dt>Période</dt><dd>du ${crDate(pr.start)} au ${crDate(pr.start + pr.days - 1)}</dd><dt>Coût</dt><dd>${c} crédits</dd><dt>Solde après</dt><dd>${cr.bal - c} crédits</dd></dl><p class="hint">Étiquetée « Sponsorisé », elle n’apparaît que dans les recherches qui vous correspondent. Annulable jusqu’au début, avec restitution des crédits.</p>`, foot: V.btn('Confirmer', { cls: 'sm block', attrs: 'data-ok' }) });
+        const sh = V.sheet.open({ title: 'Confirmer la mise en avant', body: `<dl class="kv"><dt>Zone</dt><dd>${esc(crZoneTxt(pr.zone))}</dd><dt>Période</dt><dd>du ${crDate(pr.start)} au ${crDate(pr.start + pr.days - 1)}</dd><dt>Coût</dt><dd>${c} crédits</dd><dt>Solde après</dt><dd>${cr.bal - c} crédits</dd></dl><p class="hint">Étiquetée « ${esc(V.sponLabel())} », elle n’apparaît que dans les recherches qui vous correspondent. Annulable jusqu’au début, avec restitution des crédits.</p>`, foot: V.btn('Confirmer', { cls: 'sm block', attrs: 'data-ok' }) });
         $('[data-ok]', sh).onclick = async (ev) => {
           ev.currentTarget.classList.add('loading'); await V.wait(700);
           if (!free() || cr.bal < c) { V.sheet.close(); draw(); return V.toast('La place vient d’être prise ou le solde a changé : rien n’a été débité.', { icon: 'info', ms: 4000 }); }
@@ -427,7 +447,59 @@
           <div class="tl-i ok"><b>Médias concordants</b><span>${D.fmtShort(D.addDays(v.media))}</span></div>
           <div class="tl-i cur"><b>Prochain selfie de contrôle</b><span>avant le ${D.fmtShort(D.addDays(v.media + 90))} · moins d’une minute</span></div>
         </div>${V.btn('Faire mon selfie de contrôle', { act: 'selfie-check', arrow: 'camera' })}</div>
+        ${ctlCard()}
         <div class="panel soft"><h3>Pourquoi ces contrôles ?</h3><p class="small ink2" style="margin-top:8px">Ils rassurent les visiteurs et vous distinguent des faux profils. Sans contrôle à jour, le badge tombe, puis le profil est suspendu après un délai de grâce de 14 jours.</p><div class="callout" style="margin-top:12px">${I('lock')}<span>Votre selfie sert uniquement à la comparaison : il n’est jamais publié.</span></div></div></div>`),
+    };
+  }, { mode: 'pro' });
+
+  /* Contrôle planifié : BD propose une date, la professionnelle confirme ou reporte (même état que le back-office) */
+  const ctlGet = () => { const a = V.L.adm2 && V.L.adm2.ctl && V.L.adm2.ctl.alma; if (a) return { ...a, when: new Date(a.when), from: a.from ? new Date(a.from) : null }; const d = V.ADM && V.ADM.PLANNED.find((x) => x.id === 'alma'); return d || null; };
+  const ctlSet = (o) => { V.L.adm2 = V.L.adm2 || {}; V.L.adm2.ctl = V.L.adm2.ctl || {}; V.L.adm2.ctl.alma = { id: 'alma', ...o, when: +o.when, from: o.from ? +o.from : null }; V.L.adm2.log = [...(V.L.adm2.log || []), { at: Date.now(), who: 'Alma', role: 'Professionnelle', what: o.state === 'confirmé' ? 'Contrôle confirmé par la professionnelle' : 'Contrôle reporté par la professionnelle', obj: `Alma · ${V.gva ? V.gva.dt(new Date(+o.when)) : ''}` }]; V.save(); };
+  const ctlCard = () => {
+    const c = ctlGet(); if (!c) return '';
+    const G = V.gva; const lbl = { proposé: ['warn', 'À confirmer'], confirmé: ['ok', 'Confirmé'], reporté: ['v', 'Reporté, en attente de BD'] }[c.state];
+    return `<div class="panel" style="margin-top:14px"><div class="row-b"><h3>Prochain rendez-vous de contrôle</h3><span class="badge ${lbl[0]}">${lbl[1]}</span></div>
+      <div class="adm-ctl"><span class="adm-ctl-d"><b>${G.wd(c.when)}</b><small>${G.t(c.when)}</small></span><div><b>${c.kind}</b><div class="small muted">${G.long(c.when)} à ${G.t(c.when)} · ${c.mode} · heure de Genève</div>${c.from ? `<div class="xs muted">Vous avez reporté la date du ${G.dt(c.from)}</div>` : ''}</div></div>
+      ${c.state === 'proposé' ? `<div class="row wrapr" style="margin-top:12px">${V.btn('Je confirme', { cls: 'sm', arrow: 'check', attrs: 'data-ctl="ok"' })}${V.btn('Proposer un autre moment', { cls: 'sm ghost', arrow: 'calendar', attrs: 'data-ctl="move"' })}</div>` : c.state === 'confirmé' ? '<p class="hint">Un rappel discret vous est envoyé la veille.</p>' : '<p class="hint">L’équipe confirme votre nouvelle date sous 24 h.</p>'}
+      <p class="hint">BD propose la date ; vous confirmez ou proposez un autre moment. Rien n’est publié.</p></div>`;
+  };
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-ctl]'); if (!b || V.parse().path !== '/pro/controles') return;
+    const c = ctlGet();
+    if (b.dataset.ctl === 'ok') { ctlSet({ ...c, state: 'confirmé', by: 'La professionnelle' }); V.toast('Merci : rendez-vous de contrôle confirmé.', { icon: 'calendar' }); return V.render(); }
+    const G = V.gva; const opts = Array.from({ length: 6 }, (_, k) => G.at(k + 3, [10, 14, 17][k % 3], k % 2 ? 30 : 0)).filter((d) => d.getDay() !== 0);
+    const sh = V.sheet.open({ title: 'Proposer un autre moment', body: `<div class="stack">${opts.map((d, k) => V.opt('nd', String(d.getTime()), `${G.long(d)} à ${G.t(d)}`, 'Heure de Genève', { on: !k })).join('')}</div>`, foot: V.btn('Proposer ce moment', { cls: 'sm block', attrs: 'data-ok' }) });
+    $('[data-ok]', sh).onclick = () => { const v = $('input[name="nd"]:checked', sh).value; ctlSet({ ...c, from: c.when, when: +v, state: 'reporté', by: 'La professionnelle' }); V.sheet.close(); V.toast('Nouvelle date proposée. L’équipe BD vous confirme sous 24 h.', { icon: 'calendar' }); V.render(); };
+  });
+
+  /* =================================================================== CONFIDENTIALITÉ (blocage par pays) */
+  const COUNTRIES = [['CH', 'Suisse'], ['FR', 'France'], ['IT', 'Italie'], ['DE', 'Allemagne'], ['AT', 'Autriche'], ['ES', 'Espagne'], ['PT', 'Portugal'], ['BE', 'Belgique'], ['GB', 'Royaume-Uni'], ['RO', 'Roumanie'], ['BG', 'Bulgarie'], ['HU', 'Hongrie'], ['PL', 'Pologne'], ['UA', 'Ukraine'], ['RU', 'Russie'], ['BR', 'Brésil'], ['CO', 'Colombie'], ['VE', 'Venezuela'], ['MA', 'Maroc'], ['TN', 'Tunisie'], ['DZ', 'Algérie'], ['TH', 'Thaïlande'], ['CN', 'Chine'], ['US', 'États-Unis']];
+  V.route(/^\/pro\/confidentialite$/, () => {
+    const pc = (V.L.pro.priv = V.L.pro.priv || { block: ['BR'], faceBlur: false, revealTel: true, history: true });
+    return {
+      title: 'Confidentialité',
+      html: shell('confidentialite', `<div class="dash-head"><div><div class="eyebrow">Vous décidez qui vous voit</div><h1>Centre de confidentialité</h1></div></div>
+        <div class="grid-2">
+          <div class="panel"><div class="row-b"><h3>Bloquer des pays</h3><span class="badge ${pc.block.length ? 'v' : ''}">${pc.block.length} bloqué${pc.block.length > 1 ? 's' : ''}</span></div>
+            <p class="small muted" style="margin:4px 0 12px">Votre profil n’apparaît pas aux visiteurs qui se connectent depuis ces pays (par exemple votre pays d’origine). La localisation est approximative et n’est jamais conservée.</p>
+            <label class="al-search" style="width:100%;margin-bottom:10px">${I('search', 'sm')}<input type="search" placeholder="Chercher un pays…" data-cq aria-label="Chercher un pays" style="width:100%"></label>
+            <div class="chips" id="cty">${COUNTRIES.map(([c, n]) => `<button type="button" class="chip sm${pc.block.includes(c) ? ' on' : ''}" data-cty="${c}"><span class="ck">${I('check', 'sm')}</span>${n}</button>`).join('')}</div>
+            <p class="hint">Un VPN peut contourner ce blocage : il réduit l’exposition, il ne garantit pas l’anonymat.</p></div>
+          <div class="stack">
+            <div class="panel"><h3>Autres réglages</h3>${V.sw('pv-face', pc.faceBlur, 'Flouter mon visage sur toutes les photos', 'Appliqué en moins de 2 min, sans nouvelle modération')}${V.sw('pv-tel', pc.revealTel, 'Numéro révélé seulement au clic', 'Jamais écrit dans le code de la page ni lisible par les robots')}${V.sw('pv-hist', pc.history, 'Ne pas garder l’historique de mes statuts', 'Seul le statut en cours est visible')}${V.sw('seo', V.L.pro.seo !== false, 'Fiche visible dans les moteurs de recherche', 'Désactivez pour n’être trouvée que sur BD')}</div>
+            <div class="panel soft"><h3>Vos données</h3><p class="small ink2" style="margin-top:6px">Téléchargez tout ce que BD conserve sur vous, ou demandez une rectification. Réponse sous 30 jours, sans justification.</p><div class="row wrapr" style="margin-top:12px">${V.btn('Télécharger mes données', { cls: 'sm ghost', arrow: 'download', attrs: 'data-pv="dl"' })}${V.btn('Demander une rectification', { cls: 'sm ghost', attrs: 'data-pv="fix"' })}</div></div>
+          </div>
+        </div>`),
+      after: (v) => {
+        const root = v.firstElementChild;
+        root.addEventListener('click', (e) => {
+          const c = e.target.closest('[data-cty]');
+          if (c) { const on = c.classList.toggle('on'); const code = c.dataset.cty; pc.block = on ? [...new Set([...pc.block, code])] : pc.block.filter((x) => x !== code); V.save(); V.toast(on ? `Profil masqué aux visiteurs depuis : ${c.textContent.trim()}.` : `${c.textContent.trim()} : profil de nouveau visible.`, { icon: 'globe', ms: 2600 }); const b = root.querySelector('.panel .badge'); if (b) { b.textContent = `${pc.block.length} bloqué${pc.block.length > 1 ? 's' : ''}`; b.className = 'badge ' + (pc.block.length ? 'v' : ''); } return; }
+          const d = e.target.closest('[data-pv]'); if (d) V.toast(d.dataset.pv === 'dl' ? 'Démonstration : archive de vos données préparée, envoyée par e-mail sous 24 h.' : 'Demande envoyée à l’équipe BD. Réponse sous 30 jours.', { icon: 'mail' });
+        });
+        root.addEventListener('input', (e) => { if (!e.target.matches('[data-cq]')) return; const q = e.target.value.toLowerCase(); $$('[data-cty]', root).forEach((b) => { b.hidden = q && !b.textContent.toLowerCase().includes(q); }); });
+        root.addEventListener('change', (e) => { const k = { 'pv-face': 'faceBlur', 'pv-tel': 'revealTel', 'pv-hist': 'history' }[e.target.name]; if (k) { pc[k] = e.target.checked; V.save(); V.toast('Réglage enregistré.', { ms: 1600 }); } else if (e.target.name === 'seo') { V.L.pro.seo = e.target.checked; V.save(); } });
+      },
     };
   }, { mode: 'pro' });
 
@@ -435,18 +507,19 @@
   V.route(/^\/pro\/parametres$/, () => ({
     title: 'Paramètres',
     html: shell('parametres', `<div class="dash-head"><h1>Paramètres</h1></div>
-      <div class="grid-2"><div class="panel stack-lg">${V.field('E-mail', { type: 'email', value: 'alma.g@proton.me' })}${V.field('Téléphone professionnel', { value: ME().tel })}${V.field('Langue de l’espace pro', { type: 'select', value: 'fr', options: [['fr', 'Français'], ['en', 'English'], ['es', 'Español'], ['pt', 'Português'], ['ru', 'Русский']] })}</div>
+      <div class="grid-2"><div class="panel stack-lg">${V.field('E-mail', { type: 'email', value: 'alma.g@proton.me' })}${V.field('Téléphone professionnel', { value: ME().tel })}${V.field('Langue de l’espace pro', { type: 'select', value: 'fr', options: V.LANG8 })}</div>
       <div class="panel">${V.sw('2fa', true, 'Double authentification', 'Code par application ou SMS à chaque connexion')}${V.sw('n-exp', true, 'Statut expiré', 'SMS et e-mail')}${V.sw('n-ctrl', true, 'Contrôles à prévoir', 'E-mail, 14 jours avant')}${V.sw('n-bill', true, 'Factures et paiements', 'E-mail')}${V.sw('n-leak', true, 'Alertes de fuite d’images', 'E-mail et SMS')}</div></div>
       <div class="panel" style="margin-top:14px;border-color:color-mix(in srgb,var(--danger) 40%,transparent)"><div class="row-b wrapr"><div><h3>Supprimer mon profil</h3><p class="small ink2" style="margin-top:4px">Profil et photos supprimés définitivement après 7 jours de rétractation. Les données sont effacées sous 30 jours, sauvegardes comprises.</p></div>${V.btn('Supprimer', { act: 'pro-delete', cls: 'sm danger-ghost', arrow: 'trash' })}</div></div>`),
   }), { mode: 'pro' });
 
   /* =================================================================== INSCRIPTION EN 4 ÉTAPES */
   const REG0 = { pseudo: 'Daria', ville: 'Genève', cat: 'Femme', langs: ['fr', 'en', 'ru'], days: [1, 2, 3, 4], bio: '', tel: '78 655 32 10', otp: false, kyc: 0, live: false, slot: null, mode: 'visio', cgu: false, ind: false, photos: [], consent: false, plan: 'visibilite' };
-  const REG = () => (V.S.reg = V.S.reg || Object.assign({}, REG0));
+  const REG = () => { V.L.reg = V.L.reg || Object.assign({}, REG0); V.L.reg.savedAt = Date.now(); return V.L.reg; }; // brouillon gardé sur l'appareil
   const steps = ['Candidature', 'Contrôles', 'Profil', 'Publication'];
   const stepper = (n) => `<div class="stepper">${steps.map((s, k) => `<div class="${k + 1 < n ? 'done' : k + 1 === n ? 'cur' : ''}"><i></i><span>${k + 1}. ${s}</span></div>`).join('')}</div>`;
   const regShell = (n, inner, nextLbl) => `<div class="wrap" style="max-width:860px;padding-top:24px">
-      <div class="row-b"><a class="txt-btn" href="${n > 1 ? '#/pro/inscription/' + (n - 1) : '#/rejoindre'}">${I('arrow-left', 'sm')}${n > 1 ? 'Étape précédente' : 'Retour'}</a><span class="xs muted">Enregistrement automatique · reprise possible plus tard</span></div>
+      <div class="row-b"><a class="txt-btn" href="${n > 1 ? '#/pro/inscription/' + (n - 1) : '#/rejoindre'}">${I('arrow-left', 'sm')}${n > 1 ? 'Étape précédente' : 'Retour'}</a><span class="xs muted reg-draft">${I('check', 'sm')}Brouillon enregistré à ${new Date().toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' })} · reprise possible plus tard</span></div>
+      ${REG().fix && REG().fix.length && n === 3 ? `<div class="callout gold" style="margin-top:14px">${I('edit')}<span><b>Corrections demandées par l’équipe :</b> ${REG().fix.map(esc).join(' · ')}</span></div>` : ''}
       <h1 class="h2" style="margin-top:16px">${['Votre candidature', 'Vos contrôles', 'Votre profil', 'Prête à publier'][n - 1]}</h1>
       ${stepper(n)}${inner}
       <div class="row-b" style="margin-top:24px"><span class="small muted">Étape ${n} sur 4</span>${V.btn(nextLbl || 'Continuer', { act: 'reg-next', id: String(n), arrow: 'arrow-right', cls: 'lg' })}</div>
@@ -457,14 +530,14 @@
     return {
       title: 'Inscription · candidature',
       html: regShell(1, `<div class="panel stack-lg">
-        <div class="form-grid two">${V.field('Pseudo (nom public)', { name: 'pseudo', value: R.pseudo, state: '<span class="ok">' + I('check', 'sm') + 'Disponible</span>' })}${V.field('Ville', { type: 'select', value: R.ville, options: ['Genève', 'Lausanne (bientôt)'] })}</div>
-        <div><p class="small b" style="margin-bottom:8px">Catégorie</p><div class="chips">${['Femme', 'Femme trans', 'Homme', 'Couple', 'Duo'].map((c) => `<button class="chip${R.cat === c ? ' on' : ''}" data-act="reg-cat" data-v="${c}"><span class="ck">${I('check', 'sm')}</span>${c}</button>`).join('')}</div></div>
+        <div class="form-grid two">${V.field('Pseudo (nom public)', { name: 'pseudo', value: R.pseudo, state: '<span class="ok">' + I('check', 'sm') + 'Disponible</span>' })}${V.field('Ville', { type: 'select', value: R.ville, options: ['Genève', 'Lausanne (bientôt)', 'Zurich (bientôt)'] })}</div>
+        <div><p class="small b" style="margin-bottom:8px">Catégorie</p><div class="chips">${['Femme', 'Femme trans', 'Homme', 'Masseuse', 'BDSM', 'Duo ou couple'].map((c) => `<button class="chip${R.cat === c ? ' on' : ''}" data-act="reg-cat" data-v="${c}"><span class="ck">${I('check', 'sm')}</span>${c}</button>`).join('')}</div></div>
         <div><p class="small b" style="margin-bottom:8px">Langues parlées</p><div class="chips">${['fr', 'en', 'es', 'pt', 'ru', 'it', 'de', 'ar', 'uk'].map((l) => `<button class="chip sm${R.langs.includes(l) ? ' on' : ''}" data-act="toggle-on"><span class="ck">${I('check', 'sm')}</span>${V.LANGS[l]}</button>`).join('')}</div><p class="hint">Vous préciserez vos niveaux à l’étape 3.</p></div>
         <div><p class="small b" style="margin-bottom:8px">Disponibilités habituelles</p><div class="chips">${['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'].map((d, k) => `<button class="chip sm${R.days.includes(k) ? ' on' : ''}" data-act="toggle-on"><span class="ck">${I('check', 'sm')}</span>${d}</button>`).join('')}</div></div>
         ${V.field('Présentation (quelques phrases)', { type: 'textarea', name: 'bio', value: R.bio, max: 600 })}
         <div><div class="form-grid two">${V.field('Téléphone professionnel', { name: 'tel', value: R.tel, suffix: '+41' })}${V.field('E-mail', { type: 'email', value: 'daria.m@proton.me' })}</div>
           <div id="otpBox" style="margin-top:12px">${R.otp ? `<div class="callout ok">${I('check')}<span>Numéro vérifié.</span></div>` : V.btn('Recevoir le code par SMS', { act: 'otp-send', cls: 'sm ghost', arrow: 'sms' })}</div></div>
-        ${V.field('Langue de votre espace pro', { type: 'select', value: 'fr', options: [['fr', 'Français'], ['en', 'English'], ['es', 'Español'], ['pt', 'Português'], ['ru', 'Русский']] })}
+        ${V.field('Langue de votre espace pro', { type: 'select', value: 'fr', options: V.LANG8 })}
       </div>`),
       after: (v) => {
         v.firstElementChild.addEventListener('click', (e) => { const c = e.target.closest('[data-act="toggle-on"]'); if (c) c.classList.toggle('on'); const k = e.target.closest('[data-act="reg-cat"]'); if (k) { $$('[data-act="reg-cat"]', v).forEach((b) => b.classList.toggle('on', b === k)); R.cat = k.dataset.v; V.save(); } });
@@ -572,9 +645,25 @@
           <div class="tl-i"><b>Photos en modération</b><span>moins de 2 heures</span></div>
           <div class="tl-i"><b>Mise en ligne</b><span>avec votre consentement horodaté</span></div>
         </div></div>
+        ${regStatus(R)}
         <div class="row wrapr" style="margin-top:20px;justify-content:center">${V.btn('Voir le dossier côté équipe', { href: '#/admin/candidature/c1', cls: 'dark', arrow: true })}${V.btn('Retour au site', { href: '#/', cls: 'ghost' })}</div></div>`,
+      after: (v) => v.firstElementChild.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-rs]'); if (!b) return;
+        const A2 = (V.L.adm2 = V.L.adm2 || {}); A2.cand = A2.cand || {};
+        if (b.dataset.rs === 'sim') { A2.cand.c1 = { status: 'à compléter', msg: 'Merci de remplacer la photo 2 (floue) et de préciser vos langues.', at: Date.now() }; R.fix = ['Remplacer la photo 2 (floue)', 'Préciser vos langues et leur niveau']; V.save(); V.toast('Démonstration : l’équipe demande des corrections.', { icon: 'edit' }); return V.render(); }
+        if (b.dataset.rs === 'send') { A2.cand.c1 = { status: 'en vérification', msg: 'Corrections reçues, merci.', at: Date.now() }; R.fix = []; V.save(); V.toast('Corrections envoyées : votre dossier repasse en vérification.', { icon: 'check' }); return V.render(); }
+      }),
     };
   }, { mode: 'pro' });
+
+  /* Statut du dossier vu par la candidate : lu depuis la décision de l'équipe (back-office) */
+  const regStatus = (R) => {
+    const c = (V.L.adm2 && V.L.adm2.cand && V.L.adm2.cand.c1) || null;
+    if (c && c.status === 'à compléter') return `<div class="panel" style="margin-top:16px;border-color:var(--gold)"><div class="row-b"><h3>Corrections demandées</h3><span class="badge warn">À compléter</span></div><p class="small ink2" style="margin-top:6px">« ${esc(c.msg || '')} »</p>${(R.fix || []).length ? `<ul class="svc" style="margin-top:10px">${R.fix.map((x) => `<li>${I('edit')}${esc(x)}</li>`).join('')}</ul>` : ''}<div class="row wrapr" style="margin-top:12px">${V.btn('Corriger mon profil', { href: '#/pro/inscription/3', cls: 'sm', arrow: true })}${V.btn('J’ai corrigé, renvoyer', { cls: 'sm ghost', attrs: 'data-rs="send"' })}</div><p class="hint">Votre brouillon est conservé : rien n’est perdu.</p></div>`;
+    if (c && c.status === 'accepté') return `<div class="callout ok" style="margin-top:16px">${I('check')}<span><b>Dossier accepté.</b> Choisissez votre formule pour la mise en ligne.</span></div>`;
+    if (c && c.status === 'refusé') return `<div class="callout danger" style="margin-top:16px">${I('x')}<span><b>Dossier refusé.</b> ${esc(c.msg || '')}</span></div>`;
+    return `<div class="panel soft" style="margin-top:16px"><div class="row-b wrapr"><span class="small ink2">${I('clock', 'sm')} Dossier en vérification. Si l’équipe demande une correction, vous la retrouverez ici, avec votre brouillon.</span>${V.btn('Démo : l’équipe demande une correction', { cls: 'xs ghost', attrs: 'data-rs="sim"' })}</div></div>`;
+  };
 
   /* ---------- Actions de l'inscription ---------- */
   V.regNext = (n) => {

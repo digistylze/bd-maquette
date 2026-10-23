@@ -69,7 +69,7 @@
       map.on('click', (e) => { st.me = [e.latlng.lat, e.latlng.lng]; meMk.setLatLng(st.me); render(); hideHint(); });
       P.forEach((p) => {
         const now = V.statusOf(p).t === 'now';
-        const m = L.marker(posOf(p), { title: `${p.name}, dès ${p.from}.–`, riseOnHover: true, icon: L.divIcon({ className: 'mp-mk', html: `<div class="mp-pin${now ? ' on' : ''}"><i class="mp-ph" style="background-image:url('${V.img(p.photos[0], 's')}')"></i><span class="mp-tag"><b>${esc(p.name)}</b>${p.from}.–</span><i class="mp-tip"></i></div>`, iconSize: [PIN.w, PIN.h], iconAnchor: [PIN.w / 2, PIN.h] }) }).addTo(map);
+        const m = L.marker(posOf(p), { title: `${p.name}, ${V.fromTxt(p)}`, riseOnHover: true, icon: L.divIcon({ className: 'mp-mk', html: `<div class="mp-pin${now ? ' on' : ''}"><i class="mp-ph" style="background-image:url('${V.img(p.photos[0], 's')}')"></i><span class="mp-tag"><b>${esc(p.name)}</b>${p.from ? p.from + '.–' : 'tarif ?'}</span><i class="mp-tip"></i></div>`, iconSize: [PIN.w, PIN.h], iconAnchor: [PIN.w / 2, PIN.h] }) }).addTo(map);
         m.on('click', () => select(p.id, true));
         marks[p.id] = m;
       });
@@ -137,7 +137,7 @@
       Object.entries(marks).forEach(([k, m]) => { const el = m.getElement(); if (el) el.classList.toggle('dim', !ids.has(k)); });
       declutter();
       $('#mpCount', v).innerHTML = `<b>${list.length}</b> profil${list.length > 1 ? 's' : ''}${st.r ? ` à moins de ${st.r} km` : ''}`;
-      $('#mpList', v).innerHTML = list.length ? list.map(({ p, d }) => `<button type="button" class="mp-it${st.sel === p.id ? ' on' : ''}" data-id="${p.id}"><img src="${V.img(p.photos[0], 's')}" alt=""><span class="mp-tx"><b>${esc(p.name)} <span>${V.ageShort(p)}</span>${I('badge-check', 'sm')}</b><small>${I('map-pin', 'sm')}${V.communeTxt(p.commune)} · ${kmTxt(d)}</small>${V.statusPill(p, true, true)}</span><span class="mp-pr">dès<b>${p.from}.–</b></span></button>`).join('') : `<p class="small muted" style="padding:16px 4px">Aucun profil dans ce rayon. Élargissez la zone ou déplacez-vous sur la carte.</p>`;
+      $('#mpList', v).innerHTML = list.length ? list.map(({ p, d }) => `<button type="button" class="mp-it${st.sel === p.id ? ' on' : ''}" data-id="${p.id}"><img src="${V.img(p.photos[0], 's')}" alt=""><span class="mp-tx"><b>${esc(p.name)} <span>${V.ageShort(p)}</span>${I('badge-check', 'sm')}</b><small>${I('map-pin', 'sm')}${V.communeTxt(p.commune)} · ${kmTxt(d)}</small>${V.statusPill(p, true, true)}</span><span class="mp-pr">${p.from ? `dès<b>${p.from}.–</b>` : 'tarif<b>non renseigné</b>'}</span></button>`).join('') : `<p class="small muted" style="padding:16px 4px">Aucun profil dans ce rayon. Élargissez la zone ou déplacez-vous sur la carte.</p>`;
       if (map) {
         if (ring) { ring.remove(); ring = null; }
         if (st.r) { ring = L.circle(st.me, { radius: +st.r * 1000, color: '#4b1c71', weight: 1, fillColor: '#4b1c71', fillOpacity: .05 }).addTo(map); map.fitBounds(ring.getBounds(), { padding: [30, 30] }); }

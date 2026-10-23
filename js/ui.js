@@ -103,7 +103,7 @@
         </div>
         <div class="m-foot">
           <button class="m-chip" data-act="theme">${V.i('moon', 'sm')}<span data-theme-label>Thème sombre</span></button>
-          <button class="m-chip" data-act="lang">${V.i('globe', 'sm')}FR · EN · ES · PT · RU</button>
+          <button class="m-chip" data-act="lang">${V.i('globe', 'sm')}Français · 8 langues</button>
           <button class="m-chip" data-act="demo-news">${V.i('zap', 'sm')}Démo : simuler une nouveauté</button>
           <button class="m-chip" data-act="panic">${V.i('door', 'sm')}Sortie rapide</button>
         </div>
@@ -308,7 +308,7 @@
       return `<div class="s-item${chg ? ' chg' : ''}${o.added === p.id && ui.sessTab === 'fav' ? ' just' : ''}" data-id="${p.id}">
         ${ui.sessTab === 'fav' ? `<span class="grip" title="Glisser pour réordonner">${V.i('grip', 'sm')}</span>` : ''}
         <img src="${V.img(p.photos[0], 's')}" alt="">
-        <div class="t" data-act="open" data-id="${p.id}"><b>${V.esc(p.name)}, ${V.ageShort(p)}</b><span><i class="${s.cls}"></i>${s.short}${chg ? ' · <span style="color:var(--gold-2)">changé</span>' : ''}${o.drawer ? ` · dès ${p.from}.–` : ''}</span></div>
+        <div class="t" data-act="open" data-id="${p.id}"><b>${V.esc(p.name)}, ${V.ageShort(p)}</b><span><i class="${s.cls}"></i>${s.short}${chg ? ' · <span style="color:var(--gold-2)">changé</span>' : ''}${o.drawer ? ` · ${V.fromTxt(p)}` : ''}</span></div>
         ${ui.sessTab === 'fav' ? `<button class="x" data-act="fav" data-id="${p.id}" aria-label="Retirer">${V.i('x', 'sm')}</button>` : `<button class="x" data-act="fav" data-id="${p.id}" aria-label="Ajouter">${V.i(V.isSel(p.id) ? 'check' : 'plus', 'sm')}</button>`}
       </div>`;
     }).join('');

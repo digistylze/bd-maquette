@@ -16,9 +16,12 @@ window.V = window.V || {};
     { id: 'femme', label: 'Femmes' },
     { id: 'trans', label: 'Femmes trans' },
     { id: 'homme', label: 'Hommes' },
-    { id: 'duo', label: 'Couples et duos' },
+    { id: 'masseuse', label: 'Masseuses' },
+    { id: 'bdsm', label: 'BDSM' },
+    { id: 'duo', label: 'Duos et couples' },
   ];
 
+  V.LANG8 = [['fr', 'Français'], ['en', 'English'], ['de', 'Deutsch'], ['it', 'Italiano'], ['es', 'Español'], ['pt', 'Português'], ['ru', 'Русский'], ['ar', 'العربية']];
   V.LANGS = { fr: 'Français', en: 'Anglais', de: 'Allemand', it: 'Italien', es: 'Espagnol', pt: 'Portugais', ru: 'Russe', ar: 'Arabe', uk: 'Ukrainien', zh: 'Mandarin', sv: 'Suédois', th: 'Thaï', ca: 'Catalan', ln: 'Lingala' };
   V.ORIGINS = ['Europe', 'Afrique', 'Amérique latine', 'Asie', 'Moyen-Orient', 'Métisse', 'Non précisée'];
   /* Lieux affichés sur les fiches : quartiers de la ville (c = commune de rattachement) et autres communes */
@@ -311,9 +314,9 @@ window.V = window.V || {};
   V.PLAN_DUO = { id: 'duo', name: 'Profil duo ou couple', price: 299, note: 'Un abonnement pour le profil commun. Payé par l’une des deux ou partagé à parts égales.' };
   V.LAUNCH = { months: 2, until: () => V.date.addDays(61), label: '2 mois offerts, sans carte' };
   V.ADDONS = [
-    { ico: 'sparkles', name: 'Crédits de mise en avant', price: 'dès CHF 7', unit: 'le crédit', desc: 'Profil en grand, étiqueté « Sponsorisé », dans les recherches qui vous correspondent. 3 crédits par jour dans votre quartier, 5 pour tout le canton.' },
+    { ico: 'sparkles', name: 'Crédits de mise en avant', price: 'dès CHF 7', unit: 'le crédit', desc: 'Profil en grand, toujours étiqueté comme mise en avant payante, dans les recherches qui vous correspondent. 3 crédits par jour dans votre quartier, 5 pour tout le canton.' },
     { ico: 'camera', name: 'Shooting photo', price: 'CHF 290', unit: 'au lieu de 450', desc: 'Session groupée de 4 à 5 escortes, retouches comprises. Vidéo + CHF 190.' },
-    { ico: 'languages', name: 'Rédaction et traduction', price: 'CHF 120', unit: 'une fois', desc: 'Présentation écrite avec vous et traduite en 5 langues par des natifs.' },
+    { ico: 'languages', name: 'Rédaction et traduction', price: 'CHF 120', unit: 'une fois', desc: 'Présentation écrite avec vous et traduite dans les 8 langues du site par des natifs.' },
     { ico: 'phone', name: 'Réceptionniste', price: 'dès CHF 390', unit: '/ mois · bientôt', desc: 'Prise de rendez-vous en français au forfait fixe, jamais à la commission. En cours de validation.', soon: true },
   ];
   V.FEATURED = { perDay: 29, perWeek: 149, slotsPerDay: 6 };

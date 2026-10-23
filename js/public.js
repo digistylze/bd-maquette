@@ -11,16 +11,6 @@
   const storyItem = (p) => `<a class="st-item${(V.S.stSeen || []).includes(p.id) ? ' seen' : ''}" href="#/story/${p.id}"><span class="st-ph"><img src="${V.img(p.photos[0], 's')}" alt="Photo de ${esc(p.name)}" loading="lazy" draggable="false">${V.statusOf(p).t === 'now' ? '<i class="st-on" title="En ligne"></i>' : ''}</span><b>${esc(p.name)}</b><span>${V.communeTxt(p.commune)}</span></a>`;
   const MODE_TXT = { incall: 'Reçoit', outcall: 'Se déplace', both: 'Reçoit · déplace' };
   const statusCard = (p) => V.card(p, { ago: true, noHide: true });
-  /* Avis de démonstration (js/profils-details.js) : les plus récents, un par profil, pour l'accueil */
-  const latestReviews = (n = 8) => {
-    const seen = new Set();
-    return (V.AVIS || []).slice().sort((a, b) => a.ago - b.ago).filter((r) => !seen.has(r.to) && seen.add(r.to)).slice(0, n);
-  };
-  const reviewCard = (r) => {
-    const p = V.byId(r.to); if (!p || !V.visible(p)) return '';
-    const prenom = p.name.split(' ')[0];
-    return `<article class="av-card"><a class="av-ph" href="#/profil/${p.id}" data-act="open" data-id="${p.id}"><img src="${V.img(p.photos[0], 's')}" alt="Photo de ${esc(p.name)}" loading="lazy" draggable="false"></a><div class="av-head"><b class="av-to">${esc(p.name)}</b><span class="av-sub">a reçu un avis de <b>${esc(r.by)}</b></span></div><div class="av-meta">${V.i('map-pin', 'sm')}<span>${V.communeTxt(p.commune)} · ${V.agoTxt(Date.now() - r.ago)}</span></div><p class="av-txt">« ${esc(r.txt)} »</p>${V.btn('Voir le profil de ' + prenom, { href: '#/profil/' + p.id, cls: 'sm ghost', arrow: true })}</article>`;
-  };
   const CTRL = {
     media: ['Selfie de contrôle validé', 'Comparé aux photos publiées. Le prochain aura lieu dans 90 jours au plus tard.'],
     id: ['Âge et identité vérifiés', 'Pièce d’identité et selfie vivant, chez un prestataire suisse.'],
@@ -63,7 +53,7 @@
       if (!els[0].isConnected) return clearInterval(V.liveTimer);
       const [m, u] = els;
       tween(m, Math.min(21, Math.max(15, +m.dataset.val + Math.round(Math.random() * 2 - 1))));
-      tween(u, Math.min(1480, Math.max(1120, +u.dataset.val + Math.round(Math.random() * 60 - 26))));
+      if (u) tween(u, Math.min(1480, Math.max(1120, +u.dataset.val + Math.round(Math.random() * 60 - 26)))); // compteur de visiteurs : seulement s'il est réel
     }, 4000);
   };
   const H2 = (t) => `<h2 class="h2 rv-h"><span class="ln"><span>${t}</span></span></h2>`;
@@ -96,7 +86,7 @@
           <div class="h2-cta">${V.btn('Voir qui est disponible', { href: '#/profils?dispo=now', cls: 'gold lg', arrow: true })}${V.btn('Publier mon profil', { href: '#/rejoindre', cls: 'ghost lg d-only', attrs: WHITE_GHOST })}<a class="h3-pro m-only" href="#/rejoindre">Escorte à Genève ? Publiez votre profil</a></div>
           <div class="h2-stats">
             <div class="h2-stat"><span class="avs">${nowList.slice(0, 4).map((p) => `<img src="${V.img(p.photos[0], 's')}" alt="">`).join('')}</span><span><b data-count="18">18</b><small>disponibles en ce moment</small></span></div>
-            <div class="h2-stat"><i class="dot-live"></i><span><b data-count="1284">1’284</b><small>visiteurs en ce moment</small></span></div>
+            ${Number.isFinite(V.LIVE_VISITORS) ? `<div class="h2-stat"><i class="dot-live"></i><span><b data-count="${V.LIVE_VISITORS}">${V.nf(V.LIVE_VISITORS)}</b><small>visiteurs en ce moment</small></span></div>` : ''}
           </div>
         </div>
       </section>
@@ -122,10 +112,11 @@
 
       ${coverflow(hot, nowList.length)}
 
-      <section class="section-sm"><div class="wrap">
-        <div class="sec-head"><div>${H2('Ils en parlent')}<p class="sec-note">Les derniers avis laissés après un rendez-vous.</p></div></div>
-        ${V.carousel(latestReviews().map(reviewCard).join(''), 'wide')}
-      </div></section>
+      <section class="section-sm"><div class="wrap"><div class="fb-band">
+        <div class="fb-ic">${I('shield')}</div>
+        <div class="sp"><h2 class="fb-t">Un rendez-vous à raconter ? <em>Dites-le à BD, en privé.</em></h2><p>Pas d’avis publics ni de notes : votre retour, positif ou non, va uniquement à l’équipe BD. Il aide à vérifier les profils et à protéger tout le monde.</p></div>
+        ${V.btn('Laisser un retour privé', { cls: 'gold', act: 'feedback', arrow: true })}
+      </div></div></section>
 
       <section class="section-sm"><div class="wrap">
         <div class="sec-head"><div>${H2('Nos partenaires')}<p class="sec-note">Des adresses de confiance à Genève. Emplacements de démonstration, au forfait mensuel.</p></div><a class="link d-only" href="#/rejoindre">Devenir partenaire</a></div>
@@ -176,7 +167,7 @@
       <div class="wrap cf-in">
         <div class="cf-head"><div class="eyebrow">${I('sparkles', 'sm')}Cette semaine sur BD</div><h2 class="cf-title">Les profils <em>à la une</em></h2></div>
         <div class="cf-stage" tabindex="0">
-          <div class="cf-track">${list.map((p, k) => `<article class="cf-card" data-i="${k}" data-id="${p.id}" data-act="open"><div class="cf-ph"><img src="${V.img(p.photos[0])}" alt="Photo de ${esc(p.name)}" draggable="false"><span class="cf-hot">${I('sparkles', 'sm')}Sponsorisé</span>${V.statusPill(p, false, true)}<span class="cf-grad"></span><div class="cf-cap"><b>${esc(p.name)} <span>${V.ageShort(p)}</span>${I('badge-check', 'sm')}</b><small>${I('map-pin', 'sm')}${V.communeTxt(p.commune)} · dès ${p.from}.–</small></div></div></article>`).join('')}</div>
+          <div class="cf-track">${list.map((p, k) => `<article class="cf-card" data-i="${k}" data-id="${p.id}" data-act="open"><div class="cf-ph"><img src="${V.img(p.photos[0])}" alt="Photo de ${esc(p.name)}" draggable="false"><span class="cf-hot">${I('sparkles', 'sm')}${esc(V.sponLabel())}</span>${V.statusPill(p, false, true)}<span class="cf-grad"></span><div class="cf-cap"><b>${esc(p.name)} <span>${V.ageShort(p)}</span>${I('badge-check', 'sm')}</b><small>${I('map-pin', 'sm')}${V.communeTxt(p.commune)} · ${V.fromTxt(p)}</small></div></div></article>`).join('')}</div>
           <button type="button" class="cf-nav prev" aria-label="Profil précédent">${I('chevron-left')}</button><button type="button" class="cf-nav next" aria-label="Profil suivant">${I('chevron-right')}</button>
         </div>
         <div class="cf-info">
@@ -201,7 +192,7 @@
       dots.forEach((b, j) => b.classList.toggle('on', j === k));
       cards.forEach((c, j) => c.classList.toggle('cur', j === k));
       const p = V.byId(cards[k].dataset.id);
-      $('#cfLegend', root).innerHTML = `<b>${esc(p.name)}, ${V.ageShort(p)} ans</b><span>${esc(p.type || V.modeTxt(p.mode))} · ${V.communeTxt(p.commune)} · dès ${p.from}.–</span>`;
+      $('#cfLegend', root).innerHTML = `<b>${esc(p.name)}, ${V.ageShort(p)} ans</b><span>${esc(p.type || V.modeTxt(p.mode))} · ${V.communeTxt(p.commune)} · ${V.fromTxt(p)}</span>`;
       $('#cfCta', root).href = '#/profil/' + p.id;
     };
     const place = () => {
@@ -294,15 +285,15 @@
   const QF_MAIN = [
     ['dispo', 'Disponibilité', [['', 'Toutes'], ['now', 'Maintenant'], ['today', 'Aujourd’hui'], ['tomorrow', 'Demain']]],
     ['mode', 'Rendez-vous', [['', 'Indifférent'], ['incall', 'Reçoit'], ['outcall', 'Se déplace']]],
-    ['prix', 'Budget pour 1 h', [['', 'Tous'], ['0-300', 'Jusqu’à 300'], ['300-400', '300 à 400'], ['400-1000', '400 et plus']]],
   ];
   const QF_ADV = [
-    ['age', 'Âge', [['', 'Tous'], ['18-25', '18 à 25'], ['26-30', '26 à 30'], ['31-40', '31 à 40'], ['41-99', '41 et plus']]],
     ['sil', 'Silhouette', [['', 'Toutes'], ['mince', 'Mince'], ['sportive', 'Sportive'], ['pulpeuse', 'Pulpeuse']]],
     ['hair', 'Cheveux', [['', 'Tous'], ['brun', 'Brun'], ['blond', 'Blond'], ['châtain', 'Châtain'], ['roux', 'Roux'], ['noir', 'Noir']]],
   ];
   const QF_SVC = ['s7', 'p2', 'p4', 'p14', 'p20', 'p23', 'p24', 's3', 's1'];
-  const QF_LANG = ['fr', 'en', 'es', 'pt', 'ru', 'de', 'it'];
+  const QF_LANG = ['fr', 'en', 'de', 'it', 'es', 'pt', 'ru', 'ar'];
+  const CLIENTS = [['solo', 'Seul ou seule'], ['couple', 'Couple'], ['multi', 'Plusieurs clients'], ['pro', 'Avec une autre professionnelle']];
+  const CLV = (v) => (v === 'oui' ? '<span class="yes">Accepté</span>' : v === 'non' ? '<span class="no">Refusé</span>' : v === 'discuter' ? '<span class="tbd">À discuter</span>' : 'non renseigné');
   const qfChips = (k, opts) => `<div class="qf-chips" data-qk="${k}">${opts.map(([v, l]) => `<button type="button" class="qf-c${v ? '' : ' on'}" data-qv="${v}">${l}</button>`).join('')}</div>`;
   const qfGroup = (label, inner) => `<div class="qf-g"><span class="qf-l">${label}</span>${inner}</div>`;
   const quickFilters = (L) => {
@@ -312,13 +303,16 @@
         <div class="qf-box">
         <div class="qf-panel">
           <div class="qf-top">
-            ${qfGroup('Catégorie', qfChips('cat', [['', 'Toutes'], ['femme', 'Femmes'], ['trans', 'Trans'], ['homme', 'Hommes'], ['duo', 'Couples']]))}
+            ${qfGroup('Catégorie', qfChips('cat', [['', 'Toutes'], ['femme', 'Femmes'], ['trans', 'Trans'], ['homme', 'Hommes'], ['masseuse', 'Masseuses'], ['bdsm', 'BDSM'], ['duo', 'Duos et couples']]))}
             ${QF_MAIN.map(([k, l, o]) => qfGroup(l, qfChips(k, o))).join('')}
+            ${qfGroup('Budget pour 1 h', `<div class="qf-range">${V.rangeHTML('prix', 200, 1000, 200, 1000, ' CHF', { step: 50, gap: 50, plus: 1 })}</div><div class="qf-chips"><button type="button" class="qf-c" data-qt="prixnr">Inclure « tarif non renseigné »</button></div>`)}
             ${qfGroup('Quartier', `<label class="qf-sel">${I('map-pin', 'sm')}<select data-qs="commune" aria-label="Quartier"><option value="">Tout Genève</option>${communes.map((c) => `<option value="${c.id}">${esc(c.label)}</option>`).join('')}</select>${I('chevron-down', 'sm')}</label>`)}
             ${qfGroup('Langue', `<div class="qf-chips" data-qm="lang">${QF_LANG.map((l) => `<button type="button" class="qf-c" data-qv="${l}">${flag(l)}${l.toUpperCase()}</button>`).join('')}</div>`)}
           </div>
           <div class="qf-adv" hidden>
+            ${qfGroup('Âge (vérifié)', `<div class="qf-range">${V.rangeHTML('age', 18, 60, 18, 60, ' ans', { plus: 1, gap: 2 })}</div>`)}
             ${QF_ADV.map(([k, l, o]) => qfGroup(l, qfChips(k, o))).join('')}
+            ${qfGroup('Clientèle et composition', `<div class="qf-chips" data-qm="cl">${CLIENTS.map(([k, l]) => `<button type="button" class="qf-c" data-qv="${k}">${l}</button>`).join('')}</div><div class="qf-chips"><button type="button" class="qf-c" data-qt="cld">Inclure « à discuter »</button></div>`)}
             ${qfGroup('Pratiques', `<div class="qf-chips" data-qm="svc">${QF_SVC.map((s) => `<button type="button" class="qf-c" data-qv="${s}">${V.SERVICES[s]}</button>`).join('')}</div>`)}
             ${qfGroup('Options', `<div class="qf-chips">${[['nosmoke', 'Non-fumeuse'], ['acc', 'Accepte les couples'], ['video', 'Avec vidéo'], ['face', 'Visage visible']].map(([k, l]) => `<button type="button" class="qf-c" data-qt="${k}">${l}</button>`).join('')}</div>`)}
           </div>
@@ -341,12 +335,13 @@
   };
   function quickFiltersAfter(v) {
     const box = $('#qf', v); if (!box) return;
-    const q = {}, multi = { lang: new Set(), svc: new Set() }, tog = new Set();
+    const q = {}, multi = { lang: new Set(), svc: new Set(), cl: new Set() }, tog = new Set();
     const grid = $('#qfGrid', box), count = $('#qfCount', box), more = $('#qfMore', box);
     const build = () => {
       const qq = { ...q };
       if (multi.lang.size) qq.lang = [...multi.lang].join(',');
       if (multi.svc.size) qq.svc = [...multi.svc].join(',');
+      if (multi.cl.size) qq.cl = [...multi.cl].join(',');
       tog.forEach((t) => { qq[t] = t === 'acc' ? 'Couples' : '1'; });
       return qq;
     };
@@ -358,7 +353,7 @@
       const qs = new URLSearchParams(Object.entries(qq).filter(([, x]) => x)).toString();
       more.innerHTML = L.length > 4 ? V.btn(`Voir les ${L.length} profils`, { href: '#/profils' + (qs ? '?' + qs : ''), cls: 'ghost', arrow: true }) : '';
       more.classList.toggle('m-only', L.length <= 8); // sur mobile on n'affiche que 4 cartes
-      const nAdv = ['age', 'sil', 'hair'].filter((k) => q[k]).length + multi.svc.size + tog.size;
+      const nAdv = ['age', 'sil', 'hair'].filter((k) => q[k]).length + multi.svc.size + multi.cl.size + [...tog].filter((t) => !['prixnr'].includes(t)).length;
       const nb = $('.qf-n', box); nb.hidden = !nAdv; nb.textContent = nAdv;
       grid.classList.remove('flash'); void grid.offsetWidth; grid.classList.add('flash');
     };
@@ -374,30 +369,65 @@
       const adv = e.target.closest('[data-qf-adv]');
       if (adv) { const pane = $('.qf-adv', box); pane.hidden = !pane.hidden; adv.setAttribute('aria-expanded', String(!pane.hidden)); adv.classList.toggle('on', !pane.hidden); return; }
       if (e.target.closest('[data-qf-reset]')) {
-        Object.keys(q).forEach((k) => delete q[k]); multi.lang.clear(); multi.svc.clear(); tog.clear();
+        Object.keys(q).forEach((k) => delete q[k]); multi.lang.clear(); multi.svc.clear(); multi.cl.clear(); tog.clear();
+        $$('.range', box).forEach((r) => { const [a, b] = $$('input', r); a.value = a.min; b.value = b.max; V.ui.range(r); });
         $$('.qf-chips', box).forEach((g) => $$('.qf-c', g).forEach((x, j) => x.classList.toggle('on', !!g.dataset.qk && j === 0)));
         $$('select[data-qs]', box).forEach((s) => { s.selectedIndex = 0; });
         render();
       }
     });
     $$('select[data-qs]', box).forEach((s) => s.addEventListener('change', () => { q[s.dataset.qs] = s.value; render(); }));
+    box.addEventListener('range', (e) => { const r = e.target.closest('.range'); const [a, b] = $$('input', r); const k = r.dataset.name; const full = +a.value === +a.min && +b.value === +b.max; q[k] = full ? '' : `${a.value}-${b.value}`; render(); });
     render();
   }
 
   V.footer = () => `<footer class="footer"><div class="wrap">
     <div class="cols">
       <div class="f-brand">${V.ui.brand()}<p>BD met en relation des adultes à Genève. Les profils sont vérifiés, les contacts se font directement, sans intermédiaire ni commission.</p>
-        <div class="f-langs">${['Français', 'English', 'Español', 'Português', 'Русский'].map((l, k) => `<button type="button" class="${k ? '' : 'on'}" data-act="lang">${l}</button>`).join('')}</div>
+        <div class="f-langs">${V.LANG8.map(([c, l], k) => `<button type="button" class="${k ? '' : 'on'}" data-act="lang-set" data-l="${c}"${c === 'ar' ? ' lang="ar" dir="rtl"' : ''}>${l}</button>`).join('')}</div>
         <div class="row">${V.btn('Créer mon profil', { href: '#/pro/inscription/1', cls: 'gold sm', arrow: true })}${V.btn('Espace pro', { href: '#/pro', cls: 'ghost sm', attrs: WHITE_GHOST })}</div></div>
-      <div><h5>Liens rapides</h5><ul><li><a href="#/profils">Tous les profils</a></li><li><a href="#/profils?dispo=now">Disponibles maintenant</a></li><li><a href="#/profils?tri=new">Nouvelles arrivées</a></li><li><a href="#/profils?cat=duo">Couples et duos</a></li><li><a href="#/masques">Profils masqués</a></li></ul></div>
-      <div><h5>Quartiers</h5><ul>${V.COMMUNES.slice(0, 6).map((c) => `<li><a href="#/geneve/${c.id}">${c.label}</a></li>`).join('')}</ul></div>
+      <div><h5>Liens rapides</h5><ul><li><a href="#/profils">Tous les profils</a></li><li><a href="#/profils?dispo=now">Disponibles maintenant</a></li><li><a href="#/profils?tri=new">Nouvelles arrivées</a></li><li><a href="#/profils?cat=duo">Duos et couples</a></li><li><a href="#/masques">Profils masqués</a></li></ul></div>
+      <div><h5>Quartiers</h5><ul>${V.COMMUNES.slice(0, 6).map((c) => `<li><a href="#/geneve/${c.id}">${c.label}</a></li>`).join('')}</ul><h5 style="margin-top:18px">Bientôt</h5><ul><li><a href="#/ville/lausanne">Lausanne</a></li><li><a href="#/ville/zurich">Zurich</a></li></ul></div>
       <div><h5>À propos</h5><ul><li><a href="#/verifications">Comment nous vérifions</a></li><li><a href="#/securite">Sécurité et signalement</a></li><li><a href="#/rejoindre">Nous rejoindre</a></li><li><a href="#/legal/cg-visiteurs">Conditions d’utilisation</a></li><li><a href="#/legal/confidentialite">Confidentialité</a></li><li><a href="#/legal/mentions">Mentions légales</a></li></ul></div>
     </div>
     <div class="legal"><span>© ${new Date().getFullYear()} BD · maquette, profils fictifs</span><span class="swiss"><i></i>Données hébergées en Suisse</span><span>Police 117 · Urgences 144</span></div>
   </div></footer>`;
 
   /* =================================================================== GALERIE */
-  const FKEYS = ['cat', 'dispo', 'lang', 'mode', 'svc', 'commune', 'origin', 'hair', 'sil', 'acc', 'age', 'prix', 'nosmoke', 'recent', 'video', 'face', 'q', 'tri', 'chg'];
+  const FKEYS = ['cat', 'dispo', 'lang', 'mode', 'svc', 'commune', 'origin', 'hair', 'sil', 'acc', 'cl', 'cld', 'age', 'prix', 'prixnr', 'nosmoke', 'recent', 'video', 'face', 'q', 'tri', 'chg'];
+  /* Recherche plein texte : présentations, pratiques et attributs, en 8 langues, tolérante aux fautes de frappe */
+  const norm = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\u0400-\u04ff\u0600-\u06ff]+/g, ' ').trim();
+  const SYN = [
+    ['massage', 'massaggio', 'masaje', 'massagem', 'massagen', 'массаж', 'تدليك'], ['tantra', 'tantrique', 'tantrico', 'tantrisch', 'тантра'],
+    ['domination', 'dominatrice', 'dominazione', 'dominacion', 'dominacao', 'dominanz', 'bdsm', 'доминирование'], ['couple', 'couples', 'coppia', 'pareja', 'casal', 'paar', 'пара'],
+    ['embrasser', 'bisous', 'baiser', 'kiss', 'kissing', 'kuss', 'bacio', 'beso', 'beijo', 'поцелуй'], ['petite amie', 'gfe', 'girlfriend', 'fidanzata', 'novia', 'namorada', 'freundin'],
+    ['lingerie', 'dessous', 'lenceria', 'intimo', 'unterwasche', 'белье'], ['anglais', 'english', 'englisch', 'inglese', 'ingles', 'английский'], ['francais', 'french', 'franzosisch', 'francese', 'frances', 'французский'],
+    ['allemand', 'german', 'deutsch', 'tedesco', 'aleman', 'alemao', 'немецкий'], ['italien', 'italian', 'italienisch', 'italiano'], ['espagnol', 'spanish', 'spanisch', 'spagnolo', 'espanol', 'испанский'],
+    ['portugais', 'portuguese', 'portugiesisch', 'portoghese', 'portugues'], ['russe', 'russian', 'russisch', 'russo', 'ruso', 'русский'], ['arabe', 'arabic', 'arabisch', 'arabo', 'العربية'],
+    ['blonde', 'blond', 'bionda', 'rubia', 'loira', 'блондинка'], ['brune', 'brun', 'brunette', 'morena', 'bruna', 'брюнетка'], ['rousse', 'roux', 'redhead', 'rossa', 'pelirroja', 'ruiva', 'рыжая'],
+    ['hotel', 'albergo', 'отель'], ['diner', 'dinner', 'abendessen', 'cena', 'jantar', 'ужин'], ['soiree', 'evening', 'abend', 'sera', 'noche', 'noite', 'вечер'], ['nuit', 'night', 'nacht', 'notte', 'ночь'],
+    ['deplace', 'outcall', 'hausbesuch', 'trasferta'], ['recoit', 'incall', 'appartement', 'apartment', 'wohnung'], ['jeu de role', 'roleplay', 'rollenspiel', 'gioco di ruolo', 'juego de rol'],
+    ['douche', 'shower', 'dusche', 'doccia', 'ducha', 'banho'], ['discretion', 'discrete', 'discreet', 'diskret', 'discreta', 'discreto'],
+  ].map((g) => g.map(norm));
+  const lev = (a, b) => { if (Math.abs(a.length - b.length) > 2) return 9; const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]); for (let j = 1; j <= b.length; j++) d[0][j] = j; for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) { d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1); } return d[a.length][b.length]; };
+  const tol = (w) => (w.length >= 8 ? 2 : w.length >= 4 ? 1 : 0);
+  const docOf = (p) => { if (p._doc) return p._doc; const f = { nom: [p.name, p.type], presentation: [p.bio, ...(p.desc || [])], pratiques: (p.services || []).map((x) => V.SERVICES[x]), langues: (p.langs || []).map(([l]) => V.LANGS[l]), profil: [...Object.values(p.attrs || {}), V.communeTxt(p.commune), V.modeTxt(p.mode), ...(p.interests || [])] }; p._doc = Object.fromEntries(Object.entries(f).map(([k, v]) => { const t = norm(v.filter(Boolean).join(' ')); return [k, { t, w: [...new Set(t.split(' '))] }]; })); return p._doc; };
+  V.fts = (query, p) => {
+    const nq = norm(query); if (!nq) return { ok: true, where: [], fixes: [] };
+    const phrases = SYN.flat().filter((v) => v.includes(' ') && nq.includes(v));
+    const toks = nq.split(' ').filter((t) => t.length > 1 && !phrases.some((ph) => ph.split(' ').includes(t)));
+    const terms = [...phrases.map((ph) => [ph]), ...toks.map((t) => [t])].map(([t]) => { const g = SYN.find((gr) => gr.includes(t)) || SYN.find((gr) => gr.some((v) => !v.includes(' ') && v.length >= 4 && lev(t, v) <= tol(v))); return { t, alts: g ? [...new Set([t, ...g])] : [t] }; });
+    const doc = docOf(p), where = new Set(), fixes = [];
+    const ok = terms.every(({ t, alts }) => Object.entries(doc).some(([k, f]) => {
+      for (const a of alts) {
+        if (a.includes(' ') ? f.t.includes(a) : f.w.some((w) => w === a || (a.length >= 3 && w.startsWith(a)))) { where.add(k); if (a !== t && !SYN.some((g) => g.includes(t))) fixes.push([t, a]); return true; }
+      }
+      for (const a of alts) { if (a.includes(' ')) continue; const w = f.w.find((x) => x.length >= 4 && lev(a, x) <= tol(x)); if (w) { where.add(k); fixes.push([t, w]); return true; } }
+      return false;
+    }));
+    return { ok, where: [...where], fixes };
+  };
+  const isPhone = (s) => /^[+\d][\d\s.]{2,}$/.test(s.trim());
   V.filterList = (q, base) => {
     let L = (base || vis()).slice();
     const has = (v) => v !== undefined && v !== '' && v !== 'all';
@@ -411,13 +441,14 @@
     if (has(q.hair)) L = L.filter((p) => q.hair.split(',').some((h) => (p.attrs.Cheveux || '').toLowerCase().includes(h)));
     if (has(q.sil)) L = L.filter((p) => q.sil.split(',').some((h) => (p.attrs.Silhouette || '').toLowerCase().includes(h)));
     if (has(q.acc)) L = L.filter((p) => q.acc.split(',').every((a) => p.accepts.includes(a)));
+    if (has(q.cl)) L = L.filter((p) => p.clients && q.cl.split(',').every((k) => p.clients[k] === 'oui' || (q.cld && p.clients[k] === 'discuter')));
     if (has(q.age)) { const [a, b] = q.age.split('-').map(Number); L = L.filter((p) => { const ag = Array.isArray(p.age) ? Math.min(...p.age) : p.age; return ag >= a && ag <= b; }); }
-    if (has(q.prix)) { const [a, b] = q.prix.split('-').map(Number); L = L.filter((p) => p.from >= a && (b >= 1000 || p.from <= b)); }
+    if (has(q.prix)) { const [a, b] = q.prix.split('-').map(Number); L = L.filter((p) => (p.from == null ? !!q.prixnr : p.from >= a && (b >= 1000 || p.from <= b))); }
     if (q.nosmoke) L = L.filter((p) => p.attrs.Tabac === 'Non');
     if (q.recent) L = L.filter((p) => p.photosRecent || -p.verif.media <= 30);
     if (q.video) L = L.filter((p) => p.video);
     if (q.face) L = L.filter((p) => !p.faceHidden);
-    if (has(q.q)) { const s = q.q.toLowerCase().replace(/\s/g, ''); L = L.filter((p) => p.name.toLowerCase().includes(s) || p.tel.replace(/\s|•/g, '').includes(s.replace(/^0/, '+41'))); }
+    if (has(q.q)) { if (isPhone(q.q)) { const s = q.q.replace(/\s|\./g, ''); L = L.filter((p) => p.tel.replace(/\s|•/g, '').includes(s.replace(/^0/, '+41'))); } else L = L.filter((p) => V.fts(q.q, p).ok); }
     if (q.chg) { const c = V.S.chg; const ids = [...c.arrive, ...c.dispo, ...c.upd]; L = L.filter((p) => ids.includes(p.id)); }
     const tri = q.tri || 'maj';
     const idx = (p) => P.indexOf(p);
@@ -425,7 +456,7 @@
       maj: (a, b) => ((b.isUpd ? 1 : 0) + (b.isNew ? 1 : 0)) - ((a.isUpd ? 1 : 0) + (a.isNew ? 1 : 0)) || idx(a) - idx(b),
       dispo: (a, b) => V.statusRank[V.statusOf(a).t] - V.statusRank[V.statusOf(b).t] || V.statusOf(b).since - V.statusOf(a).since,
       new: (a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0) || b.verif.id - a.verif.id,
-      'prix-asc': (a, b) => a.from - b.from, 'prix-desc': (a, b) => b.from - a.from,
+      'prix-asc': (a, b) => (a.from == null) - (b.from == null) || a.from - b.from, 'prix-desc': (a, b) => (a.from == null) - (b.from == null) || b.from - a.from,
       age: (a, b) => [].concat(a.age)[0] - [].concat(b.age)[0],
     };
     return L.sort(sorters[tri] || sorters.maj);
@@ -468,7 +499,7 @@
           ${V.seg('cat', V.CATS.map((c) => [c.id, c.label]), q.cat || 'all')}
           <div class="row2"><div class="chips scroll">
             <button class="chip filter${ac ? ' has' : ''}" data-act="filters">${I('filter', 'sm')}Filtres${ac ? ` · ${ac}` : ''}</button>
-            <button class="chip filter${q.q ? ' has' : ''}" data-act="search">${I('search', 'sm')}${q.q ? esc(q.q) : 'Nom ou numéro'}</button>
+            <button class="chip filter${q.q ? ' has' : ''}" data-act="search">${I('search', 'sm')}${q.q ? esc(q.q) : 'Mot-clé ou numéro'}</button>
             <button class="chip filter${q.dispo ? ' has' : ''}" data-act="filters" data-g="dispo">Disponibilité${I('chevron-down', 'sm')}</button>
             <button class="chip filter${q.lang ? ' has' : ''}" data-act="filters" data-g="lang">Langue${I('chevron-down', 'sm')}</button>
             <button class="chip filter${q.mode ? ' has' : ''}" data-act="filters" data-g="mode">Modalité${I('chevron-down', 'sm')}</button>
@@ -483,7 +514,7 @@
           <div>
             <div id="news"></div>
             ${q.chg ? `<div class="mode-changes"><span>Vous voyez uniquement ce qui a changé depuis le début de votre visite.</span><button data-act="exit-changes">Revenir à ma liste</button></div>` : ''}
-            <div class="row-b" style="margin-bottom:14px"><span class="g-count" id="gCount">${L.length} profil${L.length > 1 ? 's' : ''}${sp.length ? ` · dont ${sp.length} sponsorisé${sp.length > 1 ? 's' : ''}` : ''}</span><a class="txt-btn" href="#/masques">${I('eye-off', 'sm')}Masqués (${V.hidden().length})</a></div>
+            <div class="row-b" style="margin-bottom:14px"><span class="g-count" id="gCount">${L.length} profil${L.length > 1 ? 's' : ''}${sp.length ? ` · dont ${sp.length} « ${esc(V.sponLabel())} »` : ''}</span><a class="txt-btn" href="#/masques">${I('eye-off', 'sm')}Masqués (${V.hidden().length})</a></div>
             ${L.length ? '<div class="gallery" id="gallery"></div><div class="sentinel" id="sentinel"></div><div class="load-more" id="loadMore"></div>' : V.empty('search', 'Aucun profil ne correspond', 'Élargissez votre recherche : retirez un filtre pour voir plus de profils.', `<div class="chips" style="justify-content:center">${pillsFor(q)}</div>`)}
           </div>
           <aside class="aside-session"><div class="session-box" data-live></div></aside>
@@ -513,6 +544,9 @@
     (q.hair || '').split(',').filter(Boolean).forEach((h) => x('hair', 'Cheveux : ' + h, h));
     (q.sil || '').split(',').filter(Boolean).forEach((h) => x('sil', h, h));
     (q.acc || '').split(',').filter(Boolean).forEach((h) => x('acc', 'Accepte : ' + h.toLowerCase(), h));
+    (q.cl || '').split(',').filter(Boolean).forEach((h) => x('cl', (CLIENTS.find(([k]) => k === h) || [, h])[1], h));
+    if (q.cld) x('cld', 'Avec « à discuter »');
+    if (q.prixnr) x('prixnr', 'Avec « tarif non renseigné »');
     if (q.age) x('age', 'Âge : ' + q.age.replace('-', ' à ') + ' ans');
     if (q.prix) x('prix', 'Tarif : ' + q.prix.replace('-', ' à ') + ' CHF');
     if (q.nosmoke) x('nosmoke', 'Non-fumeur·se');
@@ -545,7 +579,7 @@
       more.innerHTML = n < L.length ? '' : `<span class="muted small">${L.length} profils · fin de la liste</span>`;
     };
     batch();
-    V.ui.refreshCount = () => { const c = $('#gCount'); if (c) { const k = $$('#gallery .card:not(.out)').length, s = $$('#gallery .card.feat:not(.out)').length; c.textContent = `${k} profil${k > 1 ? 's' : ''}${s ? ` · dont ${s} sponsorisé${s > 1 ? 's' : ''}` : ''}`; } };
+    V.ui.refreshCount = () => { const c = $('#gCount'); if (c) { const k = $$('#gallery .card:not(.out)').length, s = $$('#gallery .card.feat:not(.out)').length; c.textContent = `${k} profil${k > 1 ? 's' : ''}${s ? ` · dont ${s} « ${V.sponLabel()} »` : ''}`; } };
     const io = new IntersectionObserver((es) => {
       if (!es[0].isIntersecting || n >= L.length || g.dataset.loading) return;
       g.dataset.loading = 1;
@@ -570,12 +604,13 @@
       ${grp('commune', 'Lieu', `<div class="chips">${V.COMMUNES.map((c) => ch('commune', c.id, c.label)).join('')}</div>`)}
       ${grp('mode', 'Rendez-vous', `<div class="chips">${one('mode', 'all', 'Peu importe')}${one('mode', 'incall', 'Reçoit')}${one('mode', 'outcall', 'Se déplace')}</div>`)}
       ${grp('age', 'Âge (vérifié)', V.rangeHTML('age', 18, 60, a0, a1, ' ans', { plus: 1, gap: 2 }))}
-      ${grp('prix', 'Tarif de départ', V.rangeHTML('prix', 200, 1000, p0, p1, ' CHF', { step: 50, gap: 50, plus: 1 }))}
+      ${grp('prix', 'Tarif de départ', `${V.rangeHTML('prix', 200, 1000, p0, p1, ' CHF', { step: 50, gap: 50, plus: 1 })}${V.sw('prixnr', !!d.prixnr, 'Inclure les tarifs non renseignés', 'Un tarif absent n’est jamais compté comme zéro')}`)}
       ${grp('lang', 'Langues parlées', `<div class="chips">${LANGQ.map((l) => ch('lang', l, V.LANGS[l])).join('')}</div>`)}
       ${grp('origin', 'Origine (déclarée par la personne)', `<div class="chips">${V.ORIGINS.filter((o) => o !== 'Non précisée').map((o) => ch('origin', o, o)).join('')}</div><p class="hint">Information facultative, renseignée uniquement par les personnes qui le souhaitent.</p>`)}
       ${grp('svc', 'Services', `<div class="chips">${Object.entries(V.SERVICES).map(([k, l]) => ch('svc', k, l)).join('')}</div>`)}
       ${grp('phys', 'Physique', `<p class="small b" style="margin-bottom:8px">Cheveux</p><div class="chips">${['blond', 'brun', 'noir', 'roux', 'châtain'].map((h) => ch('hair', h, h[0].toUpperCase() + h.slice(1))).join('')}</div><p class="small b" style="margin:14px 0 8px">Silhouette</p><div class="chips">${['mince', 'sportive', 'normale', 'pulpeuse', 'petite'].map((h) => ch('sil', h, h[0].toUpperCase() + h.slice(1))).join('')}</div>`)}
       ${grp('acc', 'Accepte', `<div class="chips">${['Hommes', 'Femmes', 'Couples'].map((a) => ch('acc', a, a)).join('')}</div>`)}
+      ${grp('cl', 'Clientèle et composition', `<div class="chips">${CLIENTS.map(([k, l]) => ch('cl', k, l)).join('')}</div>${V.sw('cld', !!d.cld, 'Inclure « à discuter »', 'Sinon, seulement les profils qui acceptent clairement')}`)}
       ${grp('more', 'Autres critères', `${V.sw('nosmoke', !!d.nosmoke, 'Non-fumeur·se')}${V.sw('recent', !!d.recent, 'Photos vérifiées il y a moins de 30 jours')}${V.sw('video', !!d.video, 'Avec vidéo de présentation')}${V.sw('face', !!d.face, 'Visage visible sur les photos')}`)}`;
     const sh = V.sheet.open({ title: 'Filtres', side: matchMedia('(min-width:1024px)').matches, body, foot: `<button class="btn ghost sm" data-clear style="flex:1">Tout effacer</button><button class="btn sm" data-apply style="flex:2"><span class="roll"><span id="fcount">Voir</span><span aria-hidden="true">Appliquer</span></span></button>` });
     const upd = () => {
@@ -603,7 +638,7 @@
     sh.addEventListener('change', (e) => { if (e.target.name === 'tri') { setTimeout(() => { V.sheet.close(); setQ({ tri: e.target.value === 'maj' ? '' : e.target.value }); }, 220); } });
   };
   V.openSearch = () => {
-    const sh = V.sheet.open({ title: 'Rechercher', body: `${V.field('Pseudo ou numéro de téléphone', { name: 'q', attrs: 'autocomplete="off" inputmode="search"' })}<p class="hint">Vérifiez qu’un numéro reçu appartient bien à un profil vérifié. Exemple : 079 412.</p><div class="list-rows" id="sres" style="margin-top:10px"></div>` });
+    const sh = V.sheet.open({ title: 'Rechercher', body: `${V.field('Mot-clé, pseudo ou numéro', { name: 'q', attrs: 'autocomplete="off" inputmode="search"' })}<p class="hint">Cherche dans les présentations et les pratiques, en 8 langues, même avec une faute : « massge », « english », « bacio ». Un numéro vérifie qu’il appartient à un profil vérifié (ex. 079 412).</p><div class="list-rows" id="sres" style="margin-top:10px"></div>` });
     const inp = $('input', sh); setTimeout(() => inp.focus(), 300);
     const run = () => {
       const s = inp.value.trim();
@@ -656,14 +691,12 @@
     const placeTxt = V.communeTxt(p.commune) + (comm && comm.c === 'geneve' ? ' (Genève)' : '');
     const incall = p.mode !== 'outcall', outcall = p.mode !== 'incall';
     const modeShort = { both: 'Reçoit et se déplace', incall: 'Reçoit', outcall: 'Se déplace' }[p.mode] || '';
-    const revs = (V.AVIS || []).filter((r) => r.to === p.id).sort((a, b) => a.ago - b.ago);
-    const avg = revs.length ? revs.reduce((s, r) => s + r.note, 0) / revs.length : 0;
     const offered = new Set(p.services);
     const groups = (V.SVC_GROUPS || []).map(([g, ids]) => [g, ids.filter((s) => offered.has(s))]).filter(([, ids]) => ids.length);
     const inGroups = new Set(groups.flatMap(([, ids]) => ids));
     const others = p.services.filter((s) => !inGroups.has(s) && V.SERVICES[s]);
     if (others.length) groups.push(['Autres', others]);
-    const price = (r, ix, ok) => (ok && r[ix] ? `<b>${V.chf(r[ix])}</b>` : '<span class="muted">—</span>');
+    const price = (r, ix, ok) => (ok && r[ix] ? `<b>${V.chf(r[ix])}</b>` : ok && !p.from ? '<span class="muted">non renseigné</span>' : '<span class="muted">—</span>');
     const typeTxt = p.type || p.kind || ((V.CATS.find((c) => c.id === p.cat) || {}).label || '').replace(/s$/, '');
     const aboutRows = [
       ['map-pin', 'Quartier', placeTxt], ['flag', 'Origine', p.origin], ['cake', 'Âge', V.ageTxt(p)], ['briefcase', 'Profil', typeTxt],
@@ -677,7 +710,8 @@
     return `<article class="fiche" tabindex="-1">
       <div class="f-top"><button class="icon-btn" data-act="close-ov" aria-label="Fermer">${I('arrow-left')}</button><div class="ttl">${esc(p.name)}, ${V.ageShort(p)}</div><span class="sp"></span>
         <button class="icon-btn" data-act="share" data-id="${p.id}" aria-label="Partager">${I('share')}</button>
-        <button class="icon-btn" data-act="fav" data-id="${p.id}" aria-label="Sélection"><span style="color:${on ? 'var(--violet)' : 'inherit'}">${I('heart')}</span></button></div>
+        <button class="icon-btn" data-act="fav" data-id="${p.id}" aria-label="Sélection"><span style="color:${on ? 'var(--violet)' : 'inherit'}">${I('heart')}</span></button>
+        <button class="icon-btn" data-act="close-ov" aria-label="Fermer la fiche (Échap)">${I('x')}</button></div>
       <div class="f-grid">
         <div class="f-media protect">
           <div class="f-track" id="fTrack">${slides.map((s, j) => `<div class="f-slide"><img src="${s.src}" alt="Photo ${j + 1} de ${esc(p.name)}" style="object-position:${s.pos};${s.zoom ? `transform:scale(${s.zoom});transform-origin:${s.pos}` : ''}" draggable="false"><span class="wm">BD · photo vérifiée</span></div>`).join('')}</div>
@@ -688,8 +722,7 @@
         <div class="f-body">
           <div class="eyebrow">${esc(typeTxt)} · ${V.communeTxt(p.commune)}</div>
           <h2 class="f-name" style="margin-top:10px">${esc(p.name)}<span class="age">${V.ageTxt(p)}</span></h2>
-          <div class="f-sub">${V.statusPill(p, true)}<span class="xs muted">${st.sub}</span>${(p.likes || 0) > 2500 ? `<span class="f-hot">${I('flame', 'sm')}Très demandée</span>` : ''}</div>
-          <div class="f-meta">${revs.length ? `<span class="f-rate">${I('star', 'sm')}<b>${avg.toFixed(1)}</b> · ${revs.length} avis</span>` : ''}${p.likes ? `<span>${I('heart', 'sm')}${nf(p.likes)} likes</span><span>${I('eye', 'sm')}${nf(p.visits)} visites</span>` : ''}</div>
+          <div class="f-sub">${V.statusPill(p, true)}<span class="xs muted">${st.sub}</span>${(p.likes || 0) > 2500 ? `<span class="f-hot">${I('flame', 'sm')}Très demandée</span>` : ''}${p.tourLeft ? `<span class="badge pst-tour">Plus que ${p.tourLeft} jours à Genève</span>` : ''}${p.newPhoto ? '<span class="badge pst-photo">Nouvelle photo</span>' : ''}${p.online ? '<span class="badge pst-online"><i></i>En ligne</span>' : ''}</div>
           <p class="f-ver">${I('badge-check', 'sm')}<span><b>Profil vérifié</b> · âge réel contrôlé${p.photosRecent || -v.media <= 30 ? ' · photos de moins de 30 jours' : ''}${p.duoVerified ? ' · duo vérifié' : ''}${p.video ? ' · vidéo de présentation' : ''}</span></p>
           <div class="f-actions">
             <button class="f-act${on ? ' on' : ''}" data-act="fav" data-id="${p.id}">${I('heart')}<span class="lbl">${on ? 'Ajoutée' : 'Ajouter'}</span></button>
@@ -697,9 +730,10 @@
             <button class="f-act" data-act="hide-close" data-id="${p.id}">${I('eye-off')}<span>Masquer</span></button>
             <button class="f-act" data-act="report" data-id="${p.id}">${I('flag')}<span>Signaler</span></button>
           </div>
+          <div class="f-priv"><button type="button" class="soc-b${(V.S.likes || []).includes(p.id) ? ' on' : ''}" data-f="like">${I('thumbs-up', 'sm')}J’aime</button><button type="button" class="soc-b${(V.S.follows || []).includes(p.id) ? ' on' : ''}" data-f="follow">${I('bell', 'sm')}Suivre</button><span class="xs muted">${I('lock', 'sm')}Privé : aucun compteur public, ${esc(first)} ne voit pas qui aime ou suit.</span></div>
           <div class="f-keys">
             <div class="fk">${I('map-pin')}<span><small>Quartier</small><b>${V.communeTxt(p.commune)}</b></span></div>
-            <div class="fk">${I('banknote')}<span><small>À partir de</small><b>${V.chf(p.from)}</b></span></div>
+            <div class="fk">${I('banknote')}<span><small>À partir de</small><b>${p.from ? V.chf(p.from) : 'Non renseigné'}</b></span></div>
             <div class="fk">${I(incall ? 'home' : 'car')}<span><small>Rendez-vous</small><b>${modeShort}</b></span></div>
             <div class="fk">${I('languages')}<span><small>Langues</small><b class="fk-flags">${p.langs.slice(0, 4).map(([l]) => flag(l)).join('')}</b></span></div>
           </div>
@@ -718,6 +752,10 @@
           <section class="f-card"><div class="f-h-row"><h3 class="f-h">${I('flame')}Pratiques</h3><span class="f-count">${p.services.length} pratiques</span></div>
             <div class="svc-groups">${groups.map(([g, ids]) => `<div class="svc-g"><span class="svc-gt">${g}</span><div class="svc-chips">${ids.map((s) => `<span class="svc-c">${I('check', 'sm')}${V.SERVICES[s]}</span>`).join('')}</div></div>`).join('')}${p.limits.length ? `<div class="svc-g"><span class="svc-gt">Ne pratique pas</span><div class="svc-chips">${p.limits.map((l) => `<span class="svc-c no">${I('x', 'sm')}${V.LIMITS[l]}</span>`).join('')}</div></div>` : ''}</div>
           </section>
+
+          ${p.clients ? `<section class="f-card"><h3 class="f-h">${I('users')}Clientèle et composition</h3>
+            <div class="cl-grid">${CLIENTS.map(([k, l]) => `<div class="cl-i ${p.clients[k]}"><span>${l}</span>${CLV(p.clients[k])}</div>`).join('')}</div>
+            <p class="hint">Déclaré par ${esc(first)}. « À discuter » : à préciser avec elle avant le rendez-vous.</p></section>` : ''}
 
           <section class="f-card"><h3 class="f-h">${I('map-pin')}Localisation</h3>
             <p class="f-p">${esc(first)} travaille dans le secteur <b>${placeTxt}</b>. ${incall && outcall ? `${pron} reçoit et se déplace dans tout le canton.` : incall ? `${pron} reçoit uniquement.` : `${pron} se déplace uniquement, dans tout le canton.`}</p>
@@ -743,13 +781,13 @@
             <p class="hint">Tarifs fixés librement par ${esc(first)}. BD ne perçoit aucune commission sur les rendez-vous.</p>
           </section>
 
-          ${p.likes ? `<section class="f-card"><h3 class="f-h">${I('heart')}Likes et abonnés</h3>
-            <div class="soc"><div class="soc-i"><b data-likes>${nf(p.likes)}</b><span>likes</span><button type="button" class="soc-b" data-f="like">${I('thumbs-up', 'sm')}J’aime</button></div><div class="soc-i"><b data-fol>${nf(p.followers)}</b><span>abonnés</span><button type="button" class="soc-b" data-f="follow">${I('star', 'sm')}Suivre</button></div><div class="soc-i"><b>${nf(p.visits)}</b><span>visites du profil</span></div></div>
-          </section>` : ''}
+          ${p.links && p.links.length ? `<section class="f-card"><h3 class="f-h">${I('link')}Ailleurs sur le web</h3>
+            <div class="ext-links">${p.links.map((l) => `<a class="ext-l" href="#" data-act="ext-link" data-k="${l.k}" data-h="${esc(l.h)}" rel="nofollow noopener">${I(l.k === 'webcam' ? 'video' : l.k === 'instagram' ? 'camera' : 'star', 'sm')}<span><b>${{ webcam: 'Webcam', onlyfans: 'OnlyFans', instagram: 'Instagram' }[l.k]}</b><small>${esc(l.h)}</small></span>${I('arrow-up-right', 'sm')}</a>`).join('')}</div>
+            <p class="hint">Simples liens, ajoutés par ${esc(first)}. BD n’intègre ni ne vérifie le contenu de ces sites.</p></section>` : ''}
 
-          <section class="f-card"><div class="f-h-row"><h3 class="f-h">${I('edit')}Avis (${revs.length})</h3>${revs.length ? `<span class="fr-avg"><span class="fr-st">${starsRow(Math.round(avg), 5)}</span><b>${avg.toFixed(1)}</b>/5</span>` : ''}</div>
-            <div class="fr-actions"><button type="button" class="soc-b" data-f="review">${I('edit', 'sm')}Écrire un avis</button><button type="button" class="soc-b danger" data-act="report" data-id="${p.id}">${I('alert', 'sm')}Signaler le profil</button></div>
-            ${revs.length ? `<div class="fr-list">${revs.map((r) => `<article class="fr-i"><div class="fr-top"><span class="fr-av">${esc(r.by[0])}</span><div class="sp"><b>${esc(r.by)}</b><small>${V.agoTxt(Date.now() - r.ago)}</small></div><span class="fr-st">${starsRow(r.note, 5)}</span></div><p>« ${esc(r.txt)} »</p></article>`).join('')}</div>` : `<p class="small muted" style="margin-top:12px">Aucun avis pour l’instant. Soyez le premier à partager votre expérience.</p>`}
+          <section class="f-card"><h3 class="f-h">${I('shield')}Un retour sur ${esc(first)} ?</h3>
+            <p class="f-p">Après un contact ou un rendez-vous, dites à l’équipe BD comment ça s’est passé. Votre retour reste <b>privé</b> : il n’est ni publié ni noté, et ${esc(first)} ne le voit pas.</p>
+            <div class="fr-actions"><button type="button" class="soc-b" data-act="feedback" data-id="${p.id}">${I('edit', 'sm')}Laisser un retour privé</button><button type="button" class="soc-b danger" data-act="report" data-id="${p.id}">${I('alert', 'sm')}Signaler le profil</button></div>
           </section>
 
           ${duoP && V.visible(duoP) ? `<section class="f-card"><h3 class="f-h">${I('users')}Aussi en duo</h3><div class="duo-link" data-act="open" data-id="${duoP.id}"><img src="${V.img(duoP.photos[0], 's')}" alt=""><div class="sp"><b class="serif" style="font-size:21px;font-weight:400">${esc(duoP.name)}</b><div class="small muted">Duo réel · deux profils vérifiés et liés</div></div>${I('chevron-right')}</div></section>` : ''}
@@ -785,29 +823,25 @@
     f.addEventListener('touchmove', (e) => { if (y0 === null) return; const dy = e.touches[0].clientY - y0; if (dy > 0) f.style.transform = `translateY(${dy * .6}px)`; }, { passive: true });
     f.addEventListener('touchend', (e) => { if (y0 === null) return; const dy = e.changedTouches[0].clientY - y0; f.style.transform = ''; if (dy > 120) V.overlay.back(); y0 = null; });
     f.addEventListener('contextmenu', (e) => { if (e.target.tagName === 'IMG') e.preventDefault(); });
-    // likes, abonnement et avis : démonstration (rien n'est envoyé)
+    // J'aime et Suivre : actions privées, sans compteur public
     const first = p.name.split(' ')[0];
-    const likeB = $('[data-f="like"]', ov), folB = $('[data-f="follow"]', ov), revB = $('[data-f="review"]', ov);
-    if (likeB) likeB.onclick = () => { const on = likeB.classList.toggle('on'); $('[data-likes]', ov).textContent = nf(p.likes + (on ? 1 : 0)); V.toast(on ? `Vous aimez le profil de ${first}.` : 'J’aime retiré.', { icon: 'heart' }); };
-    if (folB) folB.onclick = () => { const on = folB.classList.toggle('on'); $('[data-fol]', ov).textContent = nf(p.followers + (on ? 1 : 0)); V.toast(on ? `Vous suivez ${first} : ses nouveaux statuts vous seront signalés.` : `Vous ne suivez plus ${first}.`, { icon: 'star' }); };
-    if (revB) revB.onclick = () => openReview(p);
+    const priv = (k, b, on1, off1) => { const a = (V.S[k] = V.S[k] || []); const on = !a.includes(p.id); if (on) a.push(p.id); else a.splice(a.indexOf(p.id), 1); V.save(); b.classList.toggle('on', on); V.toast(on ? on1 : off1, { icon: k === 'likes' ? 'thumbs-up' : 'bell' }); };
+    const likeB = $('[data-f="like"]', ov), folB = $('[data-f="follow"]', ov);
+    if (likeB) likeB.onclick = () => priv('likes', likeB, `Vous aimez le profil de ${first}. C’est privé : aucun compteur public.`, 'J’aime retiré.');
+    if (folB) folB.onclick = () => priv('follows', folB, `Vous suivez ${first} : ses nouveaux statuts vous seront signalés.`, `Vous ne suivez plus ${first}.`);
+    // glisser à gauche ou à droite sur le texte de la fiche : profil suivant ou précédent
+    let sx = null, sy = null;
+    const body = $('.f-body', ov);
+    body.addEventListener('touchstart', (e) => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+    body.addEventListener('touchend', (e) => { if (sx === null) return; const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy; sx = null; if (Math.abs(dx) > 80 && Math.abs(dx) > 2 * Math.abs(dy)) { const b = $$('.f-next [data-act="goto"]', ov)[dx < 0 ? 1 : 0]; if (b) b.click(); } });
   }
-  function openReview(p) {
-    const first = p.name.split(' ')[0];
-    let note = 5;
-    const sh = V.sheet.open({
-      title: `Votre avis sur ${esc(first)}`,
-      body: `<p class="ink2" style="margin-bottom:14px">Les avis sont publiés après modération, sous un pseudonyme. Aucun détail permettant d’identifier qui que ce soit.</p>
-        <div class="rate-in" role="group" aria-label="Note sur 5">${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-n="${n}" class="on" aria-label="${n} sur 5">${I('star')}</button>`).join('')}</div>
-        <div style="margin-top:14px">${V.field('Votre pseudonyme')}</div>
-        <div style="margin-top:12px">${V.field('Votre avis', { type: 'textarea', max: 600 })}</div>`,
-      foot: `${V.btn('Envoyer mon avis', { cls: 'sm block', attrs: 'data-send' })}`,
-    });
-    const stars = $$('.rate-in button', sh);
-    stars.forEach((b) => { b.onclick = () => { note = +b.dataset.n; stars.forEach((x) => x.classList.toggle('on', +x.dataset.n <= note)); }; });
-    $('[data-send]', sh).onclick = () => { V.sheet.close(); V.toast(`Merci ! Votre avis (${note}/5) sur ${first} sera publié après modération.`, { icon: 'check', ms: 4000 }); };
-  }
-
+  /* Flèches gauche et droite : fiche précédente ou suivante */
+  document.addEventListener('keydown', (e) => {
+    const t = e.target instanceof Element ? e.target : document.body;
+    if (!['ArrowLeft', 'ArrowRight'].includes(e.key) || V.sheet.el || t.closest('input, textarea, select, [contenteditable]')) return;
+    const ov = $('#ov-fiche.on'); if (!ov || t.closest('.f-track')) return;
+    const b = $$('.f-next [data-act="goto"]', ov)[e.key === 'ArrowRight' ? 1 : 0]; if (b) { e.preventDefault(); b.click(); }
+  });
   /* Contact direct (hors plateforme) */
   V.openContact = (id, ch) => {
     const p = V.byId(id);
@@ -908,11 +942,14 @@
     V.overlay.open('cmp', `<section class="cmp" role="dialog" aria-label="Comparateur"></section>`, (ov) => renderCmp(ov));
   }, { overlay: true });
   function renderCmp(ov) {
-    const list = V.sel().map(V.byId).filter(Boolean).slice(0, 6);
+    const all = V.sel().map(V.byId).filter(Boolean);
+    const pages = Math.max(1, Math.ceil(all.length / 6));
+    V.cmpPage = Math.min(Math.max(0, V.cmpPage || 0), pages - 1);
+    const list = all.slice(V.cmpPage * 6, V.cmpPage * 6 + 6);
     const box = $('.cmp', ov);
     const onlyDiff = V.cmpDiff !== false;
     const grp = V.cmpGrp || 'all';
-    if (list.length < 2) {
+    if (all.length < 2) {
       box.innerHTML = `<div class="cmp-head"><div class="row-b"><h2 class="h2">Comparer</h2><button class="icon-btn" data-act="close-ov" aria-label="Fermer">${I('x')}</button></div></div>
         <div class="cmp-empty">${V.empty('columns', 'Ajoutez au moins deux profils', 'Utilisez le cœur sur les cartes ou les fiches : votre sélection apparaît ici, prête à être comparée.', V.btn('Parcourir les profils', { href: '#/profils', arrow: true }))}</div>`;
       return;
@@ -922,17 +959,18 @@
     const rows = [
       ['ess', 'En bref', 'Disponibilité', (p) => V.statusInfo(p).label],
       ['ess', 'En bref', 'Langues', (p) => p.langs.map(([l, lv]) => `${V.LANGS[l]} ${lv}`).join(', ')],
-      ['ess', 'En bref', 'Tarif de départ', (p) => `Dès ${p.from} CHF`],
+      ['ess', 'En bref', 'Tarif de départ', (p) => (p.from ? `Dès ${p.from} CHF` : 'Non renseigné')],
       ['ess', 'En bref', 'Modalité', (p) => V.modeTxt(p.mode)],
       ['ess', 'En bref', 'Quartier', (p) => V.communeTxt(p.commune)],
       ['rdv', 'Rendez-vous', 'Horaires habituels', (p) => p.hours],
       ['rdv', 'Rendez-vous', 'Accepte', (p) => p.accepts.join(', ')],
       ['rdv', 'Rendez-vous', 'Consignes', (p) => p.rules],
-      ['tar', 'Tarifs', '1 heure · reçoit', (p) => (p.rates[0][1] ? V.chf(p.rates[0][1]) : 'non')],
-      ['tar', 'Tarifs', '1 heure · se déplace', (p) => (p.rates[0][2] ? V.chf(p.rates[0][2]) : 'non')],
-      ['tar', 'Tarifs', '2 heures', (p) => V.chf(p.rates[1][1] || p.rates[1][2])],
-      ['tar', 'Tarifs', 'Soirée (4 h)', (p) => V.chf(p.rates[2][1])],
-      ['tar', 'Tarifs', 'Nuit', (p) => V.chf(p.rates[3][1])],
+      ['tar', 'Tarifs', '1 heure · reçoit', (p) => (p.rates[0][1] ? V.chf(p.rates[0][1]) : p.from ? 'non' : 'non renseigné')],
+      ['tar', 'Tarifs', '1 heure · se déplace', (p) => (p.rates[0][2] ? V.chf(p.rates[0][2]) : p.from ? 'non' : 'non renseigné')],
+      ['tar', 'Tarifs', '2 heures', (p) => (p.rates[1][1] || p.rates[1][2] ? V.chf(p.rates[1][1] || p.rates[1][2]) : 'non renseigné')],
+      ['tar', 'Tarifs', 'Soirée (4 h)', (p) => (p.rates[2][1] ? V.chf(p.rates[2][1]) : 'non renseigné')],
+      ['tar', 'Tarifs', 'Nuit', (p) => (p.rates[3][1] ? V.chf(p.rates[3][1]) : 'non renseigné')],
+      ...CLIENTS.map(([k, l]) => ['rdv', 'Clientèle', l, (p) => CLV(p.clients && p.clients[k])]),
       ...svcU.map((s) => ['svc', 'Services', V.SERVICES[s], (p) => (p.services.includes(s) ? '<span class="yes">Oui</span>' : '<span class="no">non</span>')]),
       ['pro', 'Profil', 'Âge (vérifié)', (p) => V.ageTxt(p)],
       ['pro', 'Profil', 'Taille', (p) => p.attrs.Taille || 'non précisé'],
@@ -950,7 +988,8 @@
       return `<tr class="${same ? 'same' : 'diff'}"><td class="crit">${r[2]}<small>${r[1]}</small></td>${list.map((p) => `<td class="${V.cmpOut.includes(p.id) ? 'out' : ''}">${r[3](p)}</td>`).join('')}</tr>`;
     }).join('');
     box.innerHTML = `<div class="cmp-head">
-        <div class="row-b"><h2 class="h2">Comparer ${list.length} profils</h2><button class="icon-btn" data-act="close-ov" style="flex:none" aria-label="Fermer">${I('x')}</button></div>
+        <div class="row-b"><h2 class="h2">Comparer ${all.length} profils</h2><button class="icon-btn" data-act="close-ov" style="flex:none" aria-label="Fermer">${I('x')}</button></div>
+        ${pages > 1 ? `<div class="cmp-pages"><button class="icon-btn" data-cmp-p="-1" aria-label="Page précédente" ${V.cmpPage ? '' : 'disabled'}>${I('chevron-left')}</button><span><b>${V.cmpPage * 6 + 1}–${V.cmpPage * 6 + list.length}</b> sur ${all.length} · page ${V.cmpPage + 1} / ${pages}</span><button class="icon-btn" data-cmp-p="1" aria-label="Page suivante" ${V.cmpPage < pages - 1 ? '' : 'disabled'}>${I('chevron-right')}</button><span class="xs muted">6 profils par page, toute la sélection est comparée</span></div>` : ''}
         <p class="muted small" style="margin-top:6px">Les critères identiques restent discrets. Chaque profil peut être écarté sans être supprimé de votre sélection.</p>
         <div class="cmp-tools"><label class="row small b" style="gap:10px"><span class="switch"><input type="checkbox" id="cmpDiff" ${onlyDiff ? 'checked' : ''}><span></span></span>Uniquement les différences</label>
         ${V.seg('cmpgrp', [['all', 'Tout'], ['ess', 'En bref'], ['rdv', 'Rendez-vous'], ['tar', 'Tarifs'], ['svc', 'Services'], ['pro', 'Profil']], grp, 'violet')}</div>
@@ -960,6 +999,7 @@
       ${hiddenSame ? `<p class="muted small" style="padding:16px">${hiddenSame} critère${hiddenSame > 1 ? 's' : ''} identique${hiddenSame > 1 ? 's' : ''} masqué${hiddenSame > 1 ? 's' : ''}. <button class="link" data-act="cmp-all">Tout afficher</button></p>` : ''}</div>`;
     V.ui.enhance(box);
     $('#cmpDiff', box).onchange = (e) => { V.cmpDiff = e.target.checked; renderCmp(ov); };
+    $$('[data-cmp-p]', box).forEach((b) => { b.onclick = () => { V.cmpPage += +b.dataset.cmpP; renderCmp(ov); }; });
     $('[data-seg="cmpgrp"]', box).addEventListener('seg', (e) => { V.cmpGrp = e.detail; renderCmp(ov); });
   }
   V.renderCmp = () => { const ov = $('#ov-cmp'); if (ov) renderCmp(ov); };
@@ -1047,7 +1087,7 @@
         <div class="eyebrow">Escortes indépendantes à Genève</div>
         <h1 class="rj-title">Vos tarifs. Votre agenda.<br><em>Zéro commission.</em></h1>
         <p class="lead rj-lead">Un forfait mensuel sans engagement, et c’est tout. Ce que vous gagnez avec vos clients ne nous regarde pas. <b>Deux mois offerts</b> au lancement, sans carte bancaire.</p>
-        <div class="row wrapr" style="margin-top:28px">${V.btn('Commencer ma candidature', { href: '#/pro/inscription/1', cls: 'gold lg', arrow: true })}${V.btn('Voir les offres', { href: '#/rejoindre', act: 'scroll-tarifs', cls: 'ghost lg', attrs: WHITE_GHOST })}</div>
+        <div class="row wrapr" style="margin-top:28px">${V.L.reg ? V.btn('Reprendre mon brouillon', { href: '#/pro/inscription/1', cls: 'gold lg', arrow: true }) : V.btn('Commencer ma candidature', { href: '#/pro/inscription/1', cls: 'gold lg', arrow: true })}${V.btn('Voir les offres', { href: '#/rejoindre', act: 'scroll-tarifs', cls: 'ghost lg', attrs: WHITE_GHOST })}</div>
         <div class="rj-proof"><span class="avs">${L.slice(0, 5).map((p) => `<img src="${V.img(p.photos[0], 's')}" alt="">`).join('')}</span><span><b>${L.length} escortes vérifiées</b> sont déjà en ligne</span></div>
         <div class="rj-stats">${[['0 %', 'de commission sur vos rendez-vous'], ['2 mois', 'offerts au lancement'], ['24 h', 'pour être en ligne après vérification'], ['100 %', 'des données hébergées en Suisse']].map(([n, l]) => `<div><b>${n}</b><span>${l}</span></div>`).join('')}</div>
       </div></section>
@@ -1059,7 +1099,7 @@
           ['zap', 'Le statut en un geste', '<b>« Disponible maintenant »</b> ou « ce soir à 21 h », depuis l’écran d’accueil du téléphone. Il expire seul au bout de trois heures.'],
           ['eye-off', 'Masquée en moins d’une minute', 'Depuis l’espace pro, à tout moment. Photos <b>filigranées et surveillées</b> sur le web ; votre adresse n’apparaît jamais.'],
           ['chart', 'Des chiffres lisibles', 'Vues, ajouts en sélection, <b>clics par canal de contact</b>, comparés à la moyenne de votre catégorie.'],
-          ['heart', 'Avis, likes et abonnés', 'Vos clients vous <b>suivent</b> et sont prévenus de vos nouveaux statuts. Les avis sont modérés avant publication.'],
+          ['heart', 'Suivie, sans compteur public', 'Vos clients peuvent vous <b>suivre</b> et sont prévenus de vos nouveaux statuts. Aucun avis ni chiffre public : les retours restent privés.'],
           ['shield', 'Vérifiée, donc crédible', 'Âge, identité et photos <b>contrôlés</b> : le badge vérifié rassure et fait la différence dans la galerie.'],
         ].map(([ic, t, d]) => `<article class="rj-card"><span class="rj-ic">${I(ic)}</span><h3>${t}</h3><p>${d}</p></article>`).join('')}</div>
       </div></section>

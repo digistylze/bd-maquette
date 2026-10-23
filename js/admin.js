@@ -209,7 +209,7 @@
 
   route(/^\/admin\/candidature\/(\w+)$/, (m) => {
     const c = A.CAND.find((x) => x.id === m[1]) || A.CAND[0];
-    const s = candSt(c), R2 = V.S.reg || {};
+    const s = candSt(c), R2 = V.L.reg || {};
     if (st.viewed !== c.id) { st.viewed = c.id; log('Dossier ouvert', `${c.name} (${c.ref})`); }
     const days = Array.from({ length: 6 }, (_, k) => G.at(k + 1, 10, 30)).filter((d) => d.getDay() !== 0);
     const itw = c.id === 'c1' && R2.slot ? `${G.long(days[R2.day || 0])} à ${R2.slot} · ${R2.mode === 'visio' ? 'visio' : 'bureau'}` : c.id === 'c1' ? `${G.long(G.at(1, 10, 30))} à 10:30 · visio` : c.itw;
@@ -580,11 +580,11 @@
     const fin = camp.filter((c) => c.state !== 'Programmée' && c.lift != null);
     return {
       title: 'Mises en avant',
-      html: shell('mises-en-avant', `${head('Encarts étiquetés « Sponsorisé », limités par zone', 'Mises en avant et parrainage')}${T.bar}
+      html: shell('mises-en-avant', `${head(`Encarts étiquetés « ${esc(V.sponLabel())} », limités par zone`, 'Mises en avant et parrainage')}${T.bar}
         ${T.pane('cal', `<section class="panel adm-list" data-list="calendrier-encarts" data-title="Calendrier des encarts"><div class="al-head"><div><h3>Occupation · 14 jours</h3><p class="small muted">Places prises sur places disponibles, par zone et par jour.</p></div><div class="al-tools"><button type="button" class="al-csv" data-a="csv">${I('download', 'sm')}CSV</button></div></div>
             <div class="tbl-wrap"><table class="tbl adm-occ"><thead><tr><th>Zone</th>${days.map((d) => `<th class="c">${G.wd(d)}</th>`).join('')}</tr></thead><tbody>${occ.map((o) => `<tr><td class="b small">${o.z} <span class="xs muted">· ${o.max} places</span></td>${o.days.map((n) => `<td class="c" data-c="${n}/${o.max}"><span class="occ-c l${n === 0 ? 0 : n >= o.max ? 3 : n / o.max > .5 ? 2 : 1}">${n}/${o.max}</span></td>`).join('')}</tr>`).join('')}</tbody></table></div>
             <div class="legend" style="margin-top:12px"><span><i class="occ-c l0"></i>Libre</span><span><i class="occ-c l1"></i>Quelques places prises</span><span><i class="occ-c l2"></i>Presque complet</span><span><i class="occ-c l3"></i>Complet</span></div></section>
-          <div class="grid-2" style="margin-top:14px"><div class="panel"><h3>Règles des encarts</h3><dl class="kv" style="margin-top:12px"><dt>Places</dt><dd>${st.params.slotsZone || 3} par quartier et par jour, ${st.params.slotsCanton || 6} pour le canton</dd><dt>Durée</dt><dd>1 à 14 jours</dd><dt>Prix</dt><dd>${V.CREDITS ? V.CREDITS.cost.zone : 3} crédits / jour (quartier), ${V.CREDITS ? V.CREDITS.cost.canton : 5} (canton)</dd><dt>Étiquette</dt><dd>Toujours « Sponsorisé », visible</dd><dt>Libellé</dt><dd>Choisi par BD : ${A.LABELS.map((l) => `« ${l} »`).join(', ')}</dd><dt>Ordre</dt><dd>Rotation équitable, filtres de recherche respectés</dd></dl></div>
+          <div class="grid-2" style="margin-top:14px"><div class="panel"><h3>Règles des encarts</h3><dl class="kv" style="margin-top:12px"><dt>Places</dt><dd>${st.params.slotsZone || 3} par quartier et par jour, ${st.params.slotsCanton || 6} pour le canton</dd><dt>Durée</dt><dd>1 à 14 jours</dd><dt>Prix</dt><dd>${V.CREDITS ? V.CREDITS.cost.zone : 3} crédits / jour (quartier), ${V.CREDITS ? V.CREDITS.cost.canton : 5} (canton)</dd><dt>Étiquette</dt><dd>Toujours visible : « ${esc(V.sponLabel())} » (réglable dans Paramètres)</dd><dt>Libellé</dt><dd>Choisi par BD : ${A.LABELS.map((l) => `« ${l} »`).join(', ')}</dd><dt>Ordre</dt><dd>Rotation équitable, filtres de recherche respectés</dd></dl></div>
             <div class="panel"><h3>Distinctions non achetables</h3><ul class="svc" style="margin-top:10px">${['Nouvelle arrivée (moins de 14 jours)', 'Profil complet', 'Photos vérifiées récemment', 'Très demandée cette semaine'].map((x) => `<li>${I('check')}${x}</li>`).join('')}</ul></div></div>`)}
         ${T.pane('camp', `<div class="kpis">${kpi('Campagnes en cours', camp.filter((c) => c.state === 'En cours').length)}${kpi('Programmées', camp.filter((c) => c.state === 'Programmée').length)}${kpi('Effet moyen sur les vues', fin.length ? `+${Math.round(fin.reduce((a, c) => a + c.lift, 0) / fin.length)} %` : '—', '<span class="xs muted">pendant la campagne, vs 7 jours avant</span>', 'dark')}${kpi('Crédits engagés', nf(camp.reduce((a, c) => a + c.credits, 0)))}</div>
           <div style="margin-top:14px">${list({ id: 'campagnes', title: 'Campagnes', sub: 'Vues et contacts sur 7 jours avant, pendant la campagne, et 7 jours après.', filters: [['', 'Toutes'], ['En cours', 'En cours'], ['Programmée', 'Programmées'], ['Terminée', 'Terminées']], cols: [
@@ -600,14 +600,18 @@
           <div style="margin-top:14px">${list({ id: 'parrainages', title: 'Parrainages', cols: [
             { l: 'Marraine', r: (x) => who(A.byId(x.who), ''), c: (x) => x.name }, { l: 'Code', k: 'code', cls: 'num small b' },
             { l: 'Filleules', r: (x) => (x.kids.length ? x.kids.map(([n, s2, ok]) => `<div class="small">${esc(n)} <span class="xs ${ok ? '' : 'muted'}" style="${ok ? 'color:var(--ok)' : ''}">· ${s2}</span></div>`).join('') : '<span class="small muted">Aucune pour l’instant</span>'), c: (x) => x.kids.map(([n, s2]) => `${n} (${s2})`).join(', ') },
-            { l: 'Mois gagnés', r: (x) => `<b class="num">${x.won}</b>`, c: (x) => x.won },
-          ], rows: A.REFERRALS })}</div>`)}`),
+            { l: 'Mois gagnés', r: (x) => { const fx = (st.refFix || {})[x.who] || []; const t = x.won + fx.reduce((a, f) => a + f.d, 0); return `<b class="num">${t}</b>${fx.length ? `<div class="xs muted">dont correction ${fx.map((f) => (f.d > 0 ? '+' : '') + f.d).join(', ')}</div>` : ''}`; }, c: (x) => x.won + ((st.refFix || {})[x.who] || []).reduce((a, f) => a + f.d, 0) },
+            { l: 'Corrections', r: (x) => { const fx = (st.refFix || {})[x.who] || []; return fx.length ? fx.map((f) => `<div class="xs">${f.d > 0 ? '+' : ''}${f.d} · ${esc(f.why)} <span class="muted">· ${esc(f.by)} · ${G.d(new Date(f.at))}</span></div>`).join('') : '<span class="small muted">—</span>'; }, c: (x) => ((st.refFix || {})[x.who] || []).map((f) => `${f.d} (${f.why})`).join(', ') },
+            { l: '', nocsv: true, cls: 'r', r: (x) => V.btn('Corriger', { cls: 'xs ghost', attrs: `data-a="ref-fix" data-id="${x.who}"` }) },
+          ], rows: A.REFERRALS, note: 'Une correction (filleule refusée, paiement annulé, geste commercial) demande un motif et reste visible, avec son auteur et sa date.' })}</div>`)}`),
     };
   });
 
   /* ================================================================ STATISTIQUES (Q42-Q45, Q73-Q76) */
   route(/^\/admin\/stats$/, () => {
     const N = +st.period, S = A.STATS, k = N / 30;
+    const vcur = sumS('visits', 0, N), vprev = sumS('visits', N, 2 * N);
+    const cmp = (extra) => (vprev ? Math.round(((vcur / vprev) * (1 + extra) - 1) * 100) : null);
     const sc = (v) => Math.round(v * k);
     const P = A.PROS.map((p) => ({ ...p, s: proSt(p) }));
     const grp = (f) => Object.entries(P.reduce((a, p) => { const g = f(p); a[g] = (a[g] || 0) + 1; return a; }, {})).sort((a, b) => b[1] - a[1]);
@@ -618,7 +622,8 @@
     return {
       title: 'Statistiques',
       html: shell('stats', `${head('Mesure d’audience sans cookie, hébergée en Suisse', 'Statistiques', periodSel())}
-        <div class="kpis">${kpi('Vues de fiches', nf(sc(S.use.views)))}${kpi('Ajouts en favoris', nf(sc(S.use.favs)))}${kpi('Comparaisons', nf(sc(S.use.cmp)))}${kpi('Abandons', `${S.use.abandon} %`, '<span class="xs muted">fiche ouverte puis quittée sans contact</span>', 'dark')}</div>
+        <div class="kpis">${kpi('Vues de fiches', nf(sc(S.use.views)), delta(cmp(0.0)))}${kpi('Ajouts en favoris', nf(sc(S.use.favs)), delta(cmp(0.06)))}${kpi('Comparaisons', nf(sc(S.use.cmp)), delta(cmp(0.14)))}${kpi('Abandons', `${S.use.abandon} %`, `<span class="xs muted">fiche ouverte puis quittée sans contact</span>${delta(-3, true)}`, 'dark')}</div>
+        <p class="hint" style="margin-top:8px">${I('clock', 'sm')} Période : ${G.d(new Date(Date.now() - N * 864e5))} → ${G.d(new Date())}, heure de Genève, comparée aux ${N} jours précédents.</p>
         <h2 class="adm-h2">Profils</h2>
         <div class="grid-3 adm-g3"><div class="panel"><h3>Par statut</h3><div style="margin-top:12px">${bars(byStatus, { w: 100 })}</div></div><div class="panel"><h3>Par catégorie</h3><div style="margin-top:12px">${bars(byCat, { w: 110 })}</div></div><div class="panel"><h3>Par ville</h3><div style="margin-top:12px">${bars(byCity, { w: 90 })}</div></div></div>
         <div style="margin-top:14px">${list({ id: 'profils-repartition', title: 'Profils par statut, catégorie et ville', cols: [{ l: 'Regroupement', k: 'g', cls: 'small muted' }, { l: 'Valeur', k: 'l', cls: 'small b' }, { l: 'Profils', k: 'v', cls: 'num r' }], rows: prof })}</div>
@@ -637,7 +642,8 @@
 
   /* ================================================================ RETOURS PRIVÉS (Q105) */
   route(/^\/admin\/retours$/, () => {
-    const rows = A.FEEDBACK.map((f) => ({ ...f, _f: [f.kind, f.from === 'BD' ? 'bd' : 'pro'].join('|') }));
+    const vis = (V.L.fb || []).map((f, k) => ({ id: 'vf' + k, at: new Date(f.at), from: 'visiteur', fromName: 'Visiteur (site)', about: f.pid ? `Profil « ${name(f.pid)} » · ${f.canal}, ${f.when.toLowerCase()}` : `${f.canal}, ${f.when.toLowerCase()}`, kind: f.kind, text: f.text || '—', next: 'À examiner' }));
+    const rows = [...vis.reverse(), ...A.FEEDBACK].map((f) => ({ ...f, _f: [f.kind, f.from === 'BD' ? 'bd' : f.from === 'visiteur' ? 'visiteur' : 'pro'].join('|') }));
     const n = (k) => rows.filter((r) => r.kind === k).length;
     return {
       title: 'Retours privés',
@@ -645,10 +651,10 @@
         <div class="kpis">${kpi('Positifs', n('Positif'))}${kpi('Négatifs', n('Négatif'))}${kpi('Sans réponse', n('Sans réponse'))}${kpi('Suites données', rows.filter((r) => !r.next.startsWith('Aucune')).length, '<span class="xs muted">décision humaine à chaque fois</span>', 'dark')}</div>
         <div style="margin-top:14px">${list({
           id: 'retours-prives', title: 'Retours', sub: 'Retours des professionnelles après un contact, et retours de l’équipe BD. Aucune note publique, aucun registre de clients.', search: 'Prénom, contact…',
-          filters: [['', 'Tous'], ['Positif', 'Positifs'], ['Négatif', 'Négatifs'], ['Sans réponse', 'Sans réponse'], ['pro', 'Des professionnelles'], ['bd', 'De BD']],
+          filters: [['', 'Tous'], ['Positif', 'Positifs'], ['Négatif', 'Négatifs'], ['Sans réponse', 'Sans réponse'], ['pro', 'Des professionnelles'], ['bd', 'De BD'], ['visiteur', 'Des visiteurs']],
           cols: [
             { l: 'Date', r: (f) => `<span class="small num">${G.rel(f.at)}</span>`, c: (f) => G.dt(f.at) },
-            { l: 'De', r: (f) => (f.from === 'BD' ? '<b class="small">Équipe BD</b>' : who(A.byId(f.from), '')), c: (f) => f.fromName },
+            { l: 'De', r: (f) => (f.from === 'BD' ? '<b class="small">Équipe BD</b>' : f.from === 'visiteur' ? '<b class="small">Visiteur</b><div class="xs muted">retour privé depuis le site</div>' : who(A.byId(f.from), '')), c: (f) => f.fromName },
             { l: 'À propos de', k: 'about', cls: 'small' },
             { l: 'Retour', r: (f) => badge(f.kind === 'Positif' ? 'ok' : f.kind === 'Négatif' ? 'danger' : '', f.kind), c: (f) => f.kind },
             { l: 'Commentaire', k: 'text', cls: 'small' }, { l: 'Suite donnée', k: 'next', cls: 'small muted' },
@@ -662,9 +668,10 @@
   const PG = { ok: ['ok', 'Publié'], rev: ['warn', 'À relire'], miss: ['danger', 'Manquant'] };
   route(/^\/admin\/referentiels$/, () => {
     const cats = [['Escortes', ['femme'], 'Active', 'Silhouette, cheveux, yeux, langues, pratiques'], ['Escortes trans', ['trans'], 'Active', 'Mêmes critères, catégorie distincte'], ['Escorts hommes', ['homme'], 'Active', 'Mêmes critères, catégorie distincte'], ['Masseuses', ['masseuse'], 'Active', 'Types de massage, sans pratiques sexuelles affichées'], ['BDSM', ['bdsm'], 'Active', 'Rôles, pratiques et limites, lexique encadré'], ['Duos', ['duo'], 'Active', 'Deux personnes vérifiées, profils liés']].map(([l, ids, s2, cr]) => ({ l, n: A.PROS.filter((p) => ids.includes(p.cat)).length, s2, cr }));
-    const crit = [['Silhouette', ['Mince', 'Sportive', 'Pulpeuse', 'Ronde'], 'Non', 'Oui'], ['Cheveux', ['Blond', 'Châtain', 'Brun', 'Noir', 'Roux'], 'Non', 'Oui'], ['Yeux', ['Bleu', 'Vert', 'Noisette', 'Marron'], 'Non', 'Non'], ['Langues', ['A1 à C2', '8 langues d’interface'], 'Oui', 'Oui'], ['Rendez-vous', ['Reçoit', 'Se déplace', 'Les deux'], 'Oui', 'Oui'], ['Origine', V.ORIGINS || [], 'Non', 'Oui'], ['Pratiques', [`${Object.keys(V.SERVICES || {}).length} pratiques (catalogue fermé)`], 'Non', 'Oui']].map(([l, vals, req, f]) => ({ l, vals, req, f }));
+    const crit = [['Silhouette', ['Mince', 'Sportive', 'Pulpeuse', 'Ronde'], 'Non', 'Oui'], ['Cheveux', ['Blond', 'Châtain', 'Brun', 'Noir', 'Roux'], 'Non', 'Oui'], ['Yeux', ['Bleu', 'Vert', 'Noisette', 'Marron'], 'Non', 'Non'], ['Langues', ['A1 à C2', '8 langues d’interface'], 'Oui', 'Oui'], ['Rendez-vous', ['Reçoit', 'Se déplace', 'Les deux'], 'Oui', 'Oui'], ['Origine', V.ORIGINS || [], 'Non', 'Oui'], ['Clientèle et composition', ['Seul ou seule', 'Couple', 'Plusieurs clients', 'Avec une autre professionnelle', '→ accepté, refusé ou à discuter'], 'Non', 'Oui'], ['Pratiques', [`${Object.keys(V.SERVICES || {}).length} pratiques (catalogue fermé)`], 'Non', 'Oui']].map(([l, vals, req, f]) => ({ l, vals, req, f }));
     const com = (V.COMMUNES || []).map((c) => ({ l: c.label, n: A.PROS.filter((p) => p.commune === c.id).length }));
-    const cities = A.CITIES.map((c) => ({ ...c, s2: (st.cities || {})[c.name] || c.state, _f: (st.cities || {})[c.name] || c.state }));
+    const preAll = [...(V.L.pre || []).map((x) => ({ ...x, at: new Date(x.at) })).reverse(), ...A.PRE];
+    const cities = A.CITIES.map((c) => ({ ...c, pre: c.pre + (V.L.pre || []).filter((x) => x.city === c.name).length, s2: (st.cities || {})[c.name] || c.state, _f: (st.cities || {})[c.name] || c.state }));
     const T = tabs('ref', [['cat', 'Catégories et critères'], ['com', 'Communes', com.length], ['city', 'Villes', cities.length], ['pages', 'Pages et FAQ']]);
     return {
       title: 'Référentiels',
@@ -676,7 +683,7 @@
             { l: 'Ville', k: 'name', cls: 'b small' }, { l: 'Statut', r: (c) => `<label class="qf-sel adm-sel"><select data-a2="city" data-id="${esc(c.name)}" aria-label="Statut de ${esc(c.name)}">${Object.keys(CITY).map((k2) => `<option${k2 === c.s2 ? ' selected' : ''}>${k2}</option>`).join('')}</select>${I('chevron-down', 'sm')}</label>`, c: (c) => c.s2 },
             { l: 'Ouverture', r: (c) => `<span class="small num">${c.since ? G.d(c.since) : '—'}</span>`, c: (c) => (c.since ? G.d(c.since) : '') }, { l: 'Profils', k: 'pros', cls: 'num small' }, { l: 'Préinscriptions', k: 'pre', cls: 'num small' },
           ], rows: cities })}
-          <div style="margin-top:14px">${list({ id: 'preinscriptions', title: 'Préinscriptions', filters: [['', 'Toutes'], ['Lausanne', 'Lausanne'], ['Montreux · Vevey', 'Montreux · Vevey']], cols: [{ l: 'Prénom', k: 'name', cls: 'b small' }, { l: 'Ville', k: 'city', cls: 'small' }, { l: 'Catégorie', k: 'cat', cls: 'small' }, { l: 'Date', r: (x) => `<span class="small num">${G.d(x.at)}</span>`, c: (x) => G.d(x.at) }, { l: 'Source', k: 'src', cls: 'small muted' }], rows: A.PRE.map((x) => ({ ...x, _f: x.city })) })}</div>`)}
+          <div style="margin-top:14px">${list({ id: 'preinscriptions', title: 'Préinscriptions', filters: [['', 'Toutes'], ['Lausanne', 'Lausanne'], ['Zurich', 'Zurich']], cols: [{ l: 'Prénom', k: 'name', cls: 'b small' }, { l: 'Ville', k: 'city', cls: 'small' }, { l: 'Catégorie', k: 'cat', cls: 'small' }, { l: 'Date', r: (x) => `<span class="small num">${G.d(x.at)}</span>`, c: (x) => G.d(x.at) }, { l: 'Source', r: (x) => `<span class="small muted">${esc(x.src)}</span>${x.ref ? `<div class="xs num">${x.ref}</div>` : ''}`, c: (x) => x.src }], rows: preAll.map((x) => ({ ...x, _f: x.city })), tools: `<a class="link small" href="#/ville/lausanne">Page Lausanne</a> <a class="link small" href="#/ville/zurich">Page Zurich</a>` })}</div>`)}
         ${T.pane('pages', list({ id: 'pages-faq', title: 'Pages et FAQ dans les 8 langues', sub: 'État de chaque traduction. Le français fait référence.', cols: [{ l: 'Page', k: 't', cls: 'b small' }, ...A.LANGS.map((l, k) => ({ l: `${V.flag(l)} ${l.toUpperCase()}`, cls: 'c', r: (x) => `<span class="adm-pg ${x.st[k]}" title="${PG[x.st[k]][1]}">${x.st[k] === 'ok' ? I('check', 'sm') : x.st[k] === 'rev' ? '…' : '—'}</span>`, c: (x) => PG[x.st[k]][1] }))], rows: A.PAGES, note: `<span class="adm-pg ok">${I('check', 'sm')}</span> Publié · <span class="adm-pg rev">…</span> À relire · <span class="adm-pg miss">—</span> Manquant` }))}`),
     };
   });
@@ -709,6 +716,7 @@
     ['ai', 'Seuil de l’IA pour une alerte prioritaire', [['0.7', '0,70'], ['0.75', '0,75'], ['0.8', '0,80'], ['0.85', '0,85'], ['0.9', '0,90']], '0.8', 'Modération'],
     ['slotsZone', 'Encarts sponsorisés par quartier et par jour', ['2', '3', '4', '5'], '3', 'Encarts'],
     ['slotsCanton', 'Encarts sponsorisés pour le canton, par jour', ['4', '6', '8'], '6', 'Encarts'],
+    ['sponLabel', 'Libellé affiché sur les encarts payants', ['Mise en avant', 'À la une', 'Sélection BD', 'Partenaire', 'Sponsorisé'], 'Mise en avant', 'Encarts'],
     ['refReward', 'Récompense de la marraine', ['1 mois offert', '2 mois offerts', '30 crédits'], '1 mois offert', 'Parrainage'],
     ['refCond', 'Condition', ['Après 1 mois payé par la filleule', 'Après 2 mois payés par la filleule', 'Après 3 mois payés par la filleule'], 'Après 2 mois payés par la filleule', 'Parrainage'],
     ['refMax', 'Plafond par an', ['3', '6', '12'], '6', 'Parrainage'],
@@ -851,6 +859,11 @@
       ch.forEach((c) => log('Paramètre modifié', c)); done(`${ch.length} paramètre${ch.length > 1 ? 's' : ''} enregistré${ch.length > 1 ? 's' : ''}. Inscrit au journal.`);
     },
     role: (el) => { const n = el.dataset.id; const sh = V.sheet.open({ title: `Rôle de ${n}`, body: `${V.field('Rôle', { type: 'select', name: 'role', value: 'Modération', options: [...A.ROLES, 'Admission · Modération'] })}<p class="hint">Le changement prend effet à la prochaine connexion, double authentification comprise.</p>`, foot: V.btn('Changer le rôle', { cls: 'sm block', attrs: 'data-ok' }) }); sheetOk(sh, () => { const r = $('select', sh).value; st.roles = { ...(st.roles || {}), [n]: r }; log('Rôle modifié', `${n} → ${r}`); V.sheet.close(); done(`${n} : ${r}.`); }); },
+    'ref-fix': (el) => {
+      const x = A.REFERRALS.find((r) => r.who === el.dataset.id);
+      const sh = V.sheet.open({ title: `Corriger le parrainage · ${x.name}`, body: `<div class="stack">${V.field('Correction', { type: 'select', name: 'd', value: '-1', options: [['-1', 'Retirer 1 mois'], ['1', 'Ajouter 1 mois'], ['-2', 'Retirer 2 mois'], ['2', 'Ajouter 2 mois']] })}${V.field('Motif', { type: 'select', name: 'why', value: 'Filleule refusée à l’admission', options: ['Filleule refusée à l’admission', 'Paiement de la filleule annulé', 'Doublon de compte', 'Geste commercial', 'Erreur de saisie'] })}</div><p class="hint">La correction reste visible avec son auteur et sa date. La marraine est prévenue.</p>`, foot: V.btn('Enregistrer la correction', { cls: 'sm block', attrs: 'data-ok' }) });
+      sheetOk(sh, () => { const d = +$('[name="d"]', sh).value, why = $('[name="why"]', sh).value; st.refFix = st.refFix || {}; (st.refFix[x.who] = st.refFix[x.who] || []).push({ d, why, by: ME.n, at: Date.now() }); log('Correction de parrainage', `${x.name} · ${d > 0 ? '+' : ''}${d} mois · ${why}`); V.sheet.close(); done(`Parrainage de ${x.name} corrigé (${d > 0 ? '+' : ''}${d} mois).`, 'gift'); });
+    },
     invite: () => V.toast('Démonstration : invitation envoyée, double authentification exigée à la première connexion.', { icon: 'mail', ms: 4000 }),
     verify: () => { const a = audit(); let ok = true; for (let k = 0; k < a.length - 1; k++) if (!a[k].h || a[k].h.length !== 8) ok = false; V.toast(ok ? `Chaîne d’empreintes vérifiée : ${a.length} lignes, aucune anomalie.` : 'Anomalie détectée dans le journal.', { icon: ok ? 'shield' : 'alert', ms: 3500 }); },
   };

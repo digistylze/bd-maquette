@@ -97,25 +97,24 @@
     Object.assign(p, { type: d.type, likes: d.likes, followers: d.followers, visits: d.visits, pay: d.pay, services: d.services, limits: d.limits, interests: d.interests, desc: d.desc });
   });
 
-  /* Avis de démonstration : utilisés sur l'accueil (derniers avis) et sur chaque fiche */
-  V.AVIS = [
-    { to: 'imp-nina', by: 'Marc', ago: 2 * H, note: 5, txt: 'Accueil tout en douceur et discrétion parfaite. Fidèle aux photos, je recommande les yeux fermés.' },
-    { to: 'imp-nina', by: 'Alexandre', ago: 9 * J, note: 5, txt: 'Une vraie GFE, on oublie la montre. Appartement impeccable, conversation passionnante.' },
-    { to: 'imp-sarah', by: 'David', ago: 5 * H, note: 5, txt: 'Élégante et cultivée, parfaite pour une soirée. Ponctuelle et vraiment charmante.' },
-    { to: 'imp-sarah', by: 'Henri', ago: 15 * J, note: 4, txt: 'Dîner puis nuit à l’hôtel : très classe, très attentionnée. Tarif à la hauteur de la prestation.' },
-    { to: 'imp-julie', by: 'Thomas', ago: 3 * H, note: 5, txt: 'Très à l’aise et naturelle, le courant passe tout de suite. Un moment simple et agréable.' },
-    { to: 'imp-julie', by: 'Kevin', ago: 6 * J, note: 4, txt: 'Adorable et souriante, studio propre. Un peu de retard mais elle a prolongé sans souci.' },
-    { to: 'imp-lou', by: 'Antoine', ago: 6 * H, note: 5, txt: 'Douce et souriante, elle met tout de suite à l’aise. Le massage est un vrai plus.' },
-    { to: 'imp-gwen', by: 'Nicolas', ago: 22 * H, note: 5, txt: 'Femme de caractère et pleine d’esprit. Elle mène la danse comme personne, moment inoubliable.' },
-    { to: 'imp-gwen', by: 'Stéphane', ago: 11 * J, note: 5, txt: 'Expérience assumée, sans tabou mais toujours dans le respect. Je reviendrai.' },
-    { to: 'imp-marion', by: 'Julien', ago: 8 * H, note: 5, txt: 'Pile à l’heure, exactement le profil annoncé. Gourmande et très joueuse, excellent moment.' },
-    { to: 'imp-marion', by: 'Romain', ago: 4 * J, note: 4, txt: 'Sportive et directe, ça me plaît. Le jeu de rôle était parfaitement mené.' },
-    { to: 'imp-cindy', by: 'Laurent', ago: 10 * H, note: 5, txt: 'Le massage tantrique vaut le détour. Très professionnelle et discrète.' },
-    { to: 'imp-lana', by: 'Paul', ago: 26 * H, note: 5, txt: 'Déplacement rapide et discret à l’hôtel. Charmante, attentionnée et ponctuelle.' },
-    { to: 'imp-pamela', by: 'Fabio', ago: 2 * J, note: 5, txt: 'Un volcan brésilien. Énergie folle, sourire permanent, aucune déception.' },
-    { to: 'imp-pamela', by: 'Olivier', ago: 13 * J, note: 5, txt: 'Soirée VIP réussie de A à Z. Elle est encore plus belle qu’en photo.' },
-    { to: 'imp-dreirys', by: 'Sébastien', ago: 3 * J, note: 5, txt: 'Latina pleine de passion, le body-body est incroyable. À essayer.' },
-    { to: 'imp-emily', by: 'Mathieu', ago: 5 * J, note: 4, txt: 'Jeune et timide au départ, puis très complice. Un peu de français, beaucoup de charme.' },
-    { to: 'imp-oceane', by: 'Yann', ago: 7 * J, note: 5, txt: 'Naturelle et câline, aucun chrono. Exactement ce que je cherchais.' },
-  ];
+  /* Clientèle et composition (accepté, refusé ou à discuter), liens externes et pastilles de la maquette */
+  const CL = { // seule ou seul, couple, plusieurs clients, professionnelle en plus
+    'imp-nina': ['oui', 'discuter', 'non', 'oui'], 'imp-julie': ['oui', 'non', 'non', 'non'], 'imp-marion': ['oui', 'oui', 'discuter', 'oui'], 'imp-pamela': ['oui', 'discuter', 'non', 'discuter'],
+    'imp-lou': ['oui', 'oui', 'non', 'non'], 'imp-sarah': ['oui', 'oui', 'oui', 'oui'], 'imp-dreirys': ['oui', 'discuter', 'discuter', 'oui'], 'imp-cindy': ['oui', 'non', 'non', 'discuter'],
+    'imp-emily': ['oui', 'non', 'non', 'non'], 'imp-lana': ['oui', 'oui', 'discuter', 'oui'], 'imp-oceane': ['oui', 'discuter', 'non', 'non'], 'imp-gwen': ['oui', 'oui', 'oui', 'discuter'],
+  };
+  const LINKS = {
+    'imp-nina': [['instagram', '@nina.geneve'], ['onlyfans', 'nina_ge']], 'imp-lana': [['webcam', 'Lana en direct'], ['onlyfans', 'lana.swiss']],
+    'imp-emily': [['instagram', '@emily.gva']], 'imp-sarah': [['onlyfans', 'sarah_cologny']], 'imp-gwen': [['webcam', 'Gwen en direct'], ['instagram', '@gwen.redhead']],
+  };
+  V.PROFILES.forEach((p) => {
+    if (CL[p.id]) { const [solo, couple, multi, pro] = CL[p.id]; p.clients = { solo, couple, multi, pro }; }
+    if (LINKS[p.id]) p.links = LINKS[p.id].map(([k, h]) => ({ k, h }));
+  });
+  const set = (id, o) => { const p = V.PROFILES.find((x) => x.id === id); if (p) Object.assign(p, o); };
+  set('imp-lana', { tourLeft: 2 }); set('imp-julie', { newPhoto: true }); set('imp-cindy', { newPhoto: true });
+  ['imp-nina', 'imp-emily', 'imp-sarah', 'imp-lou'].forEach((id) => set(id, { online: true }));
+  // tarif non renseigné : distinct de zéro (démonstration sur un profil)
+  const oc = V.PROFILES.find((x) => x.id === 'imp-oceane');
+  if (oc) { oc.from = null; oc.rates = oc.rates.map((r) => [r[0], null, null]); }
 })(window.V);
