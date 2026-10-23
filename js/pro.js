@@ -227,7 +227,8 @@
           <div class="panel"><h3>Inviter une partenaire</h3><p class="small ink2" style="margin-top:6px">Elle doit être vérifiée sur BD. Elle accepte depuis son espace pro ; chacune peut masquer le profil commun ou quitter le duo à tout moment.</p>
             <div style="margin-top:14px">${V.field('Pseudo de votre partenaire', { name: 'partner', value: inv ? inv.name : '' })}</div><div class="list-rows" id="pres"></div>
             ${inv ? `<div class="callout ${inv.ok ? 'ok' : 'gold'}" style="margin-top:12px">${I(inv.ok ? 'check' : 'clock')}<span>${inv.ok ? `${esc(inv.name)} a accepté : le profil duo est en modération.` : `Invitation envoyée à ${esc(inv.name)}. En attente de son accord.`}</span></div>${inv.ok ? '' : `<div style="margin-top:10px">${V.btn('Démo : accepter au nom de ' + esc(inv.name), { act: 'duo-accept', cls: 'sm ghost' })}</div>`}` : ''}</div>
-        </div>`),
+        </div>
+        ${V.hdDuoAgenda ? `<div style="margin-top:14px">${V.hdDuoAgenda()}</div>` : ''}`),
       after: (v) => {
         const inp = $('input[name="partner"]', v);
         const run = () => { const s = inp.value.trim().toLowerCase(); const r = s ? V.PROFILES.filter((p) => !p.persons && p.id !== 'alma' && p.name.toLowerCase().startsWith(s)) : []; $('#pres', v).innerHTML = r.map((p) => `<div><img class="avatar" src="${V.img(p.photos[0], 's')}" alt=""><div class="sp"><b>${esc(p.name)}, ${p.age}</b><div class="small muted">Profil vérifié</div></div><button class="btn xs" data-act="duo-invite" data-id="${p.id}"><span class="roll"><span>Inviter</span><span aria-hidden="true">Inviter</span></span></button></div>`).join(''); };
@@ -486,6 +487,8 @@
             <div class="chips" id="cty">${COUNTRIES.map(([c, n]) => `<button type="button" class="chip sm${pc.block.includes(c) ? ' on' : ''}" data-cty="${c}"><span class="ck">${I('check', 'sm')}</span>${n}</button>`).join('')}</div>
             <p class="hint">Un VPN peut contourner ce blocage : il réduit l’exposition, il ne garantit pas l’anonymat.</p></div>
           <div class="stack">
+            <div class="panel"><h3>Ma zone sur la carte</h3><p class="small muted" style="margin:4px 0 12px">Votre profil apparaît dans une zone approximative, décalée au hasard autour de votre quartier. Jamais votre adresse.</p>
+              <div class="chips">${[100, 150, 200].map((r) => `<button type="button" class="chip sm${(pc.zoneR || 150) === r ? ' on' : ''}" data-zr="${r}"><span class="ck">${I('check', 'sm')}</span>${r} m</button>`).join('')}</div></div>
             <div class="panel"><h3>Autres réglages</h3>${V.sw('pv-face', pc.faceBlur, 'Flouter mon visage sur toutes les photos', 'Appliqué en moins de 2 min, sans nouvelle modération')}${V.sw('pv-tel', pc.revealTel, 'Numéro révélé seulement au clic', 'Jamais écrit dans le code de la page ni lisible par les robots')}${V.sw('pv-hist', pc.history, 'Ne pas garder l’historique de mes statuts', 'Seul le statut en cours est visible')}${V.sw('seo', V.L.pro.seo !== false, 'Fiche visible dans les moteurs de recherche', 'Désactivez pour n’être trouvée que sur BD')}</div>
             <div class="panel soft"><h3>Vos données</h3><p class="small ink2" style="margin-top:6px">Téléchargez tout ce que BD conserve sur vous, ou demandez une rectification. Réponse sous 30 jours, sans justification.</p><div class="row wrapr" style="margin-top:12px">${V.btn('Télécharger mes données', { cls: 'sm ghost', arrow: 'download', attrs: 'data-pv="dl"' })}${V.btn('Demander une rectification', { cls: 'sm ghost', attrs: 'data-pv="fix"' })}</div></div>
           </div>
@@ -495,6 +498,7 @@
         root.addEventListener('click', (e) => {
           const c = e.target.closest('[data-cty]');
           if (c) { const on = c.classList.toggle('on'); const code = c.dataset.cty; pc.block = on ? [...new Set([...pc.block, code])] : pc.block.filter((x) => x !== code); V.save(); V.toast(on ? `Profil masqué aux visiteurs depuis : ${c.textContent.trim()}.` : `${c.textContent.trim()} : profil de nouveau visible.`, { icon: 'globe', ms: 2600 }); const b = root.querySelector('.panel .badge'); if (b) { b.textContent = `${pc.block.length} bloqué${pc.block.length > 1 ? 's' : ''}`; b.className = 'badge ' + (pc.block.length ? 'v' : ''); } return; }
+          const z = e.target.closest('[data-zr]'); if (z) { pc.zoneR = +z.dataset.zr; V.save(); $$('[data-zr]', root).forEach((b) => b.classList.toggle('on', b === z)); V.toast(`Zone sur la carte : environ ${z.dataset.zr} m.`, { icon: 'map-pin', ms: 2200 }); return; }
           const d = e.target.closest('[data-pv]'); if (d) V.toast(d.dataset.pv === 'dl' ? 'Démonstration : archive de vos données préparée, envoyée par e-mail sous 24 h.' : 'Demande envoyée à l’équipe BD. Réponse sous 30 jours.', { icon: 'mail' });
         });
         root.addEventListener('input', (e) => { if (!e.target.matches('[data-cq]')) return; const q = e.target.value.toLowerCase(); $$('[data-cty]', root).forEach((b) => { b.hidden = q && !b.textContent.toLowerCase().includes(q); }); });

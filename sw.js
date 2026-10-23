@@ -1,5 +1,5 @@
 /* BD — service worker : app installable et consultable hors connexion */
-const CACHE = 'bd-v31';
+const CACHE = 'bd-v32';
 const SHELL = [
 "./",
 "index.html",
@@ -18,6 +18,7 @@ const SHELL = [
 "js/carte.js",
 "js/pages-plus.js",
 "js/vitrine.js",
+"js/hors-devis.js",
 "js/ui.js",
 "icons/apple-touch-icon.png",
 "icons/icon-192.png",

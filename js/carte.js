@@ -40,7 +40,7 @@
         </div>
         <div class="mp-count" id="mpCount"></div>
         <div class="mp-list" id="mpList"></div>
-        <p class="hint mp-note">${I('shield', 'sm')}Chaque profil est placé au niveau de son quartier, avec un léger décalage. L’adresse exacte n’est jamais publiée.</p>
+        <p class="hint mp-note">${I('shield', 'sm')}Chaque profil apparaît dans une zone approximative de 100 à 200 m, décalée au hasard : l’adresse n’est ni au centre ni publiée.</p>
       </aside>
       <div class="mp-map"><div id="mpMap" role="application" aria-label="Carte des profils"></div><div class="mp-hint" id="mpHint">${I('map-pin', 'sm')}Cliquez sur la carte pour vous placer</div></div>
     </div>`,
@@ -54,7 +54,7 @@
     const P = V.PROFILES.filter((p) => V.visible(p) && !V.hidden().includes(p.id));
     const st = { me: CENTER.slice(), r: '', now: false, sel: null };
     let map = null, meMk = null, ring = null, zone = null;
-    const marks = {}, off = {};
+    const marks = {}, off = {}, zones = {};
     if (L && document.body.contains(box)) {
       if (V._map) { try { V._map.remove(); } catch (e) { /* carte précédente déjà retirée */ } }
       const dark = document.documentElement.dataset.theme === 'dark';
@@ -72,6 +72,7 @@
         const m = L.marker(posOf(p), { title: `${p.name}, ${V.fromTxt(p)}`, riseOnHover: true, icon: L.divIcon({ className: 'mp-mk', html: `<div class="mp-pin${now ? ' on' : ''}"><i class="mp-ph" style="background-image:url('${V.img(p.photos[0], 's')}')"></i><span class="mp-tag"><b>${esc(p.name)}</b>${p.from ? p.from + '.–' : 'tarif ?'}</span><i class="mp-tip"></i></div>`, iconSize: [PIN.w, PIN.h], iconAnchor: [PIN.w / 2, PIN.h] }) }).addTo(map);
         m.on('click', () => select(p.id, true));
         marks[p.id] = m;
+        zones[p.id] = L.circle(posOf(p), { radius: V.zoneR(p), color: '#5f2a8a', weight: 1, opacity: .5, fillColor: '#5f2a8a', fillOpacity: .1, interactive: false }).addTo(map);
       });
       map.on('zoomend', declutter);
       setTimeout(() => { map.invalidateSize(); declutter(); }, 120);
@@ -111,7 +112,7 @@
     }
     const popOff = (id) => { const o = off[id] || [0, 0]; return L.point(o[0], o[1] - (box.classList.contains('mp-lo') ? PIN.lh : PIN.h) + 4); };
     const hideHint = () => { const h = $('#mpHint', v); if (h) h.classList.add('off'); };
-    const popup = (p, d) => `<div class="mp-pop"><img src="${V.img(p.photos[0], 's')}" alt=""><div><b>${esc(p.name)} <span>${V.ageShort(p)}</span></b><small>${V.communeTxt(p.commune)} · à ${kmTxt(d)}</small>${V.statusPill(p, true, true)}<a class="mp-go" href="#/profil/${p.id}">Voir le profil ${I('arrow-right', 'sm')}</a></div></div>`;
+    const popup = (p, d) => `<div class="mp-pop"><img src="${V.img(p.photos[0], 's')}" alt=""><div><b>${esc(p.name)} <span>${V.ageShort(p)}</span></b><small>${V.communeTxt(p.commune)} · à ${kmTxt(d)}</small><small>Zone d’environ ${V.zoneR(p)} m, adresse non publiée</small>${V.statusPill(p, true, true)}<a class="mp-go" href="#/profil/${p.id}">Voir le profil ${I('arrow-right', 'sm')}</a></div></div>`;
     function select(id, fromMap) {
       st.sel = id;
       const p = V.byId(id); const d = km(st.me, posOf(p));
@@ -119,7 +120,7 @@
       if (map) {
         Object.entries(marks).forEach(([k, m]) => { const el = m.getElement(); if (el) el.classList.toggle('sel', k === id); });
         if (zone) zone.remove();
-        zone = L.circle(posOf(p), { radius: 420, color: '#cfae6c', weight: 1.5, dashArray: '4 5', fillColor: '#cfae6c', fillOpacity: .14 }).addTo(map);
+        zone = L.circle(posOf(p), { radius: V.zoneR(p), color: '#cfae6c', weight: 2, dashArray: '4 5', fillColor: '#cfae6c', fillOpacity: .22, interactive: false }).addTo(map);
         marks[id].bindPopup(popup(p, d), { closeButton: false, offset: popOff(id), className: 'mp-popup', autoPanPadding: [24, 24] }).openPopup();
         if (!fromMap) map.flyTo(posOf(p), Math.max(map.getZoom(), 14), { duration: .8 });
       }
@@ -135,6 +136,7 @@
         st.sel = null;
       }
       Object.entries(marks).forEach(([k, m]) => { const el = m.getElement(); if (el) el.classList.toggle('dim', !ids.has(k)); });
+      Object.entries(zones).forEach(([k, z]) => z.setStyle({ fillOpacity: ids.has(k) ? .1 : .03, opacity: ids.has(k) ? .5 : .15 }));
       declutter();
       $('#mpCount', v).innerHTML = `<b>${list.length}</b> profil${list.length > 1 ? 's' : ''}${st.r ? ` à moins de ${st.r} km` : ''}`;
       $('#mpList', v).innerHTML = list.length ? list.map(({ p, d }) => `<button type="button" class="mp-it${st.sel === p.id ? ' on' : ''}" data-id="${p.id}"><img src="${V.img(p.photos[0], 's')}" alt=""><span class="mp-tx"><b>${esc(p.name)} <span>${V.ageShort(p)}</span>${I('badge-check', 'sm')}</b><small>${I('map-pin', 'sm')}${V.communeTxt(p.commune)} · ${kmTxt(d)}</small>${V.statusPill(p, true, true)}</span><span class="mp-pr">${p.from ? `dès<b>${p.from}.–</b>` : 'tarif<b>non renseigné</b>'}</span></button>`).join('') : `<p class="small muted" style="padding:16px 4px">Aucun profil dans ce rayon. Élargissez la zone ou déplacez-vous sur la carte.</p>`;

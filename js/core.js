@@ -116,6 +116,8 @@
   V.sponLabel = () => ((V.L.adm2 && V.L.adm2.params && V.L.adm2.params.sponLabel) || 'Mise en avant');
   /* Tarif de départ : « non renseigné » reste distinct de zéro */
   V.fromTxt = (p) => (p.from ? `dès ${p.from}.–` : 'tarif non renseigné');
+  /* Zone approximative sur la carte : 100, 150 ou 200 m de rayon, jamais centrée sur l'adresse */
+  V.zoneR = (p) => { if (p.id === 'alma' && V.L.pro && V.L.pro.priv && V.L.pro.priv.zoneR) return V.L.pro.priv.zoneR; let h = 0; for (const c of p.id) h = (h * 31 + c.charCodeAt(0)) >>> 0; return [100, 150, 200][h % 3]; };
   const MODE_TAG = { incall: 'Reçoit', outcall: 'Se déplace', both: 'Reçoit · déplace' };
   V.card = (p, o = {}) => {
     const on = V.isSel(p.id);

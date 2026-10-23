@@ -388,7 +388,7 @@
         <div class="row">${V.btn('Créer mon profil', { href: '#/pro/inscription/1', cls: 'gold sm', arrow: true })}${V.btn('Espace pro', { href: '#/pro', cls: 'ghost sm', attrs: WHITE_GHOST })}</div></div>
       <div><h5>Liens rapides</h5><ul><li><a href="#/profils">Tous les profils</a></li><li><a href="#/profils?dispo=now">Disponibles maintenant</a></li><li><a href="#/profils?tri=new">Nouvelles arrivées</a></li><li><a href="#/profils?cat=duo">Duos et couples</a></li><li><a href="#/masques">Profils masqués</a></li></ul></div>
       <div><h5>Quartiers</h5><ul>${V.COMMUNES.slice(0, 6).map((c) => `<li><a href="#/geneve/${c.id}">${c.label}</a></li>`).join('')}</ul><h5 style="margin-top:18px">Bientôt</h5><ul><li><a href="#/ville/lausanne">Lausanne</a></li><li><a href="#/ville/zurich">Zurich</a></li></ul></div>
-      <div><h5>À propos</h5><ul><li><a href="#/verifications">Comment nous vérifions</a></li><li><a href="#/securite">Sécurité et signalement</a></li><li><a href="#/rejoindre">Nous rejoindre</a></li><li><a href="#/legal/cg-visiteurs">Conditions d’utilisation</a></li><li><a href="#/legal/confidentialite">Confidentialité</a></li><li><a href="#/legal/mentions">Mentions légales</a></li></ul></div>
+      <div><h5>À propos</h5><ul><li><a href="#/verifications">Comment nous vérifions</a></li><li><a href="#/securite">Sécurité et signalement</a></li><li><a href="#/rejoindre">Nous rejoindre</a></li><li><a href="#/hors-devis">Hors devis (démo)</a></li><li><a href="#/legal/cg-visiteurs">Conditions d’utilisation</a></li><li><a href="#/legal/confidentialite">Confidentialité</a></li><li><a href="#/legal/mentions">Mentions légales</a></li></ul></div>
     </div>
     <div class="legal"><span>© ${new Date().getFullYear()} BD · maquette, profils fictifs</span><span class="swiss"><i></i>Données hébergées en Suisse</span><span>Police 117 · Urgences 144</span></div>
   </div></footer>`;
@@ -405,7 +405,7 @@
     ['allemand', 'german', 'deutsch', 'tedesco', 'aleman', 'alemao', 'немецкий'], ['italien', 'italian', 'italienisch', 'italiano'], ['espagnol', 'spanish', 'spanisch', 'spagnolo', 'espanol', 'испанский'],
     ['portugais', 'portuguese', 'portugiesisch', 'portoghese', 'portugues'], ['russe', 'russian', 'russisch', 'russo', 'ruso', 'русский'], ['arabe', 'arabic', 'arabisch', 'arabo', 'العربية'],
     ['blonde', 'blond', 'bionda', 'rubia', 'loira', 'блондинка'], ['brune', 'brun', 'brunette', 'morena', 'bruna', 'брюнетка'], ['rousse', 'roux', 'redhead', 'rossa', 'pelirroja', 'ruiva', 'рыжая'],
-    ['hotel', 'albergo', 'отель'], ['diner', 'dinner', 'abendessen', 'cena', 'jantar', 'ужин'], ['soiree', 'evening', 'abend', 'sera', 'noche', 'noite', 'вечер'], ['nuit', 'night', 'nacht', 'notte', 'ночь'],
+    ['hotel', 'albergo', 'отель'], ['diner', 'dinner', 'abendessen', 'cena', 'jantar', 'ужин'], ['soiree', 'soir', 'evening', 'abend', 'sera', 'noche', 'noite', 'вечер'], ['nuit', 'night', 'nacht', 'notte', 'ночь'],
     ['deplace', 'outcall', 'hausbesuch', 'trasferta'], ['recoit', 'incall', 'appartement', 'apartment', 'wohnung'], ['jeu de role', 'roleplay', 'rollenspiel', 'gioco di ruolo', 'juego de rol'],
     ['douche', 'shower', 'dusche', 'doccia', 'ducha', 'banho'], ['discretion', 'discrete', 'discreet', 'diskret', 'discreta', 'discreto'],
   ].map((g) => g.map(norm));
@@ -415,7 +415,8 @@
   V.fts = (query, p) => {
     const nq = norm(query); if (!nq) return { ok: true, where: [], fixes: [] };
     const phrases = SYN.flat().filter((v) => v.includes(' ') && nq.includes(v));
-    const toks = nq.split(' ').filter((t) => t.length > 1 && !phrases.some((ph) => ph.split(' ').includes(t)));
+    const STOP = ['une', 'un', 'des', 'les', 'la', 'le', 'de', 'du', 'qui', 'que', 'et', 'ou', 'avec', 'pour', 'sur', 'au', 'aux', 'en', 'ce', 'je', 'cherche', 'parle', 'parlant', 'a', 'the', 'who', 'speaks', 'with'];
+    const toks = nq.split(' ').filter((t) => t.length > 1 && !STOP.includes(t) && !phrases.some((ph) => ph.split(' ').includes(t)));
     const terms = [...phrases.map((ph) => [ph]), ...toks.map((t) => [t])].map(([t]) => { const g = SYN.find((gr) => gr.includes(t)) || SYN.find((gr) => gr.some((v) => !v.includes(' ') && v.length >= 4 && lev(t, v) <= tol(v))); return { t, alts: g ? [...new Set([t, ...g])] : [t] }; });
     const doc = docOf(p), where = new Set(), fixes = [];
     const ok = terms.every(({ t, alts }) => Object.entries(doc).some(([k, f]) => {
@@ -638,7 +639,7 @@
     sh.addEventListener('change', (e) => { if (e.target.name === 'tri') { setTimeout(() => { V.sheet.close(); setQ({ tri: e.target.value === 'maj' ? '' : e.target.value }); }, 220); } });
   };
   V.openSearch = () => {
-    const sh = V.sheet.open({ title: 'Rechercher', body: `${V.field('Mot-clé, pseudo ou numéro', { name: 'q', attrs: 'autocomplete="off" inputmode="search"' })}<p class="hint">Cherche dans les présentations et les pratiques, en 8 langues, même avec une faute : « massge », « english », « bacio ». Un numéro vérifie qu’il appartient à un profil vérifié (ex. 079 412).</p><div class="list-rows" id="sres" style="margin-top:10px"></div>` });
+    const sh = V.sheet.open({ title: 'Rechercher', body: `${V.field('Mot-clé, pseudo ou numéro', { name: 'q', attrs: 'autocomplete="off" inputmode="search"' })}${V.hdMic ? V.hdMic() : ''}<p class="hint">Cherche dans les présentations et les pratiques, en 8 langues, même avec une faute : « massge », « english », « bacio ». Un numéro vérifie qu’il appartient à un profil vérifié (ex. 079 412).</p><div class="list-rows" id="sres" style="margin-top:10px"></div>` });
     const inp = $('input', sh); setTimeout(() => inp.focus(), 300);
     const run = () => {
       const s = inp.value.trim();
@@ -646,6 +647,7 @@
       $('#sres', sh).innerHTML = s ? (res.length ? res.map((p) => `<div style="cursor:pointer" data-act="open" data-id="${p.id}"><img class="avatar sq" src="${V.img(p.photos[0], 's')}" alt=""><div class="sp"><b class="serif" style="font-size:19px;font-weight:400">${esc(p.name)}, ${V.ageShort(p)}</b><div class="small muted">${p.tel} · ${V.communeTxt(p.commune)}</div></div>${I('badge-check', 'gold')}</div>`).join('') : `<div class="callout danger"><span>Aucun profil vérifié ne correspond à « ${esc(s)} ». Méfiez-vous des numéros qui ne figurent pas sur BD.</span></div>`) : '';
     };
     inp.addEventListener('input', run);
+    const mic = $('[data-hd-mic]', sh); if (mic) mic.onclick = () => V.hdListen(inp, run, mic);
     $('.sh-body', sh).insertAdjacentHTML('beforeend', `<div class="row" style="margin-top:16px">${V.btn('Filtrer la galerie', { cls: 'sm dark', act: 'search-apply' })}</div>`);
     $('[data-act="search-apply"]', sh).onclick = (e) => { e.stopPropagation(); V.sheet.close(); setQ({ q: inp.value.trim() }); };
   };
@@ -761,7 +763,7 @@
             <p class="f-p">${esc(first)} travaille dans le secteur <b>${placeTxt}</b>. ${incall && outcall ? `${pron} reçoit et se déplace dans tout le canton.` : incall ? `${pron} reçoit uniquement.` : `${pron} se déplace uniquement, dans tout le canton.`}</p>
             <div class="loc-modes"><span class="${incall ? 'ok' : 'no'}">${I(incall ? 'check' : 'x', 'sm')}Je reçois</span><span class="${outcall ? 'ok' : 'no'}">${I(outcall ? 'check' : 'x', 'sm')}Je me déplace</span></div>
             <div class="loc-map" aria-hidden="true"><span class="loc-lake"></span><span class="loc-zone"></span><span class="loc-pin">${I('map-pin')}</span><span class="loc-lbl"><img src="img/armoiries/${shield}.webp" alt="" width="16" height="19">${V.communeTxt(p.commune)}</span></div>
-            <p class="hint">Zone approximative. L’adresse exacte n’est jamais publiée : ${esc(first)} la communique au moment du rendez-vous.</p>
+            <p class="hint">Zone approximative d’environ ${V.zoneR(p)} m, décalée au hasard. L’adresse exacte n’est jamais publiée : ${esc(first)} la communique au moment du rendez-vous.</p>
           </section>
 
           <section class="f-card"><h3 class="f-h">${I('languages')}Langues parlées</h3>
@@ -785,11 +787,13 @@
             <div class="ext-links">${p.links.map((l) => `<a class="ext-l" href="#" data-act="ext-link" data-k="${l.k}" data-h="${esc(l.h)}" rel="nofollow noopener">${I(l.k === 'webcam' ? 'video' : l.k === 'instagram' ? 'camera' : 'star', 'sm')}<span><b>${{ webcam: 'Webcam', onlyfans: 'OnlyFans', instagram: 'Instagram' }[l.k]}</b><small>${esc(l.h)}</small></span>${I('arrow-up-right', 'sm')}</a>`).join('')}</div>
             <p class="hint">Simples liens, ajoutés par ${esc(first)}. BD n’intègre ni ne vérifie le contenu de ces sites.</p></section>` : ''}
 
+          ${V.hdWebcam ? V.hdWebcam(p) : ''}
           <section class="f-card"><h3 class="f-h">${I('shield')}Un retour sur ${esc(first)} ?</h3>
             <p class="f-p">Après un contact ou un rendez-vous, dites à l’équipe BD comment ça s’est passé. Votre retour reste <b>privé</b> : il n’est ni publié ni noté, et ${esc(first)} ne le voit pas.</p>
             <div class="fr-actions"><button type="button" class="soc-b" data-act="feedback" data-id="${p.id}">${I('edit', 'sm')}Laisser un retour privé</button><button type="button" class="soc-b danger" data-act="report" data-id="${p.id}">${I('alert', 'sm')}Signaler le profil</button></div>
           </section>
 
+          ${V.hdSimilar ? V.hdSimilar(p) : ''}
           ${duoP && V.visible(duoP) ? `<section class="f-card"><h3 class="f-h">${I('users')}Aussi en duo</h3><div class="duo-link" data-act="open" data-id="${duoP.id}"><img src="${V.img(duoP.photos[0], 's')}" alt=""><div class="sp"><b class="serif" style="font-size:21px;font-weight:400">${esc(duoP.name)}</b><div class="small muted">Duo réel · deux profils vérifiés et liés</div></div>${I('chevron-right')}</div></section>` : ''}
           ${p.members ? `<section class="f-card"><h3 class="f-h">${I('users')}Profils individuels</h3><div class="stack">${p.members.map(V.byId).map((x) => `<div class="duo-link" data-act="open" data-id="${x.id}"><img src="${V.img(x.photos[0], 's')}" alt=""><div class="sp"><b class="serif" style="font-size:21px;font-weight:400">${esc(x.name)}, ${x.age}</b><div class="small muted">${V.statusInfo(x).label}</div></div>${I('chevron-right')}</div>`).join('')}</div></section>` : ''}
 
